@@ -112,7 +112,7 @@ export default function GlobalError({
             {tr('حاول مرة أخرى', 'Try Again')}
           </button>
           <button
-            onClick={() => (window.location.href = '/dashboard')}
+            onClick={() => (window.location.href = '/platforms')}
             style={{
               padding: '0.5rem 1.25rem',
               backgroundColor: '#f3f4f6',
