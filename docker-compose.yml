@@ -1,0 +1,138 @@
+# ==============================================================================
+# Thea EHR — Docker Compose
+# ==============================================================================
+# Usage:
+#   docker-compose build
+#   docker-compose up -d
+#   docker-compose logs -f app
+# ==============================================================================
+
+services:
+  # --------------------------------------------------------------------------
+  # Next.js Application
+  # --------------------------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/opd/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # --------------------------------------------------------------------------
+  # Redis (rate limiting, caching, sessions)
+  # --------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --------------------------------------------------------------------------
+  # Orthanc PACS (DICOM server + DICOMWeb)
+  # --------------------------------------------------------------------------
+  orthanc:
+    image: orthancteam/orthanc:24.11.1
+    ports:
+      - "8042:8042"    # Web UI + REST API
+      - "4242:4242"    # DICOM port (receives images from modalities)
+    environment:
+      - ORTHANC__NAME=Thea PACS
+      - ORTHANC__DICOM_WEB__ENABLE=true
+      - ORTHANC__DICOM_WEB__ROOT=/dicom-web/
+      - 'ORTHANC__REGISTERED_USERS={"thea": "thea-secure-key"}'
+      - ORTHANC__AUTHENTICATION_ENABLED=true
+    volumes:
+      - orthanc-data:/var/lib/orthanc/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8042/system"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # --------------------------------------------------------------------------
+  # Mirth Connect / NextGen Connect (Integration Engine)
+  # --------------------------------------------------------------------------
+  # Mirth handles HL7, ASTM, FHIR message routing between instruments and Thea.
+  # Admin UI: https://localhost:8443  (default: admin / admin)
+  # HL7 Listener: port 6661 (MLLP — instruments send HL7 here)
+  # HTTP Listener: port 8080 (REST — alternative to MLLP)
+  # --------------------------------------------------------------------------
+  mirth:
+    image: 'nextgenhealthcare/connect:4.5'
+    ports:
+      - '8443:8443'    # Mirth Connect Administrator (HTTPS)
+      - '8080:8080'    # HTTP Listener (REST endpoints)
+      - '6661:6661'    # HL7 MLLP Listener (instruments connect here)
+    environment:
+      - DATABASE=postgres
+      - DATABASE_URL=jdbc:postgresql://mirth-db:5432/mirthdb
+      - DATABASE_USERNAME=mirth
+      - DATABASE_PASSWORD=mirth
+      - VMOPTIONS=-Xmx512m
+    depends_on:
+      mirth-db:
+        condition: service_healthy
+    volumes:
+      - mirth-appdata:/opt/connect/appdata
+      - mirth-custom-lib:/opt/connect/custom-lib
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '-k', '-f', 'https://localhost:8443/api/server/status']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # --------------------------------------------------------------------------
+  # Mirth Connect PostgreSQL (Mirth's own config database)
+  # --------------------------------------------------------------------------
+  mirth-db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=mirthdb
+      - POSTGRES_USER=mirth
+      - POSTGRES_PASSWORD=mirth
+    volumes:
+      - mirth-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U mirth -d mirthdb']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis_data:
+    driver: local
+  orthanc-data:
+    driver: local
+  mirth-appdata:
+    driver: local
+  mirth-custom-lib:
+    driver: local
+  mirth-db-data:
+    driver: local

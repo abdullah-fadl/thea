@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 180">
+  <defs>
+    <!-- Tech gradient - deep blue to cyan -->
+    <linearGradient id="techGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0EA5E9"/>
+      <stop offset="100%" style="stop-color:#06B6D4"/>
+    </linearGradient>
+    
+    <!-- Secondary gradient -->
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#14B8A6"/>
+      <stop offset="100%" style="stop-color:#0EA5E9"/>
+    </linearGradient>
+    
+    <!-- Glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Logo Mark - Abstract T with hands/brackets concept -->
+  <g>
+    <!-- Left bracket/hand -->
+    <path d="M25 45 L15 45 Q8 45 8 52 L8 88 Q8 95 15 95 L25 95" 
+          stroke="url(#techGrad)" stroke-width="4" fill="none" stroke-linecap="round"/>
+    
+    <!-- Right bracket/hand -->
+    <path d="M75 45 L85 45 Q92 45 92 52 L92 88 Q92 95 85 95 L75 95" 
+          stroke="url(#techGrad)" stroke-width="4" fill="none" stroke-linecap="round"/>
+    
+    <!-- Center T mark -->
+    <rect x="30" y="50" width="40" height="6" rx="3" fill="url(#techGrad)"/>
+    <rect x="47" y="50" width="6" height="40" rx="3" fill="url(#techGrad)"/>
+    
+    <!-- Tech dots/nodes -->
+    <circle cx="50" cy="70" r="4" fill="#14B8A6"/>
+    <circle cx="30" cy="70" r="2.5" fill="#0EA5E9" opacity="0.7"/>
+    <circle cx="70" cy="70" r="2.5" fill="#0EA5E9" opacity="0.7"/>
+    
+    <!-- Connection lines -->
+    <line x1="34" y1="70" x2="46" y2="70" stroke="#14B8A6" stroke-width="1.5" opacity="0.5"/>
+    <line x1="54" y1="70" x2="66" y2="70" stroke="#14B8A6" stroke-width="1.5" opacity="0.5"/>
+  </g>
+  
+  <!-- Text "Thea" -->
+  <text x="115" y="82" font-family="'SF Pro Display', 'Inter', -apple-system, sans-serif" font-size="58" font-weight="700" fill="#0F172A" letter-spacing="-1">
+    Thea
+  </text>
+  
+  <!-- Tagline English -->
+  <text x="117" y="115" font-family="'SF Pro Display', 'Inter', -apple-system, sans-serif" font-size="13" font-weight="500" fill="#64748B" letter-spacing="1.5">
+    Everything You Need, Between Your Hands
+  </text>
+  
+  <!-- Accent line -->
+  <rect x="117" y="125" width="50" height="2" rx="1" fill="url(#accentGrad)"/>
+  
+  <!-- Arabic tagline -->
+  <text x="117" y="150" font-family="'Tajawal', 'SF Arabic', sans-serif" font-size="14" font-weight="500" fill="#94A3B8" letter-spacing="0.5">
+    كل شي تحتاجه بين يديك
+  </text>
+</svg>

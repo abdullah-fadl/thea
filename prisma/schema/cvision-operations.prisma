@@ -1,0 +1,416 @@
+// =============================================================================
+// CVision Operations Domain — Insurance, Travel, Transport, Safety, Assets,
+//                              Expenses, Grievances
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// Insurance Models
+// -----------------------------------------------------------------------------
+
+model CvisionInsuranceProvider {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  name        String
+  nameAr      String?
+  contactInfo Json?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+  createdBy   String?
+  updatedBy   String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, isActive])
+  @@map("cvision_insurance_providers")
+}
+
+model CvisionInsurancePolicy {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  providerId      String
+  policyNumber    String
+  name            String
+  type            String // "medical", "life", "dental", "vision"
+  coverageDetails Json?
+  premium         Decimal?  @db.Decimal(12, 2)
+  startDate       DateTime  @db.Date
+  endDate         DateTime? @db.Date
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+  createdBy       String?
+  updatedBy       String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, policyNumber])
+  @@index([tenantId])
+  @@index([tenantId, providerId])
+  @@index([tenantId, isActive])
+  @@map("cvision_insurance_policies")
+}
+
+model CvisionEmployeeInsurance {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String   @db.Uuid
+  employeeId       String
+  policyId         String
+  enrollmentDate   DateTime @db.Date
+  membershipNumber String?
+  dependents       Json?
+  status           String   @default("active") // active, suspended, cancelled
+  createdAt        DateTime @default(now()) @db.Timestamptz
+  updatedAt        DateTime @updatedAt @db.Timestamptz
+  createdBy        String?
+  updatedBy        String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, policyId])
+  @@index([tenantId, status])
+  @@map("cvision_employee_insurances")
+}
+
+model CvisionInsuranceClaim {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  employeeId     String
+  policyId       String?
+  claimNumber    String
+  claimDate      DateTime  @db.Date
+  amount         Decimal   @db.Decimal(12, 2)
+  description    String?
+  status         String    @default("submitted") // submitted, under_review, approved, rejected, paid
+  attachments    Json?
+  approvedAmount Decimal?  @db.Decimal(12, 2)
+  paidAt         DateTime? @db.Timestamptz
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @db.Timestamptz
+  createdBy      String?
+  updatedBy      String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, claimNumber])
+  @@index([tenantId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, status])
+  @@map("cvision_insurance_claims")
+}
+
+model CvisionInsuranceRequest {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @db.Uuid
+  employeeId  String
+  requestType String
+  description String?
+  status      String    @default("pending") // pending, approved, rejected
+  approvedBy  String?
+  approvedAt  DateTime? @db.Timestamptz
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+  createdBy   String?
+  updatedBy   String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, status])
+  @@map("cvision_insurance_requests")
+}
+
+// -----------------------------------------------------------------------------
+// Travel & Expense Models
+// -----------------------------------------------------------------------------
+
+model CvisionTravelRequest {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String    @db.Uuid
+  employeeId    String
+  destination   String
+  purpose       String?
+  departureDate DateTime  @db.Date
+  returnDate    DateTime  @db.Date
+  estimatedCost Decimal?  @db.Decimal(12, 2)
+  currency      String    @default("SAR")
+  status        String    @default("pending") // pending, approved, rejected, completed, cancelled
+  approvedBy    String?
+  approvedAt    DateTime? @db.Timestamptz
+  attachments   Json?
+  notes         String?
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @db.Timestamptz
+  createdBy     String?
+  updatedBy     String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, status])
+  @@map("cvision_travel_requests")
+}
+
+model CvisionExpenseClaim {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  employeeId      String
+  travelRequestId String?
+  claimDate       DateTime  @db.Date
+  totalAmount     Decimal   @db.Decimal(12, 2)
+  currency        String    @default("SAR")
+  items           Json // array of expense line items
+  receipts        Json?
+  status          String    @default("pending") // pending, approved, rejected, paid
+  approvedBy      String?
+  approvedAt      DateTime? @db.Timestamptz
+  paidAt          DateTime? @db.Timestamptz
+  notes           String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+  createdBy       String?
+  updatedBy       String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, travelRequestId])
+  @@index([tenantId, status])
+  @@map("cvision_expense_claims")
+}
+
+// -----------------------------------------------------------------------------
+// Asset Management Models
+// -----------------------------------------------------------------------------
+
+model CvisionAsset {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String    @db.Uuid
+  assetCode    String
+  name         String
+  category     String // "laptop", "phone", "vehicle", "furniture", "other"
+  employeeId   String?
+  departmentId String?
+  serialNumber String?
+  purchaseDate DateTime? @db.Date
+  purchaseCost Decimal?  @db.Decimal(12, 2)
+  condition    String    @default("good") // good, fair, poor
+  status       String    @default("available") // available, assigned, maintenance, retired
+  assignedDate DateTime? @db.Date
+  returnDate   DateTime? @db.Date
+  notes        String?
+  createdAt    DateTime  @default(now()) @db.Timestamptz
+  updatedAt    DateTime  @updatedAt @db.Timestamptz
+  createdBy    String?
+  updatedBy    String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, assetCode])
+  @@index([tenantId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, category])
+  @@index([tenantId, status])
+  @@map("cvision_assets")
+}
+
+// -----------------------------------------------------------------------------
+// Transport Models
+// -----------------------------------------------------------------------------
+
+model CvisionTransportRoute {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  name        String
+  description String?
+  stops       Json?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+  createdBy   String?
+  updatedBy   String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, isActive])
+  @@map("cvision_transport_routes")
+}
+
+model CvisionTransportVehicle {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  plateNumber String
+  type        String
+  capacity    Int?
+  driverId    String?
+  routeId     String?
+  status      String   @default("active") // active, maintenance, retired
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+  createdBy   String?
+  updatedBy   String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, plateNumber])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, routeId])
+  @@map("cvision_transport_vehicles")
+}
+
+model CvisionTransportAssignment {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  employeeId  String
+  routeId     String?
+  vehicleId   String?
+  pickupPoint String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+  createdBy   String?
+  updatedBy   String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, routeId])
+  @@index([tenantId, isActive])
+  @@map("cvision_transport_assignments")
+}
+
+model CvisionTransportRequest {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  employeeId      String
+  requestDate     DateTime @db.Date
+  pickupLocation  String
+  dropoffLocation String
+  purpose         String?
+  status          String   @default("pending") // pending, approved, rejected, completed
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdBy       String?
+  updatedBy       String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, status])
+  @@map("cvision_transport_requests")
+}
+
+model CvisionTransportTrip {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String   @db.Uuid
+  vehicleId  String
+  routeId    String?
+  date       DateTime @db.Date
+  startTime  String? // HH:mm
+  endTime    String? // HH:mm
+  passengers Int?
+  notes      String?
+  createdAt  DateTime @default(now()) @db.Timestamptz
+  updatedAt  DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, vehicleId])
+  @@index([tenantId, date])
+  @@map("cvision_transport_trips")
+}
+
+model CvisionTransportIssue {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @db.Uuid
+  vehicleId   String?
+  reportedBy  String
+  issueType   String
+  description String?
+  status      String    @default("open") // open, in_progress, resolved, closed
+  resolvedAt  DateTime? @db.Timestamptz
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, vehicleId])
+  @@index([tenantId, status])
+  @@map("cvision_transport_issues")
+}
+
+// -----------------------------------------------------------------------------
+// Safety & Incident Models
+// -----------------------------------------------------------------------------
+
+model CvisionSafetyIncident {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  reportedBy        String
+  incidentDate      DateTime  @db.Date
+  location          String?
+  description       String?
+  severity          String // "low", "medium", "high", "critical"
+  injuredEmployeeId String?
+  witnesses         Json?
+  rootCause         String?
+  correctiveAction  String?
+  status            String    @default("reported") // reported, investigating, resolved, closed
+  investigatedBy    String?
+  resolvedAt        DateTime? @db.Timestamptz
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+  createdBy         String?
+  updatedBy         String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, reportedBy])
+  @@index([tenantId, severity])
+  @@index([tenantId, status])
+  @@map("cvision_safety_incidents")
+}
+
+// -----------------------------------------------------------------------------
+// Grievance Models
+// -----------------------------------------------------------------------------
+
+model CvisionGrievance {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  employeeId        String
+  type              String
+  description       String?
+  severity          String    @default("medium") // low, medium, high, critical
+  againstEmployeeId String?
+  status            String    @default("submitted") // submitted, investigating, resolved, closed, escalated
+  resolution        String?
+  resolvedBy        String?
+  resolvedAt        DateTime? @db.Timestamptz
+  isConfidential    Boolean   @default(false)
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+  createdBy         String?
+  updatedBy         String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, status])
+  @@index([tenantId, severity])
+  @@map("cvision_grievances")
+}

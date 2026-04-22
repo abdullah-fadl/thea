@@ -1,0 +1,127 @@
+// =============================================================================
+// Consumables & Inventory — Nursing Charge Capture
+// =============================================================================
+
+model ConsumableStore {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @db.Uuid
+  code         String
+  name         String
+  nameAr       String?
+  locationType String // DEPARTMENT, FLOOR, UNIT, CRASH_CART
+  locationRef  String? // departmentId, floorId, etc.
+  status       String   @default("ACTIVE") // ACTIVE, INACTIVE
+  parLevel     Int      @default(0)
+  createdAt    DateTime @default(now()) @db.Timestamptz
+  updatedAt    DateTime @updatedAt @db.Timestamptz
+  createdBy    String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, code])
+  @@index([tenantId, status])
+  @@map("consumable_stores")
+}
+
+model ConsumableStoreItem {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  storeId         String    @db.Uuid
+  supplyCatalogId String    @db.Uuid
+  currentQty      Int       @default(0)
+  reorderLevel    Int       @default(0)
+  maxLevel        Int       @default(0)
+  batchNumber     String?
+  expiryDate      DateTime? @db.Timestamptz
+  lastCountedAt   DateTime? @db.Timestamptz
+  lastCountedBy   String?
+  status          String    @default("IN_STOCK") // IN_STOCK, LOW, OUT_OF_STOCK, EXPIRED
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, storeId, supplyCatalogId])
+  @@index([tenantId, storeId, status])
+  @@map("consumable_store_items")
+}
+
+model ConsumableStockMovement {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  storeId         String   @db.Uuid
+  supplyCatalogId String   @db.Uuid
+  movementType    String // RECEIVE, ISSUE, RETURN, ADJUST, WASTE, TRANSFER, COUNT
+  quantity        Int
+  previousQty     Int
+  newQty          Int
+  reason          String?
+  encounterCoreId String?  @db.Uuid
+  patientMasterId String?  @db.Uuid
+  batchNumber     String?
+  reference       String? // usageEventId, transferId, etc.
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  createdBy       String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, storeId, createdAt])
+  @@index([tenantId, supplyCatalogId, createdAt])
+  @@map("consumable_stock_movements")
+}
+
+model ConsumableUsageEvent {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  encounterCoreId String    @db.Uuid
+  patientMasterId String?   @db.Uuid
+  department      String // OPD, ER, IPD, OR, ICU
+  supplyCatalogId String    @db.Uuid
+  supplyCode      String
+  supplyName      String
+  quantity        Int
+  wasteQty        Int       @default(0)
+  storeId         String?   @db.Uuid
+  usageContext    String // PROCEDURE, DRESSING, IV_LINE, CATHETER, DRAIN, SPLINT, MONITORING, ROUTINE, OTHER
+  notes           String?
+  templateId      String?   @db.Uuid
+  chargeEventId   String?   @db.Uuid
+  isChargeable    Boolean   @default(true)
+  costPrice       Decimal?  @db.Decimal(12, 2)
+  totalCost       Decimal?  @db.Decimal(12, 2)
+  status          String    @default("RECORDED") // RECORDED, VOIDED
+  voidedAt        DateTime? @db.Timestamptz
+  voidedBy        String?
+  voidReason      String?
+  idempotencyKey  String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  createdBy       String?
+  createdByName   String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, encounterCoreId, status])
+  @@index([tenantId, department, createdAt])
+  @@index([tenantId, idempotencyKey])
+  @@map("consumable_usage_events")
+}
+
+model ConsumableUsageTemplate {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @db.Uuid
+  name         String
+  nameAr       String?
+  department   String // OPD, ER, IPD, OR, ICU, ALL
+  usageContext String // PROCEDURE, DRESSING, IV_LINE, etc.
+  items        Json // [{supplyCatalogId, supplyCode, supplyName, defaultQty}]
+  isActive     Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now()) @db.Timestamptz
+  updatedAt    DateTime @updatedAt @db.Timestamptz
+  createdBy    String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, department, isActive])
+  @@map("consumable_usage_templates")
+}

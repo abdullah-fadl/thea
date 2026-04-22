@@ -1,0 +1,1713 @@
+[
+  {
+    "path": "/",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:public"
+    ],
+    "expectedAccess": "public",
+    "platform": "any"
+  },
+  {
+    "path": "/account",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/account/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/admin",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/admin/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/admin",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/admin/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/audit-coverage",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/audit-coverage/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/clinical-infra",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/clinical-infra/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/clinical-infra/beds",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/clinical-infra/beds/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/clinical-infra/clinics",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/clinical-infra/clinics/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/clinical-infra/facilities",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/clinical-infra/facilities/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/clinical-infra/floors",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/clinical-infra/floors/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/clinical-infra/providers",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/clinical-infra/providers/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/clinical-infra/rooms",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/clinical-infra/rooms/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/clinical-infra/specialties",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/clinical-infra/specialties/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/clinical-infra/units",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/clinical-infra/units/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/data-admin",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/data-admin/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/delete-sample-data",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/delete-sample-data/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/entitlements",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/admin/entitlements/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/groups-hospitals",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/groups-hospitals/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/integrations",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/admin/integrations/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/organization-profile",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/organization-profile/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/platform-access",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/admin/platform-access/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/quotas",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/quotas/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/roles",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/admin/roles/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/structure-management",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/structure-management/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/admin/users",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/admin/users/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ],
+    "expectedAccess": "admin",
+    "platform": "any"
+  },
+  {
+    "path": "/alignment",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/alignment/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/billing/charge-catalog",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/billing/charge-catalog/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/billing/charge-events",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/billing/charge-events/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/billing/claims",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/billing/claims/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/billing/diagnosis-catalog",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/billing/diagnosis-catalog/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/billing/insurance",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/billing/insurance/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/billing/invoice-draft",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/billing/invoice-draft/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/billing/lab-catalog",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/billing/lab-catalog/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/billing/medication-catalog",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/billing/medication-catalog/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/billing/payments",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/billing/payments/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/billing/pricing-packages",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/billing/pricing-packages/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/billing/procedure-catalog",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/billing/procedure-catalog/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/billing/radiology-catalog",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/billing/radiology-catalog/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/billing/service-catalog",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/billing/service-catalog/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/billing/statement",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/billing/statement/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/billing/supplies-catalog",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/billing/supplies-catalog/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/dashboard",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/dashboard/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/demo-limit",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/demo-limit/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/downtime/pack",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/downtime/pack/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/equipment/master",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/equipment/master/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/er/beds",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/er/beds/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/er/board",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/er/board/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/er/charge",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/er/charge/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/er/command",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/er/command/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/er/doctor",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/er/doctor/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/er/metrics",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/er/metrics/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/er/notifications",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/er/notifications/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/er/nursing",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/er/nursing/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/er/register",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/er/register/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/er/respiratory-screen",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/er/respiratory-screen/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/er/results-console",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/er/results-console/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/handover",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/handover/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/health",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/health/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/integrity",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/integrity/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/ipd/audit",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/ipd/audit/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/ipd/episodes",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/ipd/episodes/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/ipd/intake",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/ipd/intake/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/ipd/live-beds",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/ipd/live-beds/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/login",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/login/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:public"
+    ],
+    "expectedAccess": "public",
+    "platform": "any"
+  },
+  {
+    "path": "/notifications",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/notifications/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/nursing/operations",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/nursing/operations/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/opd/analytics",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/opd/analytics/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/opd/appointments",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/opd/appointments/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/opd/daily-stats",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/opd/daily-stats/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/opd/data-import",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/opd/data-import/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/opd/doctor-worklist",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/opd/doctor-worklist/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/opd/home",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/opd/home/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/opd/nurse-roster",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/opd/nurse-roster/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/opd/nurse-station",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/opd/nurse-station/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/opd/registration",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/opd/registration/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/opd/room-schedule",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/opd/room-schedule/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/opd/staff-setup",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/opd/staff-setup/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/opd/waiting-list",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/opd/waiting-list/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/orders",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/orders/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/orders/sets",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/orders/sets/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/owner",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/owner/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:owner"
+    ],
+    "expectedAccess": "owner",
+    "platform": "any"
+  },
+  {
+    "path": "/owner/setup",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/owner/setup/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:owner"
+    ],
+    "expectedAccess": "owner",
+    "platform": "any"
+  },
+  {
+    "path": "/owner/tenants",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/owner/tenants/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:owner"
+    ],
+    "expectedAccess": "owner",
+    "platform": "any"
+  },
+  {
+    "path": "/owner/users",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/owner/users/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:owner"
+    ],
+    "expectedAccess": "owner",
+    "platform": "any"
+  },
+  {
+    "path": "/p",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(portal)/p/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/p/appointments",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(portal)/p/appointments/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/p/book",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(portal)/p/book/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/p/login",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(portal)/p/login/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/p/reports",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(portal)/p/reports/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/patient-experience",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/patient-experience/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/patient-experience/analytics",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/patient-experience/analytics/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/patient-experience/cases",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/patient-experience/cases/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/patient-experience/dashboard",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/patient-experience/dashboard/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/patient-experience/delete-all-data",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/patient-experience/delete-all-data/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/patient-experience/reports",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/patient-experience/reports/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/patient-experience/seed-data",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/patient-experience/seed-data/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/patient-experience/setup",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/patient-experience/setup/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/patient-experience/visit",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/patient-experience/visit/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/patient-experience/visits",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/patient-experience/visits/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/platforms",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/platforms/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:public"
+    ],
+    "expectedAccess": "public",
+    "platform": "any"
+  },
+  {
+    "path": "/platforms/sam",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/platforms/sam/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "sam"
+  },
+  {
+    "path": "/platforms/thea-health",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/platforms/thea-health/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/quality/incidents",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/quality/incidents/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/quality/kpis",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/quality/kpis/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/registration",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/registration/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/registration/insurance",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/registration/insurance/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/results",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/results/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/risk-detector",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/risk-detector/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/sam",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/sam/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "sam"
+  },
+  {
+    "path": "/sam/assistant",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/sam/assistant/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "sam"
+  },
+  {
+    "path": "/sam/conflicts",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/sam/conflicts/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "sam"
+  },
+  {
+    "path": "/sam/drafts",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/sam/drafts/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "sam"
+  },
+  {
+    "path": "/sam/gaps",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/sam/gaps/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "sam"
+  },
+  {
+    "path": "/sam/home",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/sam/home/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "sam"
+  },
+  {
+    "path": "/sam/issues",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/sam/issues/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "sam"
+  },
+  {
+    "path": "/sam/library",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/sam/library/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "sam"
+  },
+  {
+    "path": "/sam/setup",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/sam/setup/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "sam"
+  },
+  {
+    "path": "/scheduling/calendar",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/scheduling/calendar/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/scheduling/resources",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/scheduling/resources/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/scheduling/templates",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/scheduling/templates/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/search",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/search/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/select-platform",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/select-platform/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/subscription-error",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/subscription-error/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/tasks",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/tasks/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/welcome",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/welcome/page.tsx",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:public"
+    ],
+    "expectedAccess": "public",
+    "platform": "any"
+  },
+  {
+    "path": "/departments/[department]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/departments/[department]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "department"
+    ],
+    "excludeReason": "Dynamic param 'department' requires manual placeholder determination",
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/er/encounter/[encounterId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/er/encounter/[encounterId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "encounterId"
+    ],
+    "excludeReason": "Dynamic param 'encounterId' requires manual placeholder determination",
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/er/triage/[encounterId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/er/triage/[encounterId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "encounterId"
+    ],
+    "excludeReason": "Dynamic param 'encounterId' requires manual placeholder determination",
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/handoff/[handoffId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/handoff/[handoffId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "handoffId"
+    ],
+    "excludeReason": "Dynamic param 'handoffId' requires manual placeholder determination",
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/icu/episode/[episodeId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/icu/episode/[episodeId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "episodeId"
+    ],
+    "excludeReason": "Dynamic param 'episodeId' requires manual placeholder determination",
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/ipd/audit/[episodeId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/ipd/audit/[episodeId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "episodeId"
+    ],
+    "excludeReason": "Dynamic param 'episodeId' requires manual placeholder determination",
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/ipd/episode/[episodeId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/ipd/episode/[episodeId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "episodeId"
+    ],
+    "excludeReason": "Dynamic param 'episodeId' requires manual placeholder determination",
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/ipd/episode/[episodeId]/continuity",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/ipd/episode/[episodeId]/continuity/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "episodeId"
+    ],
+    "excludeReason": "Dynamic param 'episodeId' requires manual placeholder determination",
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/ipd/intake/[handoffId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/ipd/intake/[handoffId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "handoffId"
+    ],
+    "excludeReason": "Dynamic param 'handoffId' requires manual placeholder determination",
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/mortuary/[caseId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/mortuary/[caseId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "caseId"
+    ],
+    "excludeReason": "Dynamic param 'caseId' requires manual placeholder determination",
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/opd/visit/[visitId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/opd/visit/[visitId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "visitId"
+    ],
+    "excludeReason": "Dynamic param 'visitId' requires manual placeholder determination",
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/opd/visit/[visitId]/eye-report",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/opd/visit/[visitId]/eye-report/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "visitId"
+    ],
+    "excludeReason": "Dynamic param 'visitId' requires manual placeholder determination",
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/opd/visit/[visitId]/prescription-print",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/opd/visit/[visitId]/prescription-print/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "visitId"
+    ],
+    "excludeReason": "Dynamic param 'visitId' requires manual placeholder determination",
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "health"
+  },
+  {
+    "path": "/or/cases/[caseId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/or/cases/[caseId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "caseId"
+    ],
+    "excludeReason": "Dynamic param 'caseId' requires manual placeholder determination",
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/owner/tenants/[tenantId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/owner/tenants/[tenantId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "tenantId"
+    ],
+    "placeholders": {
+      "tenantId": "test-tenant-a"
+    },
+    "tags": [
+      "access:owner"
+    ],
+    "expectedAccess": "owner",
+    "platform": "any"
+  },
+  {
+    "path": "/p/reports/ophthalmology/[encounterCoreId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(portal)/p/reports/ophthalmology/[encounterCoreId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "encounterCoreId"
+    ],
+    "excludeReason": "Dynamic param 'encounterCoreId' requires manual placeholder determination",
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/patient/[patientMasterId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/patient/[patientMasterId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "patientMasterId"
+    ],
+    "excludeReason": "Dynamic param 'patientMasterId' requires manual placeholder determination",
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/patient/[patientMasterId]/journey",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/patient/[patientMasterId]/journey/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "patientMasterId"
+    ],
+    "excludeReason": "Dynamic param 'patientMasterId' requires manual placeholder determination",
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/patient/360/[patientMasterId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/patient/360/[patientMasterId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "patientMasterId"
+    ],
+    "excludeReason": "Dynamic param 'patientMasterId' requires manual placeholder determination",
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/quality/incidents/[incidentId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/quality/incidents/[incidentId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "incidentId"
+    ],
+    "excludeReason": "Dynamic param 'incidentId' requires manual placeholder determination",
+    "tags": [
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "any"
+  },
+  {
+    "path": "/sam/drafts/[draftId]",
+    "filePath": "/Users/yousef/Desktop/Thea-f/app/(dashboard)/sam/drafts/[draftId]/page.tsx",
+    "isDynamic": true,
+    "dynamicParams": [
+      "draftId"
+    ],
+    "excludeReason": "Dynamic param 'draftId' requires manual placeholder determination",
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ],
+    "expectedAccess": "authenticated",
+    "platform": "sam"
+  }
+]

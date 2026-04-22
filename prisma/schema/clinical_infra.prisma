@@ -1,0 +1,286 @@
+// =============================================================================
+// Clinical Infrastructure — Providers, Clinics, Specialties, Departments
+// =============================================================================
+
+model ClinicalInfraProvider {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  displayName    String
+  email          String?
+  staffId        String? // Employee/Staff ID
+  employmentType String? // FULL_TIME, PART_TIME, VISITING
+  shortCode      String?
+  specialtyCode  String?
+  isArchived     Boolean   @default(false)
+  archivedAt     DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?  @db.Uuid
+  updatedBy String?  @db.Uuid
+
+  // Relations
+  tenant      Tenant                            @relation(fields: [tenantId], references: [id])
+  profiles    ClinicalInfraProviderProfile[]
+  assignments ClinicalInfraProviderAssignment[]
+
+  @@index([tenantId])
+  @@index([tenantId, email])
+  @@index([tenantId, shortCode])
+  @@map("clinical_infra_providers")
+}
+
+model ClinicalInfraClinic {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  name           String
+  unitId         String?
+  specialtyId    String?   @db.Uuid
+  allowedRoomIds String[]  @default([])
+  shortCode      String?
+  isArchived     Boolean   @default(false)
+  archivedAt     DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?  @db.Uuid
+  updatedBy String?  @db.Uuid
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, shortCode])
+  @@index([tenantId])
+  @@map("clinical_infra_clinics")
+}
+
+model ClinicalInfraSpecialty {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String    @db.Uuid
+  name       String
+  code       String
+  shortCode  String?
+  isArchived Boolean   @default(false)
+  archivedAt DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?  @db.Uuid
+  updatedBy String?  @db.Uuid
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("clinical_infra_specialties")
+}
+
+model ClinicalInfraProviderProfile {
+  id                      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId                String   @db.Uuid
+  providerId              String   @db.Uuid
+  licenseNumber           String?
+  unitIds                 String[] @default([])
+  specialtyIds            String[] @default([])
+  consultationServiceCode String?
+  level                   String? // CONSULTANT, SPECIALIST, RESIDENT
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  tenant   Tenant                @relation(fields: [tenantId], references: [id])
+  provider ClinicalInfraProvider @relation(fields: [providerId], references: [id])
+
+  @@unique([tenantId, providerId])
+  @@index([tenantId])
+  @@map("clinical_infra_provider_profiles")
+}
+
+model ClinicalInfraProviderAssignment {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @db.Uuid
+  providerId        String   @db.Uuid
+  primaryClinicId   String?
+  parallelClinicIds String[] @default([])
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  tenant   Tenant                @relation(fields: [tenantId], references: [id])
+  provider ClinicalInfraProvider @relation(fields: [providerId], references: [id])
+
+  @@unique([tenantId, providerId])
+  @@index([tenantId])
+  @@map("clinical_infra_provider_assignments")
+}
+
+model Department {
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String  @db.Uuid
+  name     String
+  code     String
+  type     String? // OPD, IPD, BOTH
+  floorId  String?
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?  @db.Uuid
+  updatedBy String?  @db.Uuid
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("departments")
+}
+
+// =============================================================================
+// Clinical Infrastructure — Facilities, Floors, Units, Rooms, Beds
+// =============================================================================
+
+model ClinicalInfraFacility {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String  @db.Uuid
+  name      String
+  shortCode String?
+  type      String?
+  status    String  @default("active")
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?  @db.Uuid
+  updatedBy String?  @db.Uuid
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, shortCode])
+  @@index([tenantId])
+  @@map("clinical_infra_facilities")
+}
+
+model ClinicalInfraFloor {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String  @db.Uuid
+  facilityId String? @db.Uuid
+  name       String
+  shortCode  String?
+  level      Int?
+  status     String  @default("active")
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?  @db.Uuid
+  updatedBy String?  @db.Uuid
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, shortCode])
+  @@index([tenantId])
+  @@map("clinical_infra_floors")
+}
+
+model ClinicalInfraUnit {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String  @db.Uuid
+  name       String
+  shortCode  String?
+  type       String? // ER, ICU, WARD, etc.
+  floorId    String? @db.Uuid
+  facilityId String? @db.Uuid
+  status     String  @default("active")
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?  @db.Uuid
+  updatedBy String?  @db.Uuid
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, shortCode])
+  @@index([tenantId])
+  @@index([tenantId, type])
+  @@map("clinical_infra_units")
+}
+
+model ClinicalInfraRoom {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String  @db.Uuid
+  unitId    String? @db.Uuid
+  floorId   String? @db.Uuid
+  name      String
+  shortCode String?
+  roomType  String?
+  status    String  @default("active")
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?  @db.Uuid
+  updatedBy String?  @db.Uuid
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, shortCode])
+  @@index([tenantId])
+  @@map("clinical_infra_rooms")
+}
+
+model ClinicalInfraBed {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String  @db.Uuid
+  roomId    String? @db.Uuid
+  label     String
+  shortCode String?
+  bedType   String? // ER, ICU, WARD, etc.
+  status    String  @default("active")
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?  @db.Uuid
+  updatedBy String?  @db.Uuid
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, bedType])
+  @@map("clinical_infra_beds")
+}
+
+model ClinicalInfraProviderUnitScope {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String  @db.Uuid
+  providerId String  @db.Uuid
+  unitId     String? @db.Uuid
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([providerId])
+  @@map("clinical_infra_provider_unit_scopes")
+}
+
+model ClinicalInfraProviderRoomAssignment {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String  @db.Uuid
+  providerId String  @db.Uuid
+  roomId     String? @db.Uuid
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([providerId])
+  @@map("clinical_infra_provider_room_assignments")
+}

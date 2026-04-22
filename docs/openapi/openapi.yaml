@@ -1,0 +1,1218 @@
+openapi: 3.0.3
+info:
+  title: EHR Core API
+  version: 1.0.0
+  description: Core EHR API for managing patients, encounters, orders, tasks, notes, privileges, and audit logs
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local development server
+
+paths:
+  /admin/users:
+    post:
+      summary: Create EHR user
+      operationId: createEHRUser
+      tags:
+        - Admin
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEHRUserRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EHRUserResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/patients:
+    post:
+      summary: Create patient
+      operationId: createPatient
+      tags:
+        - Admin
+        - Patients
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePatientRequest'
+      responses:
+        '201':
+          description: Patient created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/patients/{id}:
+    get:
+      summary: Get patient by ID
+      operationId: getPatient
+      tags:
+        - Admin
+        - Patients
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Patient ID
+      responses:
+        '200':
+          description: Patient retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientResponse'
+        '404':
+          description: Patient not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/encounters:
+    post:
+      summary: Create encounter
+      operationId: createEncounter
+      tags:
+        - Admin
+        - Encounters
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEncounterRequest'
+      responses:
+        '201':
+          description: Encounter created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EncounterResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/orders:
+    post:
+      summary: Create order
+      operationId: createOrder
+      tags:
+        - Admin
+        - Orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/tasks:
+    post:
+      summary: Create task
+      operationId: createTask
+      tags:
+        - Admin
+        - Tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/notes:
+    post:
+      summary: Create note
+      operationId: createNote
+      tags:
+        - Admin
+        - Notes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNoteRequest'
+      responses:
+        '201':
+          description: Note created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/privileges/grant:
+    post:
+      summary: Grant privilege
+      operationId: grantPrivilege
+      tags:
+        - Admin
+        - Privileges
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrantPrivilegeRequest'
+      responses:
+        '201':
+          description: Privilege granted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivilegeResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/privileges/revoke:
+    post:
+      summary: Revoke privilege
+      operationId: revokePrivilege
+      tags:
+        - Admin
+        - Privileges
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevokePrivilegeRequest'
+      responses:
+        '200':
+          description: Privilege revoked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivilegeResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Privilege not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/audit:
+    get:
+      summary: Get audit logs
+      operationId: getAuditLogs
+      tags:
+        - Admin
+        - Audit
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+          description: Filter by user ID
+        - name: resourceType
+          in: query
+          schema:
+            type: string
+          description: Filter by resource type
+        - name: resourceId
+          in: query
+          schema:
+            type: string
+          description: Filter by resource ID
+        - name: patientId
+          in: query
+          schema:
+            type: string
+          description: Filter by patient ID
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Start date (ISO timestamp)
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: End date (ISO timestamp)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+          description: Maximum number of results
+      responses:
+        '200':
+          description: Audit logs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  logs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditLogResponse'
+                  count:
+                    type: integer
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+
+    Patient:
+      type: object
+      required:
+        - id
+        - mrn
+        - firstName
+        - lastName
+        - dateOfBirth
+        - gender
+        - isActive
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        mrn:
+          type: string
+        firstName:
+          type: string
+        middleName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        gender:
+          type: string
+          enum: [MALE, FEMALE, OTHER, UNKNOWN]
+        phone:
+          type: string
+        email:
+          type: string
+        address:
+          type: object
+          properties:
+            street:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            zipCode:
+              type: string
+            country:
+              type: string
+        nationalId:
+          type: string
+        insuranceId:
+          type: string
+        insuranceProvider:
+          type: string
+        isActive:
+          type: boolean
+        deceasedDate:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+
+    CreatePatientRequest:
+      type: object
+      required:
+        - mrn
+        - firstName
+        - lastName
+        - dateOfBirth
+        - gender
+      properties:
+        mrn:
+          type: string
+        firstName:
+          type: string
+        middleName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        gender:
+          type: string
+          enum: [MALE, FEMALE, OTHER, UNKNOWN]
+        phone:
+          type: string
+        email:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        nationalId:
+          type: string
+        insuranceId:
+          type: string
+        insuranceProvider:
+          type: string
+
+    PatientResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        patient:
+          $ref: '#/components/schemas/Patient'
+
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+        country:
+          type: string
+
+    EHRUser:
+      type: object
+      required:
+        - id
+        - userId
+        - email
+        - firstName
+        - lastName
+        - isActive
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        licenseNumber:
+          type: string
+        specialty:
+          type: string
+        npi:
+          type: string
+        title:
+          type: string
+        department:
+          type: string
+        role:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+
+    CreateEHRUserRequest:
+      type: object
+      required:
+        - userId
+        - email
+        - firstName
+        - lastName
+      properties:
+        userId:
+          type: string
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        licenseNumber:
+          type: string
+        specialty:
+          type: string
+        npi:
+          type: string
+        title:
+          type: string
+        department:
+          type: string
+        role:
+          type: string
+
+    EHRUserResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/EHRUser'
+
+    Encounter:
+      type: object
+      required:
+        - id
+        - patientId
+        - mrn
+        - encounterNumber
+        - encounterType
+        - admissionDate
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        patientId:
+          type: string
+        mrn:
+          type: string
+        encounterNumber:
+          type: string
+        encounterType:
+          type: string
+          enum: [INPATIENT, OUTPATIENT, EMERGENCY, AMBULATORY, OTHER]
+        admissionDate:
+          type: string
+          format: date-time
+        dischargeDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PLANNED, IN_PROGRESS, DISCHARGED, CANCELLED]
+        department:
+          type: string
+        service:
+          type: string
+        location:
+          type: string
+        attendingPhysicianId:
+          type: string
+        admittingPhysicianId:
+          type: string
+        chiefComplaint:
+          type: string
+        primaryDiagnosis:
+          type: string
+        diagnosisCodes:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+
+    CreateEncounterRequest:
+      type: object
+      required:
+        - patientId
+        - mrn
+        - encounterType
+        - admissionDate
+      properties:
+        patientId:
+          type: string
+        mrn:
+          type: string
+        encounterType:
+          type: string
+          enum: [INPATIENT, OUTPATIENT, EMERGENCY, AMBULATORY, OTHER]
+        admissionDate:
+          type: string
+          format: date-time
+        department:
+          type: string
+        service:
+          type: string
+        location:
+          type: string
+        attendingPhysicianId:
+          type: string
+        admittingPhysicianId:
+          type: string
+        chiefComplaint:
+          type: string
+        primaryDiagnosis:
+          type: string
+        diagnosisCodes:
+          type: array
+          items:
+            type: string
+
+    EncounterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        encounter:
+          $ref: '#/components/schemas/Encounter'
+
+    Order:
+      type: object
+      required:
+        - id
+        - patientId
+        - mrn
+        - orderNumber
+        - orderType
+        - description
+        - orderedBy
+        - status
+        - orderedAt
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        patientId:
+          type: string
+        encounterId:
+          type: string
+        mrn:
+          type: string
+        orderNumber:
+          type: string
+        orderType:
+          type: string
+          enum: [MEDICATION, LAB, IMAGING, PROCEDURE, CONSULT, OTHER]
+        description:
+          type: string
+        code:
+          type: string
+        codeSystem:
+          type: string
+        orderedBy:
+          type: string
+        orderingProviderName:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, SUBMITTED, ACCEPTED, IN_PROGRESS, COMPLETED, CANCELLED, DISCONTINUED]
+        orderedAt:
+          type: string
+          format: date-time
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        scheduledTime:
+          type: string
+          format: date-time
+        priority:
+          type: string
+          enum: [ROUTINE, URGENT, STAT, ASAP]
+        instructions:
+          type: string
+        frequency:
+          type: string
+        quantity:
+          type: string
+        route:
+          type: string
+        duration:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+
+    CreateOrderRequest:
+      type: object
+      required:
+        - patientId
+        - mrn
+        - orderType
+        - description
+        - orderedBy
+      properties:
+        patientId:
+          type: string
+        encounterId:
+          type: string
+        mrn:
+          type: string
+        orderType:
+          type: string
+          enum: [MEDICATION, LAB, IMAGING, PROCEDURE, CONSULT, OTHER]
+        description:
+          type: string
+        code:
+          type: string
+        codeSystem:
+          type: string
+        orderedBy:
+          type: string
+        priority:
+          type: string
+          enum: [ROUTINE, URGENT, STAT, ASAP]
+        startDate:
+          type: string
+          format: date-time
+        scheduledTime:
+          type: string
+          format: date-time
+        instructions:
+          type: string
+        frequency:
+          type: string
+        quantity:
+          type: string
+        route:
+          type: string
+        duration:
+          type: string
+
+    OrderResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        order:
+          $ref: '#/components/schemas/Order'
+
+    Task:
+      type: object
+      required:
+        - id
+        - title
+        - taskType
+        - assignedTo
+        - status
+        - priority
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        patientId:
+          type: string
+        encounterId:
+          type: string
+        orderId:
+          type: string
+        mrn:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        taskType:
+          type: string
+          enum: [CLINICAL, ADMINISTRATIVE, FOLLOW_UP, REVIEW, OTHER]
+        assignedTo:
+          type: string
+        assignedBy:
+          type: string
+        department:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, IN_PROGRESS, COMPLETED, CANCELLED, DEFERRED]
+        dueDate:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        completedBy:
+          type: string
+        priority:
+          type: string
+          enum: [LOW, NORMAL, HIGH, URGENT]
+        notes:
+          type: string
+        completionNotes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+
+    CreateTaskRequest:
+      type: object
+      required:
+        - title
+        - taskType
+        - assignedTo
+        - priority
+      properties:
+        patientId:
+          type: string
+        encounterId:
+          type: string
+        orderId:
+          type: string
+        mrn:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        taskType:
+          type: string
+          enum: [CLINICAL, ADMINISTRATIVE, FOLLOW_UP, REVIEW, OTHER]
+        assignedTo:
+          type: string
+        assignedBy:
+          type: string
+        department:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        priority:
+          type: string
+          enum: [LOW, NORMAL, HIGH, URGENT]
+        notes:
+          type: string
+
+    TaskResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        task:
+          $ref: '#/components/schemas/Task'
+
+    Note:
+      type: object
+      required:
+        - id
+        - patientId
+        - mrn
+        - noteType
+        - content
+        - authoredBy
+        - status
+        - authoredAt
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        patientId:
+          type: string
+        encounterId:
+          type: string
+        mrn:
+          type: string
+        noteType:
+          type: string
+          enum: [PROGRESS, ADMISSION, DISCHARGE, CONSULTATION, PROCEDURE, SOAP, OTHER]
+        title:
+          type: string
+        content:
+          type: string
+        authoredBy:
+          type: string
+        authorName:
+          type: string
+        authorTitle:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, FINAL, AMENDED, VOIDED]
+        authoredAt:
+          type: string
+          format: date-time
+        signedAt:
+          type: string
+          format: date-time
+        amendedAt:
+          type: string
+          format: date-time
+        coSigners:
+          type: array
+          items:
+            type: string
+        sections:
+          type: array
+          items:
+            type: object
+            properties:
+              section:
+                type: string
+              content:
+                type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+
+    CreateNoteRequest:
+      type: object
+      required:
+        - patientId
+        - mrn
+        - noteType
+        - content
+        - authoredBy
+      properties:
+        patientId:
+          type: string
+        encounterId:
+          type: string
+        mrn:
+          type: string
+        noteType:
+          type: string
+          enum: [PROGRESS, ADMISSION, DISCHARGE, CONSULTATION, PROCEDURE, SOAP, OTHER]
+        title:
+          type: string
+        content:
+          type: string
+        authoredBy:
+          type: string
+        sections:
+          type: array
+          items:
+            type: object
+            properties:
+              section:
+                type: string
+              content:
+                type: string
+
+    NoteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        note:
+          $ref: '#/components/schemas/Note'
+
+    Privilege:
+      type: object
+      required:
+        - id
+        - userId
+        - grantedBy
+        - resource
+        - action
+        - isActive
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        grantedBy:
+          type: string
+        resource:
+          type: string
+        action:
+          type: string
+        scope:
+          type: string
+        departmentId:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+        revokedAt:
+          type: string
+          format: date-time
+        revokedBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+
+    GrantPrivilegeRequest:
+      type: object
+      required:
+        - userId
+        - resource
+        - action
+      properties:
+        userId:
+          type: string
+        resource:
+          type: string
+        action:
+          type: string
+        scope:
+          type: string
+        departmentId:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    RevokePrivilegeRequest:
+      type: object
+      required:
+        - privilegeId
+      properties:
+        privilegeId:
+          type: string
+
+    PrivilegeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        privilege:
+          $ref: '#/components/schemas/Privilege'
+
+    AuditLog:
+      type: object
+      required:
+        - id
+        - action
+        - resourceType
+        - userId
+        - success
+        - timestamp
+      properties:
+        id:
+          type: string
+        action:
+          type: string
+        resourceType:
+          type: string
+        resourceId:
+          type: string
+        userId:
+          type: string
+        userName:
+          type: string
+        changes:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              oldValue:
+                type: any
+              newValue:
+                type: any
+        ipAddress:
+          type: string
+        userAgent:
+          type: string
+        requestId:
+          type: string
+        patientId:
+          type: string
+        mrn:
+          type: string
+        success:
+          type: boolean
+        errorMessage:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+
+    AuditLogResponse:
+      $ref: '#/components/schemas/AuditLog'
+

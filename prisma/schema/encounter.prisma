@@ -1,0 +1,40 @@
+// =============================================================================
+// Encounter Domain — Core encounter shared across ER, OPD, IPD
+// =============================================================================
+
+model EncounterCore {
+  id            String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String              @db.Uuid
+  patientId     String              @db.Uuid
+  encounterType EncounterType
+  status        EncounterCoreStatus @default(CREATED)
+  department    String
+
+  openedAt DateTime? @db.Timestamptz
+  closedAt DateTime? @db.Timestamptz
+
+  // Source information
+  sourceSystem EncounterSourceSystem?
+  sourceId     String?
+
+  // Audit
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?
+  closedByUserId  String?
+
+  // Relations
+  tenant       Tenant        @relation(fields: [tenantId], references: [id])
+  patient      PatientMaster @relation(fields: [patientId], references: [id])
+  opdEncounter              OpdEncounter?
+  erEncounter               ErEncounter?
+  medicationAdministrations MedicationAdministration[]
+  nursingAssessments        NursingAssessment[]
+
+  @@index([tenantId])
+  @@index([patientId])
+  @@index([encounterType])
+  @@index([status])
+  @@index([tenantId, status])
+  @@map("encounter_core")
+}

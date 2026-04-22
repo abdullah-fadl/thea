@@ -1,0 +1,104 @@
+// =============================================================================
+// Blood Bank Domain — Requests, Units, Transfusions, Reactions
+// =============================================================================
+
+model BloodBankRequest {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  patientMasterId String   @db.Uuid
+  episodeId       String?  @db.Uuid
+  encounterId     String?  @db.Uuid
+  requestedBy     String   @db.Uuid // userId
+  urgency         String   @default("ROUTINE") // STAT, URGENT, ROUTINE, MASSIVE_TRANSFUSION
+  indication      String
+  bloodType       String? // A+, A-, B+, B-, AB+, AB-, O+, O-
+  products        Json     @default("[]") // [{product, units}] product: PRBC, FFP, PLT, CRYO, WHOLE_BLOOD
+  crossmatch      Boolean  @default(true)
+  consentObtained Boolean  @default(false)
+  status          String   @default("PENDING") // PENDING, CROSSMATCH, APPROVED, ISSUED, TRANSFUSING, COMPLETED, CANCELLED
+  createdByUserId String?
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+
+  transfusions Transfusion[]
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, status])
+  @@map("blood_bank_requests")
+}
+
+model BloodUnit {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  unitNumber     String // unique blood bag ID
+  product        String // PRBC, FFP, PLT, CRYO, WHOLE_BLOOD
+  bloodType      String
+  expiryDate     DateTime  @db.Timestamptz
+  collectionDate DateTime? @db.Timestamptz
+  volume         Int // mL
+  status         String    @default("AVAILABLE") // AVAILABLE, RESERVED, TRANSFUSED, DISCARDED, EXPIRED
+  donorId        String?
+  reservedFor    String?   @db.Uuid // patientMasterId
+  temperature    Float? // storage temp in °C
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, bloodType])
+  @@map("blood_units")
+}
+
+model Transfusion {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String           @db.Uuid
+  requestId       String           @db.Uuid
+  request         BloodBankRequest @relation(fields: [requestId], references: [id])
+  unitNumber      String // blood bag ID
+  patientMasterId String           @db.Uuid
+  administeredBy  String           @db.Uuid // nurse userId
+  startTime       DateTime         @db.Timestamptz
+  endTime         DateTime?        @db.Timestamptz
+  rate            Int? // mL/hr
+  preVitals       Json? // {bp, hr, temp, spo2}
+  postVitals      Json?
+  monitoringLog   Json             @default("[]") // [{time, bp, hr, temp, spo2, notes}]
+  status          String           @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED, STOPPED
+  stoppedReason   String?
+  createdAt       DateTime         @default(now()) @db.Timestamptz
+  updatedAt       DateTime         @updatedAt @db.Timestamptz
+
+  reaction TransfusionReaction?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, requestId])
+  @@index([tenantId, patientMasterId])
+  @@map("transfusions")
+}
+
+model TransfusionReaction {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String      @db.Uuid
+  transfusionId  String      @unique @db.Uuid
+  transfusion    Transfusion @relation(fields: [transfusionId], references: [id])
+  reactionType   String // FEBRILE, ALLERGIC, ANAPHYLACTIC, HEMOLYTIC, TACO, TRALI, OTHER
+  onset          DateTime    @db.Timestamptz
+  symptoms       String[]
+  severity       String // MILD, MODERATE, SEVERE
+  actionTaken    String
+  outcome        String?
+  reportedToBank Boolean     @default(false)
+  createdAt      DateTime    @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, transfusionId])
+  @@map("transfusion_reactions")
+}

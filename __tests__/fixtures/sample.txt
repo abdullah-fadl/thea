@@ -1,0 +1,2 @@
+Patient Admission Policy
+This is a sample document for Library E2E tests.

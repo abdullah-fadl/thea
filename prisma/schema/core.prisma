@@ -1,0 +1,1552 @@
+// =============================================================================
+// Core Domain — Tenant, User, Session, Auth, Audit
+// =============================================================================
+
+model Tenant {
+  id       String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String       @unique // Business key (e.g., 'thea-owner-dev', 'hmg-whh')
+  name     String?
+  dbName   String? // Legacy: MongoDB database name
+  status   TenantStatus @default(ACTIVE)
+  planType PlanType     @default(ENTERPRISE)
+
+  // Platform entitlements
+  entitlementSam     Boolean @default(false)
+  entitlementHealth  Boolean @default(false)
+  entitlementEdrac   Boolean @default(false)
+  entitlementCvision Boolean @default(false)
+  entitlementScm     Boolean @default(false)
+
+  // Integration settings
+  integrations Json? // { samHealth: { enabled, autoTriggerEnabled, ... } }
+
+  // Subscription lifecycle
+  subscriptionEndsAt     DateTime? @db.Timestamptz
+  gracePeriodEndsAt      DateTime? @db.Timestamptz
+  gracePeriodEnabled     Boolean   @default(false)
+  maxUsers               Int       @default(100)
+  subscriptionContractId String?
+
+  // Organization profile
+  orgTypeId          String?
+  sector             String?
+  countryCode        String?
+  orgTypeChangeCount Int     @default(0)
+
+  // Audit
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  // Relations
+  users                 User[]
+  sessions              Session[]
+  auditLogs             AuditLog[]
+  groups                OrgGroup[]
+  hospitals             Hospital[]
+  roleDefinitions       RoleDefinition[]
+  subscriptionContracts SubscriptionContract[]
+  patientMasters        PatientMaster[]
+  encounterCores        EncounterCore[]
+  opdEncounters         OpdEncounter[]
+  opdBookings           OpdBooking[]
+  opdOrders             OpdOrder[]
+  opdDailyData          OpdDailyData[]
+  opdCensus             OpdCensus[]
+  opdMeetingReports     OpdMeetingReport[]
+  opdRecommendations    OpdRecommendation[]
+  erPatients            ErPatient[]
+  erEncounters          ErEncounter[]
+  erBeds                ErBed[]
+
+  // Scheduling relations
+  schedulingResources             SchedulingResource[]
+  schedulingSlots                 SchedulingSlot[]
+  schedulingReservations          SchedulingReservation[]
+  schedulingTemplates             SchedulingTemplate[]
+  schedulingAvailabilityOverrides SchedulingAvailabilityOverride[]
+
+  // Clinical infra relations
+  clinicalInfraProviders           ClinicalInfraProvider[]
+  clinicalInfraClinics             ClinicalInfraClinic[]
+  clinicalInfraSpecialties         ClinicalInfraSpecialty[]
+  clinicalInfraProviderProfiles    ClinicalInfraProviderProfile[]
+  clinicalInfraProviderAssignments ClinicalInfraProviderAssignment[]
+  departments                      Department[]
+  clinicalInfraFacilities          ClinicalInfraFacility[]
+  clinicalInfraFloors              ClinicalInfraFloor[]
+  clinicalInfraUnits               ClinicalInfraUnit[]
+  clinicalInfraRooms               ClinicalInfraRoom[]
+  clinicalInfraBeds                ClinicalInfraBed[]
+
+  // Orders relations
+  ordersHub        OrdersHub[]
+  orderEvents      OrderEvent[]
+  orderResults     OrderResult[]
+  labResults       LabResult[]
+  radiologyReports RadiologyReport[]
+  connectResults   ConnectResult[]
+  attachments      Attachment[]
+
+  // Clinical relations
+  opdVisitNotes     OpdVisitNote[]
+  physicalExams     PhysicalExam[]
+  deathDeclarations DeathDeclaration[]
+  homeMedications           HomeMedication[]
+  medicationAdministrations MedicationAdministration[]
+  nursingAssessments        NursingAssessment[]
+
+  // Access control
+  tenantUsers TenantUser[]
+
+  // Care Gaps
+  careGaps            CareGap[]
+  careGapOutreachLogs CareGapOutreachLog[]
+
+  // Daily Care Paths
+  dailyCarePaths DailyCarePath[]
+
+  // Appointment Reminders
+  appointmentReminders AppointmentReminder[]
+  reminderSettings     ReminderSettings?
+
+  // Break-the-glass emergency access
+  breakTheGlassRequests BreakTheGlassRequest[]
+
+  // Staff Credentialing & Privileging
+  staffCredentials   StaffCredential[]
+  clinicalPrivileges ClinicalPrivilege[]
+  credentialAlerts   CredentialAlert[]
+
+  // SAM / Organization profile
+  tenantContextPacks    TenantContextPack[]
+  tenantContextOverlays TenantContextOverlay[]
+  tenantSettings        TenantSetting[]
+  publicIdCounters      PublicIdCounter[]
+
+
+  // Admission
+  admissionChecklists AdmissionChecklist[]
+  admissionOrderTemplates AdmissionOrderTemplate[]
+  admissionRequests AdmissionRequest[]
+  bedReservations BedReservation[]
+  wardTransferRequests WardTransferRequest[]
+
+  // Ai
+  aiAuditLogs AiAuditLog[]
+  aiConfigs AiConfig[]
+  cdsAlerts CdsAlert[]
+
+  // Analytics
+  analyticsKpiDefinitions AnalyticsKpiDefinition[]
+  analyticsKpiValues AnalyticsKpiValue[]
+  antibioticUsages AntibioticUsage[]
+  deviceDayRecords DeviceDayRecord[]
+  handHygieneAudits HandHygieneAudit[]
+  infectionEvents InfectionEvent[]
+  isolationPrecautions IsolationPrecaution[]
+  medicationErrors MedicationError[]
+  outbreakEvents OutbreakEvent[]
+  stewardshipAlerts StewardshipAlert[]
+  surveillanceAlerts SurveillanceAlert[]
+
+  // Billing
+  billingChargeCatalogCounters BillingChargeCatalogCounter[]
+  billingChargeCatalogs BillingChargeCatalog[]
+  billingChargeEvents BillingChargeEvent[]
+  billingClaimEvents BillingClaimEvent[]
+  billingClaims BillingClaim[]
+  billingCreditNotes BillingCreditNote[]
+  billingInvoices BillingInvoice[]
+  billingLocks BillingLock[]
+  billingPayerContexts BillingPayerContext[]
+  billingPayers BillingPayer[]
+  billingPayments BillingPayment[]
+  billingPlans BillingPlan[]
+  billingPolicyRules BillingPolicyRule[]
+  billingPostings BillingPosting[]
+  billingPromoCodes BillingPromoCode[]
+  catalogUsageIdempotencies CatalogUsageIdempotency[]
+  diagnosisCatalogs DiagnosisCatalog[]
+  medicationCatalogs MedicationCatalog[]
+  nphiesClaims NphiesClaim[]
+  nphiesEligibilityLogs NphiesEligibilityLog[]
+  nphiesPriorAuths NphiesPriorAuth[]
+  orderPaymentLogs OrderPaymentLog[]
+  pricingPackageApplications PricingPackageApplication[]
+  pricingPackageCounters PricingPackageCounter[]
+  pricingPackages PricingPackage[]
+  serviceCatalogCounters ServiceCatalogCounter[]
+  serviceCatalogs ServiceCatalog[]
+  serviceUsageEvents ServiceUsageEvent[]
+  suppliesCatalogs SuppliesCatalog[]
+  supplyCatalogCounters SupplyCatalogCounter[]
+  supplyUsageEvents SupplyUsageEvent[]
+
+  // Blood Bank
+  bloodBankRequests BloodBankRequest[]
+  bloodUnits BloodUnit[]
+  transfusionReactions TransfusionReaction[]
+  transfusions Transfusion[]
+
+  // Care Path
+  carePathAlerts CarePathAlert[]
+  carePathShifts CarePathShift[]
+  carePathTasks CarePathTask[]
+
+  // Clinical
+  adcCabinets AdcCabinet[]
+  adcInventories AdcInventory[]
+  adcTransactions AdcTransaction[]
+  bloodGasAnalysises BloodGasAnalysis[]
+  calorieIntakeRecords CalorieIntakeRecord[]
+  clinicalConsents ClinicalConsent[]
+  dataBreachIncidents DataBreachIncident[]
+  dataErasureRequests DataErasureRequest[]
+  clinicalEvents ClinicalEvent[]
+  clinicalHandovers ClinicalHandover[]
+  clinicalNotes ClinicalNote[]
+  clinicalTaskEvents ClinicalTaskEvent[]
+  clinicalTasks ClinicalTask[]
+  consultRequests ConsultRequest[]
+  consultResponses ConsultResponse[]
+  ctgRecordings CtgRecording[]
+  dietCatalogItems DietCatalogItem[]
+  dietaryOrders DietaryOrder[]
+  formularyDrugs FormularyDrug[]
+  formularyRestrictionRequests FormularyRestrictionRequest[]
+  infectionSurveillances InfectionSurveillance[]
+  ivAdmixtureOrders IvAdmixtureOrder[]
+  kitchenMealPlans KitchenMealPlan[]
+  kitchenTrayCards KitchenTrayCard[]
+  lisConnectionStatuses LisConnectionStatus[]
+  mealServices MealService[]
+  nutritionalAssessments NutritionalAssessment[]
+  partogramObservations PartogramObservation[]
+  partograms Partogram[]
+  patientEducationRecords PatientEducationRecord[]
+  radiologyPeerReviews RadiologyPeerReview[]
+  radiologyPriorStudies RadiologyPriorStudy[]
+  socialWorkAssessments SocialWorkAssessment[]
+  socialWorkNotes SocialWorkNote[]
+  speechRecognitionSessions SpeechRecognitionSession[]
+  tpnOrders TpnOrder[]
+  transportRequests TransportRequest[]
+  transportStaffs TransportStaff[]
+  woundAssessments WoundAssessment[]
+
+  // Clinical Infra
+  clinicalInfraProviderRoomAssignments ClinicalInfraProviderRoomAssignment[]
+  clinicalInfraProviderUnitScopes ClinicalInfraProviderUnitScope[]
+
+  // Consumables
+  consumableStockMovements ConsumableStockMovement[]
+  consumableStoreItems ConsumableStoreItem[]
+  consumableStores ConsumableStore[]
+  consumableUsageEvents ConsumableUsageEvent[]
+  consumableUsageTemplates ConsumableUsageTemplate[]
+
+  // Core
+  notifications Notification[]
+  organizationProfiles OrganizationProfile[]
+  patientPortalSessions PatientPortalSession[]
+  usageQuotas UsageQuota[]
+
+  // Cssd
+  cssdCycles CssdCycle[]
+  cssdDispatches CssdDispatch[]
+  cssdRecalls CssdRecall[]
+  cssdTrays CssdTray[]
+
+  // Cvision Admin
+  cvisionAnnouncements CvisionAnnouncement[]
+  cvisionApprovalMatrixes CvisionApprovalMatrix[]
+  cvisionAuditLogs CvisionAuditLog[]
+  cvisionAuthEvents CvisionAuthEvent[]
+  cvisionCalendarEvents CvisionCalendarEvent[]
+  cvisionChangeInitiatives CvisionChangeInitiative[]
+  cvisionCultureAssessments CvisionCultureAssessment[]
+  cvisionDashboards CvisionDashboard[]
+  cvisionDelegations CvisionDelegation[]
+  cvisionDeletedRecords CvisionDeletedRecord[]
+  cvisionImportJobs CvisionImportJob[]
+  cvisionIntegrationConfigs CvisionIntegrationConfig[]
+  cvisionIntegrationLogs CvisionIntegrationLog[]
+  cvisionLetterTemplates CvisionLetterTemplate[]
+  cvisionLetters CvisionLetter[]
+  cvisionMuqeemAlerts CvisionMuqeemAlert[]
+  cvisionMuqeemRecords CvisionMuqeemRecord[]
+  cvisionNotificationPreferences CvisionNotificationPreference[]
+  cvisionNotifications CvisionNotification[]
+  cvisionOrgDesigns CvisionOrgDesign[]
+  cvisionOrgHealthAssessments CvisionOrgHealthAssessment[]
+  cvisionPolicies CvisionPolicy[]
+  cvisionPolicyAcknowledgments CvisionPolicyAcknowledgment[]
+  cvisionRecognitions CvisionRecognition[]
+  cvisionRequestEvents CvisionRequestEvent[]
+  cvisionRequests CvisionRequest[]
+  cvisionRetentionAlerts CvisionRetentionAlert[]
+  cvisionRetentionScores CvisionRetentionScore[]
+  cvisionRewardPoints CvisionRewardPoint[]
+  cvisionSavedReports CvisionSavedReport[]
+  cvisionSequences CvisionSequence[]
+  cvisionStrategicAlignments CvisionStrategicAlignment[]
+  cvisionSurveyResponses CvisionSurveyResponse[]
+  cvisionSurveys CvisionSurvey[]
+  cvisionTeams CvisionTeam[]
+  cvisionTenantSettingses CvisionTenantSettings[]
+  cvisionWorkflowInstances CvisionWorkflowInstance[]
+  cvisionWorkflows CvisionWorkflow[]
+
+  // Cvision Attendance
+  cvisionAttendanceCorrections CvisionAttendanceCorrection[]
+  cvisionAttendances CvisionAttendance[]
+  cvisionBiometricLogs CvisionBiometricLog[]
+  cvisionDepartmentWorkSchedules CvisionDepartmentWorkSchedule[]
+  cvisionEmployeeShiftPreferences CvisionEmployeeShiftPreference[]
+  cvisionGeofences CvisionGeofence[]
+  cvisionScheduleApprovals CvisionScheduleApproval[]
+  cvisionScheduleEntries CvisionScheduleEntry[]
+  cvisionShiftAssignments CvisionShiftAssignment[]
+  cvisionShiftTemplates CvisionShiftTemplate[]
+  cvisionShifts CvisionShift[]
+
+  // Cvision Core
+  cvisionBranches CvisionBranch[]
+  cvisionBudgetedPositions CvisionBudgetedPosition[]
+  cvisionContracts CvisionContract[]
+  cvisionDepartments CvisionDepartment[]
+  cvisionEmployeeDocuments CvisionEmployeeDocument[]
+  cvisionEmployeeStatusHistories CvisionEmployeeStatusHistory[]
+  cvisionEmployees CvisionEmployee[]
+  cvisionGrades CvisionGrade[]
+  cvisionJobTitles CvisionJobTitle[]
+  cvisionPositionSlots CvisionPositionSlot[]
+  cvisionUnits CvisionUnit[]
+
+  // Cvision Operations
+  cvisionAssets CvisionAsset[]
+  cvisionEmployeeInsurances CvisionEmployeeInsurance[]
+  cvisionExpenseClaims CvisionExpenseClaim[]
+  cvisionGrievances CvisionGrievance[]
+  cvisionInsuranceClaims CvisionInsuranceClaim[]
+  cvisionInsurancePolicies CvisionInsurancePolicy[]
+  cvisionInsuranceProviders CvisionInsuranceProvider[]
+  cvisionInsuranceRequests CvisionInsuranceRequest[]
+  cvisionSafetyIncidents CvisionSafetyIncident[]
+  cvisionTransportAssignments CvisionTransportAssignment[]
+  cvisionTransportIssues CvisionTransportIssue[]
+  cvisionTransportRequests CvisionTransportRequest[]
+  cvisionTransportRoutes CvisionTransportRoute[]
+  cvisionTransportTrips CvisionTransportTrip[]
+  cvisionTransportVehicles CvisionTransportVehicle[]
+  cvisionTravelRequests CvisionTravelRequest[]
+
+  // Cvision Payroll
+  cvisionDepartmentBudgets CvisionDepartmentBudget[]
+  cvisionEmployeeCompensations CvisionEmployeeCompensation[]
+  cvisionGlMappings CvisionGlMapping[]
+  cvisionHeadcountBudgets CvisionHeadcountBudget[]
+  cvisionJournalEntries CvisionJournalEntry[]
+  cvisionLeaveBalances CvisionLeaveBalance[]
+  cvisionLeaves CvisionLeave[]
+  cvisionLoanPolicies CvisionLoanPolicy[]
+  cvisionLoans CvisionLoan[]
+  cvisionPayrollDryRuns CvisionPayrollDryRun[]
+  cvisionPayrollExports CvisionPayrollExport[]
+  cvisionPayrollProfiles CvisionPayrollProfile[]
+  cvisionPayrollRuns CvisionPayrollRun[]
+  cvisionPayslips CvisionPayslip[]
+  cvisionSalaryStructures CvisionSalaryStructure[]
+
+  // Cvision Performance
+  cvisionDisciplinaries CvisionDisciplinary[]
+  cvisionEmployeeOnboardings CvisionEmployeeOnboarding[]
+  cvisionEmployeeProfileSectionHistories CvisionEmployeeProfileSectionHistory[]
+  cvisionEmployeeProfileSections CvisionEmployeeProfileSection[]
+  cvisionKpis CvisionKpi[]
+  cvisionOffboardings CvisionOffboarding[]
+  cvisionOkrs CvisionOkr[]
+  cvisionOnboardingTemplates CvisionOnboardingTemplate[]
+  cvisionPerformanceReviews CvisionPerformanceReview[]
+  cvisionProfileSectionSchemas CvisionProfileSectionSchema[]
+  cvisionPromotions CvisionPromotion[]
+  cvisionReviewCycles CvisionReviewCycle[]
+  cvisionSuccessionPlans CvisionSuccessionPlan[]
+  cvisionTrainingBudgets CvisionTrainingBudget[]
+  cvisionTrainingCourses CvisionTrainingCourse[]
+  cvisionTrainingEnrollments CvisionTrainingEnrollment[]
+
+  // Cvision Recruitment
+  cvisionApplications CvisionApplication[]
+  cvisionCandidateDocuments CvisionCandidateDocument[]
+  cvisionCandidateRankings CvisionCandidateRanking[]
+  cvisionCandidates CvisionCandidate[]
+  cvisionCvInboxBatches CvisionCvInboxBatch[]
+  cvisionCvInboxItems CvisionCvInboxItem[]
+  cvisionCvParseJobs CvisionCvParseJob[]
+  cvisionInterviewSessions CvisionInterviewSession[]
+  cvisionInterviews CvisionInterview[]
+  cvisionJobPostings CvisionJobPosting[]
+  cvisionJobRequisitions CvisionJobRequisition[]
+  cvisionKilloutQuestions CvisionKilloutQuestion[]
+  cvisionManpowerPlans CvisionManpowerPlan[]
+  cvisionTalentPools CvisionTalentPool[]
+
+  // Discharge
+  dischargePrescriptions DischargePrescription[]
+  dischargeSummaries DischargeSummary[]
+  enhancedDischargeSummaries EnhancedDischargeSummary[]
+  medReconciliations MedReconciliation[]
+
+  // Ehr Admin
+  ehrAuditLogs EhrAuditLog[]
+  ehrEncounters EhrEncounter[]
+  ehrNotes EhrNote[]
+  ehrOrders EhrOrder[]
+  ehrPatients EhrPatient[]
+  ehrPrivileges EhrPrivilege[]
+  ehrTasks EhrTask[]
+  ehrUsers EhrUser[]
+
+  // Equipment
+  equipmentIssues EquipmentIssue[]
+  equipmentMaintenances EquipmentMaintenance[]
+  equipments Equipment[]
+
+  // Er
+  erAdmissionHandovers ErAdmissionHandover[]
+  erDispositions ErDisposition[]
+  erEscalations ErEscalation[]
+  erNotifications ErNotification[]
+  erNursingHandovers ErNursingHandover[]
+  erNursingNotes ErNursingNote[]
+  erNursingTransferRequests ErNursingTransferRequest[]
+  erObservations ErObservation[]
+  erSequences ErSequence[]
+  erTasks ErTask[]
+  erTriageScores ErTriageScore[]
+  mciIncidents MciIncident[]
+  mciPatients MciPatient[]
+  respiratoryScreenings RespiratoryScreening[]
+
+  // Integration
+  dicomSources DicomSource[]
+  fhirSubscriptionLogs FhirSubscriptionLog[]
+  fhirSubscriptions FhirSubscription[]
+  instruments Instrument[]
+  integrationAdtEvents IntegrationAdtEvent[]
+  integrationApiKeys IntegrationApiKey[]
+  integrationConfigs IntegrationConfig[]
+  integrationMessages IntegrationMessage[]
+
+  // Ipd
+  brainDeathProtocols BrainDeathProtocol[]
+  fluidBalanceEntries FluidBalanceEntry[]
+  icuApacheScores IcuApacheScore[]
+  icuBundleCompliances IcuBundleCompliance[]
+  icuCarePlans IcuCarePlan[]
+  icuCodeBlues IcuCodeBlue[]
+  icuDeliriumScreens IcuDeliriumScreen[]
+  icuSedationAssessments IcuSedationAssessment[]
+  icuVentilatorChecks IcuVentilatorCheck[]
+  ipdAdmissionIntakes IpdAdmissionIntake[]
+  ipdAdmissions IpdAdmission[]
+  ipdBeds IpdBed[]
+  ipdCarePlans IpdCarePlan[]
+  ipdDowntimeIncidents IpdDowntimeIncident[]
+  ipdEpisodes IpdEpisode[]
+  ipdIcuEvents IpdIcuEvent[]
+  ipdMarEvents IpdMarEvent[]
+  ipdMedOrderEvents IpdMedOrderEvent[]
+  ipdNursingAssessments IpdNursingAssessment[]
+  ipdNursingDailyProgresses IpdNursingDailyProgress[]
+  ipdOrders IpdOrder[]
+  ipdVitalses IpdVitals[]
+  organDonations OrganDonation[]
+  sofaScores SofaScore[]
+  ventilatorRecords VentilatorRecord[]
+
+  // Lab
+  labAutoValidationRules LabAutoValidationRule[]
+  labCriticalAlerts LabCriticalAlert[]
+  labMicroCultures LabMicroCulture[]
+  labOrders LabOrder[]
+  labQcResults LabQcResult[]
+  labResultAmendments LabResultAmendment[]
+  labResultIncomings LabResultIncoming[]
+  labSpecimens LabSpecimen[]
+  labTatRecords LabTatRecord[]
+
+  // Misc
+  absherVerificationLogs AbsherVerificationLog[]
+  dentalCharts DentalChart[]
+  dentalProcedures DentalProcedure[]
+  dentalTreatments DentalTreatment[]
+  departmentEntries DepartmentEntry[]
+  failedCancellations FailedCancellation[]
+  floorDepartments FloorDepartment[]
+  miscGroups Group[] @relation("TenantMiscGroups")
+  identityApplyIdempotencies IdentityApplyIdempotency[]
+  identityLookups IdentityLookup[]
+  identityRateLimits IdentityRateLimit[]
+  nafisDiseaseReports NafisDiseaseReport[]
+  nafisStatisticsLogs NafisStatisticsLog[]
+  nafisVisitLogs NafisVisitLog[]
+  newbornRecords NewbornRecord[]
+  nursingAssignments NursingAssignment[]
+  nursingShiftMetrics NursingShiftMetric[]
+  obgynForms ObgynForm[]
+  orgNodes OrgNode[]
+  orthodonticCases OrthodonticCase[]
+  orthodonticVisits OrthodonticVisit[]
+  patientExperiences PatientExperience[]
+  periodontalCharts PeriodontalChart[]
+  periodontalRecords PeriodontalRecord[]
+  pxCases PxCase[]
+
+  // Oncology
+  chemoCycles ChemoCycle[]
+  chemoProtocolTemplates ChemoProtocolTemplate[]
+  ctcaeToxicityRecords CtcaeToxicityRecord[]
+  oncologyPatients OncologyPatient[]
+  oncologyProtocols OncologyProtocol[]
+  radiationSessions RadiationSession[]
+  radiationTherapyPlans RadiationTherapyPlan[]
+  tnmStagings TnmStaging[]
+  tumorBoardCases TumorBoardCase[]
+
+  // Or
+  orAnesthesiaPreOps OrAnesthesiaPreOp[]
+  orAnesthesiaRecords OrAnesthesiaRecord[]
+  orCaseEvents OrCaseEvent[]
+  orCases OrCase[]
+  orImplants OrImplant[]
+  orNursingDocs OrNursingDoc[]
+  orNursingPreOps OrNursingPreOp[]
+  orOperativeNotes OrOperativeNote[]
+  orPacuRecords OrPacuRecord[]
+  orPostOpOrders OrPostOpOrder[]
+  orPreferenceCards OrPreferenceCard[]
+  orSpecimenLogs OrSpecimenLog[]
+  orSurgicalCounts OrSurgicalCount[]
+  orSurgicalTeams OrSurgicalTeam[]
+  orTimeOuts OrTimeOut[]
+  orUtilizationSnapshots OrUtilizationSnapshot[]
+
+  // Orders
+  connectDeviceVitalses ConnectDeviceVitals[]
+  connectIngestEvents ConnectIngestEvent[]
+  orderContextLinks OrderContextLink[]
+  orderResultAcks OrderResultAck[]
+  orderSetApplications OrderSetApplication[]
+  orderSetItems OrderSetItem[]
+  orderSets OrderSet[]
+  resultAcks ResultAck[]
+
+  // Pathology
+  pathologyReports PathologyReport[]
+  pathologySpecimens PathologySpecimen[]
+
+  // Patient
+  patientAllergies PatientAllergy[]
+  patientIdentityLinks PatientIdentityLink[]
+  patientInsurances PatientInsurance[]
+  patientProblems PatientProblem[]
+  portalProxyAccesses PortalProxyAccess[]
+
+  // Pharmacy
+  pharmacyControlledSubstanceLogs PharmacyControlledSubstanceLog[]
+  pharmacyInventories PharmacyInventory[]
+  pharmacyPrescriptions PharmacyPrescription[]
+  pharmacyStockMovements PharmacyStockMovement[]
+  pharmacyUnitDoses PharmacyUnitDose[]
+
+  // Physiotherapy
+  ptAssessments PtAssessment[]
+  ptReferrals PtReferral[]
+  ptSessions PtSession[]
+
+  // Portal
+  patientChatSessions PatientChatSession[]
+  patientClinicalHistories PatientClinicalHistory[]
+  patientConversations PatientConversation[]
+  patientExplainHistories PatientExplainHistory[]
+  patientMessages PatientMessage[]
+  patientPortalPendingRegistrations PatientPortalPendingRegistration[]
+  patientPortalRateLimits PatientPortalRateLimit[]
+  patientPortalUsers PatientPortalUser[]
+
+  // Psychiatry
+  psychGroupDefinitions PsychGroupDefinition[]
+  psychGroupSessions PsychGroupSession[]
+  psychInvoluntaryHolds PsychInvoluntaryHold[]
+  psychMedications PsychMedication[]
+  psychMentalStatusExams PsychMentalStatusExam[]
+  psychNotes PsychNote[]
+  psychProgressNotes PsychProgressNote[]
+  psychRestraintLogs PsychRestraintLog[]
+  psychRiskAssessments PsychRiskAssessment[]
+  psychScaleAdministrations PsychScaleAdministration[]
+  psychTreatmentPlans PsychTreatmentPlan[]
+  psychiatricAssessments PsychiatricAssessment[]
+
+  // Quality
+  careGapFindings CareGapFinding[]
+  careGapRules CareGapRule[]
+  cbahiAssessments CbahiAssessment[]
+  cbahiEvidences CbahiEvidence[]
+  cdoOutcomeEvents CdoOutcomeEvent[]
+  cdoResponseTimeMetrics CdoResponseTimeMetric[]
+  clinicalDecisionPrompts ClinicalDecisionPrompt[]
+  fmeaAnalysises FmeaAnalysis[]
+  fmeaSteps FmeaStep[]
+  ipsgAssessments IpsgAssessment[]
+  mortalityReviews MortalityReview[]
+  qualityIncidents QualityIncident[]
+  qualityRcas QualityRca[]
+  rcaAnalysises RcaAnalysis[]
+  readmissionRecords ReadmissionRecord[]
+  sentinelEvents SentinelEvent[]
+
+  // Referrals
+  mortuaryCases MortuaryCase[]
+  referrals Referral[]
+
+  // Sam
+  documentTasks DocumentTask[]
+  draftDocuments DraftDocument[]
+  integrityActivities IntegrityActivity[]
+  integrityFindings IntegrityFinding[]
+  integrityRulesets IntegrityRuleset[]
+  integrityRuns IntegrityRun[]
+  operationLinks OperationLink[]
+  policies Policy[]
+  policyAlerts PolicyAlert[]
+  policyChunks PolicyChunk[]
+  policyDocuments PolicyDocument[]
+  policyLifecycleEvents PolicyLifecycleEvent[]
+  practices Practice[]
+  riskRuns RiskRun[]
+  // SAM Compliance & Governance
+  complianceRequirements ComplianceRequirement[]
+  complianceViolations ComplianceViolation[]
+  correctiveActions CorrectiveAction[]
+  riskAssessments RiskAssessment[]
+  riskMitigations RiskMitigation[]
+  riskFollowUps RiskFollowUp[]
+  samStandards SamStandard[]
+  standardAssessments StandardAssessment[]
+  standardEvidence StandardEvidence[]
+  policyAcknowledgments PolicyAcknowledgment[]
+  samReminders SamReminder[]
+  samEvidence SamEvidence[]
+
+  // Scheduling
+  multiResourceBookings MultiResourceBooking[]
+  schedulingWaitlists SchedulingWaitlist[]
+
+  // Taxonomy
+  taxonomyEntityTypes TaxonomyEntityType[]
+  taxonomyFunctions TaxonomyFunction[]
+  taxonomyOperations TaxonomyOperation[]
+  taxonomyRiskDomains TaxonomyRiskDomain[]
+  taxonomyScopes TaxonomyScope[]
+  taxonomySectors TaxonomySector[]
+
+  // Telemedicine
+  rpmDevices RpmDevice[]
+  rpmReadings RpmReading[]
+  rpmThresholds RpmThreshold[]
+  teleAvailabilities TeleAvailability[]
+  teleConsultations TeleConsultation[]
+  telePrescriptions TelePrescription[]
+  teleVisits TeleVisit[]
+
+  // Transplant
+  transplantCases TransplantCase[]
+  transplantFollowUps TransplantFollowUp[]
+  transplantRejections TransplantRejection[]
+  transplantWaitlistEntries TransplantWaitlistEntry[]
+
+  // Workflow
+  clinicalPathwayInstances ClinicalPathwayInstance[]
+  clinicalPathways ClinicalPathway[]
+  workflowEscalationLogs WorkflowEscalationLog[]
+  workflowEscalationRules WorkflowEscalationRule[]
+  workflowRoutingRules WorkflowRoutingRule[]
+
+  // Imdad (Supply Chain)
+  imdadAlertInstances ImdadAlertInstance[]
+  imdadAlertRules ImdadAlertRule[]
+  imdadAnnualBudgetPlans ImdadAnnualBudgetPlan[]
+  imdadApprovalDecisions ImdadApprovalDecision[]
+  imdadApprovalDelegations ImdadApprovalDelegation[]
+  imdadApprovalRequests ImdadApprovalRequest[]
+  imdadApprovalSteps ImdadApprovalStep[]
+  imdadApprovalWorkflowRuleSteps ImdadApprovalWorkflowRuleStep[]
+  imdadApprovalWorkflowRules ImdadApprovalWorkflowRule[]
+  imdadApprovalWorkflowTemplates ImdadApprovalWorkflowTemplate[]
+  imdadAssetDisposals ImdadAssetDisposal[]
+  imdadAssetTransfers ImdadAssetTransfer[]
+  imdadAssets ImdadAsset[]
+  imdadAttachments ImdadAttachment[]
+  imdadAuditFindings ImdadAuditFinding[]
+  imdadAuditLogPartitions ImdadAuditLogPartition[]
+  imdadAuditLogs ImdadAuditLog[]
+  imdadBatchLots ImdadBatchLot[]
+  imdadBins ImdadBin[]
+  imdadBudgetBenchmarks ImdadBudgetBenchmark[]
+  imdadBudgetConsumptions ImdadBudgetConsumption[]
+  imdadBudgetLines ImdadBudgetLine[]
+  imdadBudgetProposals ImdadBudgetProposal[]
+  imdadBudgetTransfers ImdadBudgetTransfer[]
+  imdadBudgets ImdadBudget[]
+  imdadChargeCaptureItems ImdadChargeCaptureItem[]
+  imdadChargeCaptures ImdadChargeCapture[]
+  imdadComplianceCertificates ImdadComplianceCertificate[]
+  imdadConsumptionLogs ImdadConsumptionLog[]
+  imdadContractAmendments ImdadContractAmendment[]
+  imdadContractLines ImdadContractLine[]
+  imdadContracts ImdadContract[]
+  imdadCostCenters ImdadCostCenter[]
+  imdadDashboardConfigs ImdadDashboardConfig[]
+  imdadDecisionActions ImdadDecisionAction[]
+  imdadDecisions ImdadDecision[]
+  imdadDelegationChains ImdadDelegationChain[]
+  imdadDepartmentUsers ImdadDepartmentUser[]
+  imdadDepartments ImdadDepartment[]
+  imdadDeviceReplacementPlans ImdadDeviceReplacementPlan[]
+  imdadDispenseLines ImdadDispenseLine[]
+  imdadDispenseRequests ImdadDispenseRequest[]
+  imdadEventBusMessages ImdadEventBusMessage[]
+  imdadFormularyItems ImdadFormularyItem[]
+  imdadGoodsReceivingNoteLines ImdadGoodsReceivingNoteLine[]
+  imdadGoodsReceivingNotes ImdadGoodsReceivingNote[]
+  imdadGrnDiscrepancys ImdadGrnDiscrepancy[]
+  imdadInspectionChecklists ImdadInspectionChecklist[]
+  imdadInspectionTemplates ImdadInspectionTemplate[]
+  imdadInventoryAdjustments ImdadInventoryAdjustment[]
+  imdadInventoryLocations ImdadInventoryLocation[]
+  imdadInventoryTransactions ImdadInventoryTransaction[]
+  imdadInvoiceLines ImdadInvoiceLine[]
+  imdadInvoices ImdadInvoice[]
+  imdadItemCategorys ImdadItemCategory[]
+  imdadItemLocations ImdadItemLocation[]
+  imdadItemMasters ImdadItemMaster[]
+  imdadItemSubstitutes ImdadItemSubstitute[]
+  imdadJobExecutions ImdadJobExecution[]
+  imdadKpiSnapshots ImdadKpiSnapshot[]
+  imdadMaintenanceOrders ImdadMaintenanceOrder[]
+  imdadNonConformanceReports ImdadNonConformanceReport[]
+  imdadNotificationPreferences ImdadNotificationPreference[]
+  imdadNotificationTemplates ImdadNotificationTemplate[]
+  imdadNotifications ImdadNotification[]
+  imdadOperationalSignals ImdadOperationalSignal[]
+  imdadOrganizations ImdadOrganization[]
+  imdadPatientCharges ImdadPatientCharge[]
+  imdadPatientReturns ImdadPatientReturn[]
+  imdadPaymentBatchs ImdadPaymentBatch[]
+  imdadPermissions ImdadPermission[]
+  imdadPhasedInvestments ImdadPhasedInvestment[]
+  imdadPickLines ImdadPickLine[]
+  imdadPickLists ImdadPickList[]
+  imdadPrintTemplates ImdadPrintTemplate[]
+  imdadProposalLineItems ImdadProposalLineItem[]
+  imdadPurchaseOrderLines ImdadPurchaseOrderLine[]
+  imdadPurchaseOrders ImdadPurchaseOrder[]
+  imdadPurchaseRequisitionLines ImdadPurchaseRequisitionLine[]
+  imdadPurchaseRequisitions ImdadPurchaseRequisition[]
+  imdadPutAwayLines ImdadPutAwayLine[]
+  imdadPutAwayRules ImdadPutAwayRule[]
+  imdadPutAwayTasks ImdadPutAwayTask[]
+  imdadQualityInspections ImdadQualityInspection[]
+  imdadRecallActions ImdadRecallAction[]
+  imdadRecalls ImdadRecall[]
+  imdadReceivingDocks ImdadReceivingDock[]
+  imdadReorderRules ImdadReorderRule[]
+  imdadReplenishmentRules ImdadReplenishmentRule[]
+  imdadReportDefinitions ImdadReportDefinition[]
+  imdadReportExecutions ImdadReportExecution[]
+  imdadRoleDefinitions ImdadRoleDefinition[]
+  imdadSequenceCounters ImdadSequenceCounter[]
+  imdadSfdaIntegrationLogs ImdadSfdaIntegrationLog[]
+  imdadStockCountItems ImdadStockCountItem[]
+  imdadStockCounts ImdadStockCount[]
+  imdadStockReservations ImdadStockReservation[]
+  imdadStockTransactions ImdadStockTransaction[]
+  imdadSupplyRequestApprovals ImdadSupplyRequestApproval[]
+  imdadSupplyRequestAudits ImdadSupplyRequestAudit[]
+  imdadSupplyRequestItems ImdadSupplyRequestItem[]
+  imdadSupplyRequests ImdadSupplyRequest[]
+  imdadSystemConfigs ImdadSystemConfig[]
+  imdadSystemPulses ImdadSystemPulse[]
+  imdadTemperatureLogs ImdadTemperatureLog[]
+  imdadTransferLines ImdadTransferLine[]
+  imdadTransferRequests ImdadTransferRequest[]
+  imdadUnitsOfMeasures ImdadUnitsOfMeasure[]
+  imdadUomConversions ImdadUomConversion[]
+  imdadUserRoles ImdadUserRole[]
+  imdadVendorAudits ImdadVendorAudit[]
+  imdadVendorContacts ImdadVendorContact[]
+  imdadVendorDocuments ImdadVendorDocument[]
+  imdadVendorScorecards ImdadVendorScorecard[]
+  imdadVendors ImdadVendor[]
+  imdadWardParLevels ImdadWardParLevel[]
+  imdadWarehouseZones ImdadWarehouseZone[]
+  imdadWarehouses ImdadWarehouse[]
+  imdadWebhookDeliverys ImdadWebhookDelivery[]
+  imdadWebhooks ImdadWebhook[]
+
+  @@map("tenants")
+}
+
+model TenantSetting {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  key             String
+  settings        Json?
+  updatedByUserId String? @db.Uuid
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, key])
+  @@index([tenantId])
+  @@map("tenant_settings")
+}
+
+model PublicIdCounter {
+  tenantId   String @db.Uuid
+  entityType String
+  seq        Int    @default(1)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@id([tenantId, entityType])
+  @@map("public_id_counters")
+}
+
+model TenantContextPack {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String   @db.Uuid
+  orgTypeId             String
+  orgTypeNameSnapshot   String
+  sectorSnapshot        String
+  countryCode           String?
+  accreditationSets     Json     @default("[]")
+  requiredDocumentTypes String[] @default([])
+  baselineOperations    Json?
+  baselineFunctions     Json?
+  baselineRiskDomains   Json?
+  glossary              Json?
+  behavior              Json?
+  locked                Boolean  @default(false)
+  version               Int      @default(1)
+  status                String   @default("ACTIVE")
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("tenant_context_packs")
+}
+
+model TenantContextOverlay {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String  @db.Uuid
+  type      String
+  payload   Json    @default("{}")
+  createdBy String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("tenant_context_overlays")
+}
+
+model User {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String?  @db.Uuid // Null for owner users (global access)
+  email           String
+  password        String
+  firstName       String
+  lastName        String
+  displayName     String?
+  role            String // Role key (e.g. admin, opd-nurse) - supports custom roles from role_definitions
+  groupId         String?  @db.Uuid
+  hospitalId      String?  @db.Uuid
+  department      String?
+  staffId         String? // Employee/Staff ID number
+  employeeNo      String? // HR Employee Number
+  permissions     String[] @default([])
+  isActive        Boolean  @default(true)
+  activeSessionId String? // Current active session ID
+
+  // Platform access
+  platformAccessSam     Boolean?
+  platformAccessHealth  Boolean?
+  platformAccessEdrac   Boolean?
+  platformAccessCvision Boolean?
+  platformAccessScm     Boolean?
+
+  // Two-factor authentication
+  twoFactorEnabled     Boolean   @default(false)
+  twoFactorSecret      String?
+  twoFactorBackupCodes Json? // [{ hash: string, used: boolean }]
+  twoFactorEnabledAt   DateTime? @db.Timestamptz
+  twoFactorPending     Json? // { secret, backupCodes, createdAt }
+
+  // Password policy
+  passwordChangedAt   DateTime? @db.Timestamptz // Last password change time
+  passwordHistory     Json? // [{ hash: string, changedAt: string }] — last 5 passwords
+  forcePasswordChange Boolean   @default(false) // Admin-set flag for forced change on next login
+
+  // Password reset
+  passwordResetToken   String? // SHA-256 hash of the reset token
+  passwordResetExpires DateTime? @db.Timestamptz // Token expiry (1 hour from generation)
+
+  // Audit
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  // Relations
+  tenant   Tenant?   @relation(fields: [tenantId], references: [id])
+  group    OrgGroup? @relation(fields: [groupId], references: [id])
+  hospital Hospital? @relation(fields: [hospitalId], references: [id])
+
+  @@unique([email, tenantId])
+  @@index([tenantId])
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model Session {
+  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId      String  @unique // UUID used as session token
+  userId         String  @db.Uuid
+  tenantId       String? @db.Uuid // User's identity tenant
+  activeTenantId String? // Currently active tenant key (SSOT, e.g. 'hmg-whh')
+
+  createdAt  DateTime @default(now()) @db.Timestamptz
+  lastSeenAt DateTime @default(now()) @db.Timestamptz
+  expiresAt  DateTime @db.Timestamptz
+
+  userAgent String?
+  ip        String?
+
+  // Enhanced security
+  idleExpiresAt     DateTime? @db.Timestamptz
+  absoluteExpiresAt DateTime? @db.Timestamptz
+  lastActivityAt    DateTime? @db.Timestamptz
+
+  // Relations
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@index([userId])
+  @@index([tenantId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model LoginAttempt {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email       String
+  ip          String?
+  success     Boolean
+  failedCount Int       @default(0)
+  lockedUntil DateTime? @db.Timestamptz
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  @@index([email])
+  @@map("login_attempts")
+}
+
+model AuditLog {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String @db.Uuid
+
+  // Actor
+  actorUserId String
+  actorRole   String
+  actorEmail  String?
+
+  // Scope
+  groupId    String?
+  hospitalId String?
+
+  // Action
+  action       String // login_success, user_create, permission_grant, etc.
+  resourceType String // user, session, role, policy, etc.
+  resourceId   String?
+
+  // Request context
+  ip        String?
+  userAgent String?
+  method    String?
+  path      String?
+
+  // Result
+  success      Boolean @default(true)
+  errorMessage String?
+  metadata     Json?
+
+  // Tamper-proof hash chain
+  entryHash    String?
+  previousHash String?
+
+  timestamp DateTime @default(now()) @db.Timestamptz
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([actorUserId])
+  @@index([action])
+  @@index([timestamp])
+  @@map("audit_logs")
+}
+
+model RoleDefinition {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  key         String // e.g., 'opd-doctor', 'er-nurse'
+  label       String?
+  labelAr     String? // Arabic label for i18n
+  permissions String[] @default([])
+  isActive    Boolean  @default(true)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, key])
+  @@index([tenantId])
+  @@map("role_definitions")
+}
+
+model OrgGroup {
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String  @db.Uuid
+  name     String
+  code     String?
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  // Relations
+  tenant    Tenant     @relation(fields: [tenantId], references: [id])
+  hospitals Hospital[]
+  users     User[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("org_groups")
+}
+
+model Hospital {
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String  @db.Uuid
+  groupId  String  @db.Uuid
+  name     String
+  code     String?
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  // Relations
+  tenant Tenant   @relation(fields: [tenantId], references: [id])
+  group  OrgGroup @relation(fields: [groupId], references: [id])
+  users  User[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([groupId])
+  @@map("hospitals")
+}
+
+model SubscriptionContract {
+  id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String @db.Uuid
+  status       String @default("active") // active, expired, cancelled
+  maxUsers     Int    @default(100)
+  currentUsers Int    @default(0)
+  planType     String @default("enterprise")
+
+  // Enabled platforms
+  enabledSam        Boolean @default(false)
+  enabledTheaHealth Boolean @default(false)
+  enabledEdrac      Boolean @default(false)
+  enabledCvision    Boolean @default(false)
+  enabledImdad      Boolean @default(false)
+
+  enabledFeatures Json?  @default("{}")
+  storageLimit    BigInt @default(1000000000) // 1GB in bytes
+  aiQuota         Json? // { monthlyLimit, currentUsage, resetDate }
+  branchLimits    Json? // { maxDepartments, maxUnits, maxFloors }
+
+  subscriptionStartsAt DateTime  @db.Timestamptz
+  subscriptionEndsAt   DateTime? @db.Timestamptz
+  gracePeriodEnabled   Boolean   @default(false)
+  gracePeriodEndsAt    DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([status])
+  @@map("subscription_contracts")
+}
+
+model TenantUser {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  userId      String   @db.Uuid
+  displayName String?
+  email       String?
+  roles       String[] @default([])
+  areas       String[] @default([])
+  departments String[] @default([])
+  isActive    Boolean  @default(true)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, userId])
+  @@index([tenantId])
+  @@index([userId])
+  @@map("tenant_users")
+}
+
+model SystemSetting {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key       String   @unique
+  value     Json?
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  @@map("system_settings")
+}
+
+model RefreshToken {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String    @db.Uuid
+  token      String // Hashed token
+  expiresAt  DateTime  @db.Timestamptz
+  lastUsedAt DateTime? @db.Timestamptz
+  userAgent  String?
+  ip         String?
+  revoked    Boolean   @default(false)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model SessionState {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String    @unique @db.Uuid
+  lastPlatformKey String?
+  lastRoute       String?
+  lastTenantId    String?
+  lastVisitedAt   DateTime? @db.Timestamptz
+  autoRestore     Boolean   @default(true)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  @@index([userId])
+  @@map("session_states")
+}
+
+model PatientPortalSession {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  portalUserId    String
+  patientMasterId String?
+  lastSeenAt      DateTime @default(now()) @db.Timestamptz
+  expiresAt       DateTime @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([portalUserId])
+  @@index([expiresAt])
+  @@map("patient_portal_sessions")
+}
+
+model OtpToken {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mobile     String
+  otp        String
+  expiresAt  DateTime  @db.Timestamptz
+  attempts   Int       @default(0)
+  verified   Boolean   @default(false)
+  verifiedAt DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([mobile])
+  @@index([expiresAt])
+  @@map("otp_tokens")
+}
+
+model Notification {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  userId           String?   @db.Uuid
+  recipientUserId  String?   @db.Uuid
+  recipientRole    String?
+  recipientType    String? // 'user' | 'department'
+  recipientDeptKey String? // department key for department-scoped notifications
+  type             String    @default("in-app") // email, sms, push, in-app
+  kind             String    @default("SYSTEM") // SYSTEM, ALERT, TASK, etc.
+  severity         String    @default("INFO") // INFO, WARNING, CRITICAL, URGENT
+  scope            String    @default("SYSTEM") // SYSTEM, ER, OPD, IPD, etc.
+  channel          String? // specific channel
+  title            String?
+  body             String?
+  message          String?
+  metadata         Json?
+  entity           Json? // linked entity (e.g. { type: 'patient', id: '...' })
+  dedupeKey        String? // deduplication key
+  actorUserId      String?   @db.Uuid
+  actorUserEmail   String?
+  status           String    @default("OPEN") // OPEN, READ, CLOSED, ARCHIVED
+  readAt           DateTime? @db.Timestamptz
+  sentAt           DateTime? @db.Timestamptz
+  errorMessage     String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([recipientUserId])
+  @@index([recipientType])
+  @@index([recipientDeptKey])
+  @@index([type])
+  @@index([kind])
+  @@index([severity])
+  @@index([scope])
+  @@index([status])
+  @@index([dedupeKey])
+  @@map("notifications")
+}
+
+model UsageQuota {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String    @db.Uuid
+  quotaType    String? // api, storage, ai, users (legacy)
+  maxLimit     Int       @default(0)
+  currentUsage Int       @default(0)
+  periodStart  DateTime? @db.Timestamptz
+  periodEnd    DateTime? @db.Timestamptz
+  metadata     Json?
+
+  // Fields used by admin quota routes
+  scopeType  String? // 'group' | 'user'
+  scopeId    String? // groupId or userId
+  featureKey String? // e.g., 'policy.search', 'policy.view'
+  limit      Int       @default(999999)
+  used       Int       @default(0)
+  status     String    @default("active") // 'active' | 'locked'
+  startsAt   DateTime? @db.Timestamptz
+  endsAt     DateTime? @db.Timestamptz
+  lockedAt   DateTime? @db.Timestamptz
+  createdBy  String?   @db.Uuid
+  updatedBy  String?   @db.Uuid
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, quotaType])
+  @@index([tenantId])
+  @@index([tenantId, scopeType, scopeId, featureKey])
+  @@map("usage_quotas")
+}
+
+model OrganizationProfile {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String  @unique @db.Uuid
+  name        String?
+  nameAr      String?
+  sector      String?
+  orgTypeId   String?
+  countryCode String?
+  phone       String?
+  email       String?
+  website     String?
+  address     Json?
+  logo        String?
+  metadata    Json?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("organization_profiles")
+}
+
+model OrganizationType {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  sector      String
+  countryCode String?
+  status      String  @default("ACTIVE") // ACTIVE, DRAFT_PENDING_REVIEW, REJECTED
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  @@index([status])
+  @@map("organization_types")
+}
+
+model OrganizationTypeProposal {
+  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orgTypeId String
+  status    String @default("PENDING_REVIEW")
+  proposal  Json?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  @@index([orgTypeId])
+  @@index([status])
+  @@map("organization_type_proposals")
+}
+
+model ApprovedAccessToken {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId          String    @db.Uuid
+  ownerEmail       String
+  tenantId         String // tenant key
+  tenantName       String?
+  requestedAt      DateTime  @db.Timestamptz
+  approvedAt       DateTime? @db.Timestamptz
+  approvedBy       String?   @db.Uuid
+  approvedByEmail  String?
+  status           String    @default("pending") // pending, approved, rejected, expired, revoked
+  expiresAt        DateTime  @db.Timestamptz
+  accessToken      String? // Generated access token string
+  allowedPlatforms Json? // { sam, health, edrac, cvision }
+  allowedActions   String[]  @default(["view", "export"])
+  reason           String?
+  notes            String?
+  lastUsedAt       DateTime? @db.Timestamptz
+  usageCount       Int       @default(0)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  @@index([ownerId])
+  @@index([tenantId])
+  @@index([status])
+  @@index([accessToken])
+  @@map("approved_access_tokens")
+}
+
+model ApprovedAccessAuditLog {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventType    String // request_created, request_approved, etc.
+  requestId    String?
+  ownerId      String
+  ownerEmail   String
+  tenantId     String
+  tenantName   String?
+  actorId      String?
+  actorEmail   String?
+  actorRole    String?
+  action       String
+  details      Json?
+  ipAddress    String?
+  userAgent    String?
+  success      Boolean  @default(true)
+  errorMessage String?
+  timestamp    DateTime @default(now()) @db.Timestamptz
+
+  @@index([requestId])
+  @@index([ownerId])
+  @@index([tenantId])
+  @@index([timestamp])
+  @@map("approved_access_audit_logs")
+}
+
+model BreakTheGlassRequest {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  requesterId    String // userId who requested emergency access
+  requesterName  String?
+  requesterRole  String?
+  patientId      String    @db.Uuid // patient being accessed
+  reason         String // free-text reason for emergency access
+  reasonCategory String? // LIFE_THREATENING, URGENT_CARE, CONTINUITY_OF_CARE
+  status         String    @default("ACTIVE") // ACTIVE, EXPIRED, REVOKED, REVIEWED
+  grantedAt      DateTime  @default(now()) @db.Timestamptz
+  expiresAt      DateTime  @db.Timestamptz // auto-expires after configurable time
+  revokedAt      DateTime? @db.Timestamptz
+  revokedBy      String?
+  reviewedAt     DateTime? @db.Timestamptz
+  reviewedBy     String?
+  reviewNotes    String?
+  accessCount    Int       @default(0) // how many times access was used
+  ipAddress      String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, requesterId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, status])
+  @@map("break_the_glass_requests")
+}
+
+// =============================================================================
+// Staff Credentialing & Privileging
+// =============================================================================
+
+model StaffCredential {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @db.Uuid
+  userId             String    @db.Uuid
+  staffName          String
+  staffNameAr        String?
+  credentialType     String // medical_license, specialty_board, bls, acls, pals, nrp, dea, cme, malpractice_insurance, health_certificate, dataflow_verification, scfhs_classification
+  credentialNumber   String?
+  issuingAuthority   String // SCFHS, SMLE, MOH, AHA, hospital, etc.
+  issuingAuthorityAr String?
+  issueDate          DateTime  @db.Timestamptz
+  expiryDate         DateTime? @db.Timestamptz
+  status             String    @default("active") // active, expired, expiring_soon, revoked, pending_renewal, pending_verification
+  verificationStatus String    @default("pending") // pending, verified, failed, waived
+  verifiedBy         String?   @db.Uuid
+  verifiedAt         DateTime? @db.Timestamptz
+  documentUrl        String?
+  category           String? // physician, nurse, pharmacist, technician, allied_health
+  specialtyCode      String?
+  notes              String?
+  reminderSentAt     DateTime? @db.Timestamptz
+  createdAt          DateTime  @default(now()) @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, userId])
+  @@index([tenantId, status])
+  @@index([tenantId, credentialType])
+  @@index([tenantId, expiryDate])
+  @@map("staff_credentials")
+}
+
+model ClinicalPrivilege {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  userId           String    @db.Uuid
+  staffName        String
+  privilegeType    String // admitting, surgical, procedural, prescribing, sedation, laser, radiology_ordering, blood_transfusion, ventilator_management, central_line
+  privilegeCode    String?
+  department       String?
+  status           String    @default("active") // active, suspended, revoked, temporary, probationary
+  grantedBy        String    @db.Uuid
+  grantedByName    String?
+  grantedAt        DateTime  @default(now()) @db.Timestamptz
+  expiresAt        DateTime? @db.Timestamptz
+  conditions       String? // any conditions on the privilege
+  supervisorId     String?   @db.Uuid // required supervisor for probationary
+  caseLogRequired  Int? // minimum cases required
+  caseLogCompleted Int       @default(0)
+  lastReviewDate   DateTime? @db.Timestamptz
+  nextReviewDate   DateTime? @db.Timestamptz
+  notes            String?
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, userId])
+  @@index([tenantId, status])
+  @@index([tenantId, privilegeType])
+  @@map("clinical_privileges")
+}
+
+model CredentialAlert {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @db.Uuid
+  credentialId String?  @db.Uuid
+  privilegeId  String?  @db.Uuid
+  userId       String   @db.Uuid
+  alertType    String // expiring_30d, expiring_60d, expiring_90d, expired, verification_needed, review_due
+  message      String
+  messageAr    String?
+  isRead       Boolean  @default(false)
+  isDismissed  Boolean  @default(false)
+  createdAt    DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, userId])
+  @@index([tenantId, isRead])
+  @@index([tenantId, alertType])
+  @@map("credential_alerts")
+}
+
+// =============================================================================
+// Integration API Keys — Per-tenant keys for machine-to-machine auth (HL7, FHIR, etc.)
+// =============================================================================
+
+model IntegrationApiKey {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  keyHash   String   @unique // SHA-256 hash of the raw API key
+  type      String   // 'HL7', 'FHIR', 'LIS', etc.
+  label     String?  // Human-readable name like "Lab System A"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([keyHash])
+  @@index([tenantId, type])
+  @@map("integration_api_keys")
+}

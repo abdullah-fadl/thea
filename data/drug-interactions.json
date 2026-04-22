@@ -1,0 +1,459 @@
+{
+  "interactions": [
+    {
+      "drug1": "warfarin",
+      "drug2": "ibuprofen",
+      "severity": "major",
+      "description": "Increased risk of gastrointestinal and intracranial bleeding due to anticoagulation plus platelet inhibition.",
+      "descriptionAr": "زيادة خطر النزيف الهضمي وداخل الجمجمة بسبب الجمع بين مضاد التخثر وتثبيط الصفائح.",
+      "recommendation": "Avoid combination. Use acetaminophen if analgesia needed.",
+      "recommendationAr": "تجنب الجمع. استخدم الباراسيتامول إذا لزم مسكن."
+    },
+    {
+      "drug1": "warfarin",
+      "drug2": "diclofenac",
+      "severity": "major",
+      "description": "High bleeding risk from additive anticoagulant and NSAID effects.",
+      "descriptionAr": "خطر مرتفع للنزيف بسبب التأثيرات المضافة لمضاد التخثر ومضادات الالتهاب.",
+      "recommendation": "Avoid combination or monitor INR and bleeding closely.",
+      "recommendationAr": "تجنب الجمع أو راقب INR وعلامات النزيف بدقة."
+    },
+    {
+      "drug1": "warfarin",
+      "drug2": "naproxen",
+      "severity": "major",
+      "description": "NSAID use increases bleeding risk in patients on warfarin.",
+      "descriptionAr": "استخدام مضادات الالتهاب يزيد خطر النزيف مع الوارفارين.",
+      "recommendation": "Avoid combination or use gastroprotection and monitor INR.",
+      "recommendationAr": "تجنب الجمع أو استخدم حماية معدية وراقب INR."
+    },
+    {
+      "drug1": "warfarin",
+      "drug2": "aspirin",
+      "severity": "major",
+      "description": "Additive antithrombotic effect increases bleeding risk.",
+      "descriptionAr": "تأثير مضاد للتخثر مضاف يزيد خطر النزيف.",
+      "recommendation": "Avoid unless specifically indicated; monitor closely.",
+      "recommendationAr": "تجنب إلا إذا كانت هناك ضرورة واضحة؛ راقب بدقة."
+    },
+    {
+      "drug1": "warfarin",
+      "drug2": "metronidazole",
+      "severity": "major",
+      "description": "Metronidazole inhibits warfarin metabolism, increasing INR and bleeding risk.",
+      "descriptionAr": "الميترونيدازول يثبط استقلاب الوارفارين مما يرفع INR ويزيد خطر النزيف.",
+      "recommendation": "Avoid or reduce warfarin dose and monitor INR frequently.",
+      "recommendationAr": "تجنب أو خفّض جرعة الوارفارين مع مراقبة INR بشكل متكرر."
+    },
+    {
+      "drug1": "warfarin",
+      "drug2": "ciprofloxacin",
+      "severity": "major",
+      "description": "Fluoroquinolones can increase INR and bleeding risk.",
+      "descriptionAr": "الفلوروكينولونات قد ترفع INR وتزيد خطر النزيف.",
+      "recommendation": "Monitor INR closely and adjust warfarin dose.",
+      "recommendationAr": "راقب INR بدقة واضبط جرعة الوارفارين."
+    },
+    {
+      "drug1": "warfarin",
+      "drug2": "trimethoprim_sulfamethoxazole",
+      "severity": "major",
+      "description": "Significant increase in INR due to CYP inhibition.",
+      "descriptionAr": "ارتفاع ملحوظ في INR بسبب تثبيط الإنزيمات.",
+      "recommendation": "Avoid combination or reduce warfarin and monitor INR.",
+      "recommendationAr": "تجنب الجمع أو خفّض الوارفارين وراقب INR."
+    },
+    {
+      "drug1": "warfarin",
+      "drug2": "fluconazole",
+      "severity": "major",
+      "description": "Azole antifungals increase warfarin levels and bleeding risk.",
+      "descriptionAr": "مضادات الفطريات من الآزول ترفع مستويات الوارفارين وتزيد خطر النزيف.",
+      "recommendation": "Avoid or reduce warfarin dose with close INR monitoring.",
+      "recommendationAr": "تجنب أو خفّض جرعة الوارفارين مع مراقبة INR."
+    },
+    {
+      "drug1": "warfarin",
+      "drug2": "amiodarone",
+      "severity": "major",
+      "description": "Amiodarone potentiates warfarin effects, raising INR.",
+      "descriptionAr": "الأميودارون يزيد تأثير الوارفارين ويرفع INR.",
+      "recommendation": "Reduce warfarin dose and monitor INR frequently.",
+      "recommendationAr": "خفّض جرعة الوارفارين وراقب INR بشكل متكرر."
+    },
+    {
+      "drug1": "warfarin",
+      "drug2": "ginkgo",
+      "severity": "major",
+      "description": "Ginkgo may increase bleeding risk when combined with warfarin.",
+      "descriptionAr": "الجنكو قد يزيد خطر النزيف مع الوارفارين.",
+      "recommendation": "Avoid combination or monitor for bleeding.",
+      "recommendationAr": "تجنب الجمع أو راقب علامات النزيف."
+    },
+    {
+      "drug1": "metformin",
+      "drug2": "contrast_media",
+      "severity": "major",
+      "description": "Risk of lactic acidosis due to renal function changes after contrast.",
+      "descriptionAr": "خطر الحماض اللبني بسبب تدهور وظيفة الكلى بعد الصبغة.",
+      "recommendation": "Hold metformin before and 48 hours after contrast if renal risk.",
+      "recommendationAr": "أوقف الميتفورمين قبل الصبغة ولمدة 48 ساعة بعدها عند وجود خطر كلوي."
+    },
+    {
+      "drug1": "lisinopril",
+      "drug2": "potassium_chloride",
+      "severity": "major",
+      "description": "Increased risk of hyperkalemia.",
+      "descriptionAr": "زيادة خطر فرط بوتاسيوم الدم.",
+      "recommendation": "Avoid or monitor serum potassium closely.",
+      "recommendationAr": "تجنب أو راقب بوتاسيوم الدم بدقة."
+    },
+    {
+      "drug1": "enalapril",
+      "drug2": "spironolactone",
+      "severity": "major",
+      "description": "Combined RAAS inhibition and potassium-sparing diuretic increases hyperkalemia risk.",
+      "descriptionAr": "الجمع بين تثبيط نظام الرينين والدواء الحافظ للبوتاسيوم يزيد خطر فرط البوتاسيوم.",
+      "recommendation": "Use lowest effective doses and monitor potassium and renal function.",
+      "recommendationAr": "استخدم أقل جرعات فعالة وراقب البوتاسيوم ووظائف الكلى."
+    },
+    {
+      "drug1": "phenelzine",
+      "drug2": "sertraline",
+      "severity": "major",
+      "description": "Risk of serotonin syndrome due to MAOI + SSRI.",
+      "descriptionAr": "خطر متلازمة السيروتونين بسبب الجمع بين MAOI و SSRI.",
+      "recommendation": "Contraindicated; allow washout period between agents.",
+      "recommendationAr": "مضاد للاستطباب؛ يجب وجود فترة توقف بين الدوائين."
+    },
+    {
+      "drug1": "digoxin",
+      "drug2": "amiodarone",
+      "severity": "major",
+      "description": "Amiodarone increases digoxin levels causing toxicity.",
+      "descriptionAr": "الأميودارون يرفع مستويات الديجوكسين ويؤدي للتسمم.",
+      "recommendation": "Reduce digoxin dose and monitor levels and ECG.",
+      "recommendationAr": "خفّض جرعة الديجوكسين وراقب المستوى وتخطيط القلب."
+    },
+    {
+      "drug1": "lithium",
+      "drug2": "ibuprofen",
+      "severity": "major",
+      "description": "NSAIDs reduce lithium clearance, increasing toxicity.",
+      "descriptionAr": "مضادات الالتهاب تقلل طرح الليثيوم وتزيد خطر السمية.",
+      "recommendation": "Avoid or monitor lithium levels and renal function.",
+      "recommendationAr": "تجنب أو راقب مستوى الليثيوم ووظائف الكلى."
+    },
+    {
+      "drug1": "lithium",
+      "drug2": "naproxen",
+      "severity": "major",
+      "description": "NSAIDs increase lithium levels and toxicity risk.",
+      "descriptionAr": "مضادات الالتهاب تزيد مستويات الليثيوم وخطر السمية.",
+      "recommendation": "Avoid or monitor lithium levels closely.",
+      "recommendationAr": "تجنب أو راقب مستوى الليثيوم بدقة."
+    },
+    {
+      "drug1": "methotrexate",
+      "drug2": "ibuprofen",
+      "severity": "major",
+      "description": "NSAIDs reduce methotrexate clearance causing toxicity.",
+      "descriptionAr": "مضادات الالتهاب تقلل طرح الميثوتركسات وتزيد السمية.",
+      "recommendation": "Avoid high-dose combination or monitor closely.",
+      "recommendationAr": "تجنب الجرعات العالية معًا أو راقب بدقة."
+    },
+    {
+      "drug1": "methotrexate",
+      "drug2": "diclofenac",
+      "severity": "major",
+      "description": "Increased risk of methotrexate toxicity.",
+      "descriptionAr": "زيادة خطر سمية الميثوتركسات.",
+      "recommendation": "Avoid or monitor blood counts and renal function.",
+      "recommendationAr": "تجنب أو راقب تعداد الدم ووظائف الكلى."
+    },
+    {
+      "drug1": "morphine",
+      "drug2": "diazepam",
+      "severity": "major",
+      "description": "Additive CNS depression may cause respiratory failure.",
+      "descriptionAr": "تثبيط مركزي مضاف قد يسبب فشلًا تنفسيًا.",
+      "recommendation": "Avoid combination or use lowest doses with monitoring.",
+      "recommendationAr": "تجنب الجمع أو استخدم أقل الجرعات مع المراقبة."
+    },
+    {
+      "drug1": "oxycodone",
+      "drug2": "alprazolam",
+      "severity": "major",
+      "description": "High risk of profound sedation and respiratory depression.",
+      "descriptionAr": "خطر مرتفع من التهدئة الشديدة وتثبيط التنفس.",
+      "recommendation": "Avoid combination; if necessary monitor closely.",
+      "recommendationAr": "تجنب الجمع؛ وإن لزم فراقب عن قرب."
+    },
+    {
+      "drug1": "sildenafil",
+      "drug2": "nitroglycerin",
+      "severity": "major",
+      "description": "Severe hypotension due to additive vasodilation.",
+      "descriptionAr": "هبوط شديد في الضغط بسبب توسع وعائي مضاف.",
+      "recommendation": "Contraindicated; avoid within 24 hours of sildenafil.",
+      "recommendationAr": "مضاد للاستطباب؛ تجنب خلال 24 ساعة من السيلدينافيل."
+    },
+    {
+      "drug1": "tadalafil",
+      "drug2": "isosorbide_dinitrate",
+      "severity": "major",
+      "description": "Severe hypotension due to nitrate and PDE5 inhibitor.",
+      "descriptionAr": "هبوط شديد في الضغط بسبب النترات مع مثبط PDE5.",
+      "recommendation": "Contraindicated; avoid nitrates for 48 hours.",
+      "recommendationAr": "مضاد للاستطباب؛ تجنب النترات لمدة 48 ساعة."
+    },
+    {
+      "drug1": "clarithromycin",
+      "drug2": "simvastatin",
+      "severity": "major",
+      "description": "Increased statin levels raise risk of rhabdomyolysis.",
+      "descriptionAr": "ارتفاع مستويات الستاتين يزيد خطر انحلال العضلات.",
+      "recommendation": "Avoid combination; use alternative antibiotic or statin.",
+      "recommendationAr": "تجنب الجمع؛ استخدم مضادًا بديلًا أو ستاتينًا آخر."
+    },
+    {
+      "drug1": "erythromycin",
+      "drug2": "lovastatin",
+      "severity": "major",
+      "description": "CYP3A4 inhibition increases statin toxicity risk.",
+      "descriptionAr": "تثبيط CYP3A4 يزيد خطر سمية الستاتين.",
+      "recommendation": "Avoid combination; choose non-interacting agents.",
+      "recommendationAr": "تجنب الجمع؛ اختر بدائل لا تتداخل."
+    },
+    {
+      "drug1": "azithromycin",
+      "drug2": "ondansetron",
+      "severity": "major",
+      "description": "Additive QT prolongation may cause torsades de pointes.",
+      "descriptionAr": "إطالة QT بشكل مضاف قد تسبب اضطراب نظم خطير.",
+      "recommendation": "Avoid combination or monitor ECG and electrolytes.",
+      "recommendationAr": "تجنب الجمع أو راقب ECG والشوارد."
+    },
+    {
+      "drug1": "levofloxacin",
+      "drug2": "haloperidol",
+      "severity": "major",
+      "description": "Significant QT prolongation risk.",
+      "descriptionAr": "خطر كبير لإطالة QT.",
+      "recommendation": "Avoid or monitor ECG and correct electrolytes.",
+      "recommendationAr": "تجنب أو راقب ECG وصحح الشوارد."
+    },
+    {
+      "drug1": "citalopram",
+      "drug2": "haloperidol",
+      "severity": "major",
+      "description": "Additive QT prolongation risk.",
+      "descriptionAr": "خطر إطالة QT بشكل مضاف.",
+      "recommendation": "Avoid if possible; monitor ECG.",
+      "recommendationAr": "تجنب إن أمكن؛ راقب ECG."
+    },
+    {
+      "drug1": "amiodarone",
+      "drug2": "levofloxacin",
+      "severity": "major",
+      "description": "High risk of QT prolongation and arrhythmia.",
+      "descriptionAr": "خطر مرتفع لإطالة QT واضطراب النظم.",
+      "recommendation": "Avoid combination or monitor ECG closely.",
+      "recommendationAr": "تجنب الجمع أو راقب ECG بدقة."
+    },
+    {
+      "drug1": "linezolid",
+      "drug2": "sertraline",
+      "severity": "major",
+      "description": "Risk of serotonin syndrome due to MAOI activity.",
+      "descriptionAr": "خطر متلازمة السيروتونين بسبب تأثير MAOI.",
+      "recommendation": "Avoid combination; monitor closely if unavoidable.",
+      "recommendationAr": "تجنب الجمع؛ راقب بدقة إذا كان لا بد منه."
+    },
+    {
+      "drug1": "digoxin",
+      "drug2": "verapamil",
+      "severity": "major",
+      "description": "Verapamil increases digoxin levels leading to toxicity.",
+      "descriptionAr": "فيراباميل يرفع مستوى الديجوكسين ويسبب سمية.",
+      "recommendation": "Reduce digoxin dose and monitor levels.",
+      "recommendationAr": "خفّض جرعة الديجوكسين وراقب المستوى."
+    },
+    {
+      "drug1": "theophylline",
+      "drug2": "ciprofloxacin",
+      "severity": "major",
+      "description": "Ciprofloxacin inhibits metabolism of theophylline causing toxicity.",
+      "descriptionAr": "السيبروفلوكساسين يثبط استقلاب الثيوفيلين ويسبب سمية.",
+      "recommendation": "Avoid or reduce theophylline dose and monitor levels.",
+      "recommendationAr": "تجنب أو خفّض جرعة الثيوفيلين وراقب المستوى."
+    },
+    {
+      "drug1": "fluoxetine",
+      "drug2": "tramadol",
+      "severity": "major",
+      "description": "Risk of serotonin syndrome and seizures.",
+      "descriptionAr": "خطر متلازمة السيروتونين ونوبات الصرع.",
+      "recommendation": "Avoid combination or monitor closely.",
+      "recommendationAr": "تجنب الجمع أو راقب بدقة."
+    },
+    {
+      "drug1": "allopurinol",
+      "drug2": "azathioprine",
+      "severity": "major",
+      "description": "Allopurinol increases azathioprine levels causing severe myelosuppression.",
+      "descriptionAr": "الألوبورينول يرفع مستويات الآزاثيوبرين ويسبب كبتًا شديدًا للنخاع.",
+      "recommendation": "Avoid or reduce azathioprine dose to 25% with monitoring.",
+      "recommendationAr": "تجنب أو خفّض جرعة الآزاثيوبرين إلى 25% مع المراقبة."
+    },
+    {
+      "drug1": "rifampin",
+      "drug2": "ethinyl_estradiol",
+      "severity": "moderate",
+      "description": "Rifampin reduces oral contraceptive effectiveness.",
+      "descriptionAr": "الريفامبين يقلل فعالية موانع الحمل الفموية.",
+      "recommendation": "Use alternative or backup contraception.",
+      "recommendationAr": "استخدم وسيلة بديلة أو إضافية لمنع الحمل."
+    },
+    {
+      "drug1": "ibuprofen",
+      "drug2": "lisinopril",
+      "severity": "moderate",
+      "description": "NSAIDs may reduce antihypertensive effect and worsen renal function.",
+      "descriptionAr": "مضادات الالتهاب قد تقلل تأثير خافض الضغط وتؤثر على الكلى.",
+      "recommendation": "Monitor blood pressure and renal function.",
+      "recommendationAr": "راقب ضغط الدم ووظائف الكلى."
+    },
+    {
+      "drug1": "naproxen",
+      "drug2": "enalapril",
+      "severity": "moderate",
+      "description": "Reduced antihypertensive effect and renal risk.",
+      "descriptionAr": "انخفاض تأثير خافض الضغط مع خطر كلوي.",
+      "recommendation": "Monitor blood pressure and creatinine.",
+      "recommendationAr": "راقب ضغط الدم والكرياتينين."
+    },
+    {
+      "drug1": "simvastatin",
+      "drug2": "grapefruit_juice",
+      "severity": "moderate",
+      "description": "Grapefruit increases simvastatin levels.",
+      "descriptionAr": "الجريب فروت يرفع مستوى السيمفاستاتين.",
+      "recommendation": "Avoid grapefruit or use alternative statin.",
+      "recommendationAr": "تجنب الجريب فروت أو استخدم ستاتينًا آخر."
+    },
+    {
+      "drug1": "atorvastatin",
+      "drug2": "grapefruit_juice",
+      "severity": "moderate",
+      "description": "Increased statin exposure may cause muscle symptoms.",
+      "descriptionAr": "زيادة التعرض للستاتين قد تسبب ألمًا عضليًا.",
+      "recommendation": "Limit grapefruit intake or monitor for myopathy.",
+      "recommendationAr": "قلل الجريب فروت أو راقب أعراض العضلات."
+    },
+    {
+      "drug1": "omeprazole",
+      "drug2": "clopidogrel",
+      "severity": "moderate",
+      "description": "Reduced clopidogrel activation and antiplatelet effect.",
+      "descriptionAr": "نقص تفعيل الكلوبيدوغريل وتأثيره المضاد للصفائح.",
+      "recommendation": "Prefer pantoprazole or separate therapy.",
+      "recommendationAr": "يفضل بانتوبرازول أو تجنب الجمع."
+    },
+    {
+      "drug1": "esomeprazole",
+      "drug2": "clopidogrel",
+      "severity": "moderate",
+      "description": "CYP2C19 inhibition reduces clopidogrel efficacy.",
+      "descriptionAr": "تثبيط CYP2C19 يقلل فعالية الكلوبيدوغريل.",
+      "recommendation": "Use alternative PPI or H2 blocker.",
+      "recommendationAr": "استخدم مثبط مضخة بديل أو حاصر H2."
+    },
+    {
+      "drug1": "calcium_carbonate",
+      "drug2": "levothyroxine",
+      "severity": "moderate",
+      "description": "Calcium reduces levothyroxine absorption.",
+      "descriptionAr": "الكالسيوم يقلل امتصاص ليفوثيروكسين.",
+      "recommendation": "Separate doses by at least 4 hours.",
+      "recommendationAr": "افصل الجرعات بما لا يقل عن 4 ساعات."
+    },
+    {
+      "drug1": "ferrous_sulfate",
+      "drug2": "aluminum_hydroxide",
+      "severity": "moderate",
+      "description": "Antacids reduce iron absorption.",
+      "descriptionAr": "مضادات الحموضة تقلل امتصاص الحديد.",
+      "recommendation": "Separate by 2-4 hours.",
+      "recommendationAr": "افصل الجرعات 2-4 ساعات."
+    },
+    {
+      "drug1": "ciprofloxacin",
+      "drug2": "calcium_carbonate",
+      "severity": "moderate",
+      "description": "Chelation reduces ciprofloxacin absorption.",
+      "descriptionAr": "الارتباط يقلل امتصاص السيبروفلوكساسين.",
+      "recommendation": "Separate doses by at least 2 hours.",
+      "recommendationAr": "افصل الجرعات بما لا يقل عن ساعتين."
+    },
+    {
+      "drug1": "tetracycline",
+      "drug2": "calcium_carbonate",
+      "severity": "moderate",
+      "description": "Chelation reduces tetracycline absorption.",
+      "descriptionAr": "الارتباط يقلل امتصاص التتراسيكلين.",
+      "recommendation": "Separate doses by 2-3 hours.",
+      "recommendationAr": "افصل الجرعات 2-3 ساعات."
+    },
+    {
+      "drug1": "metformin",
+      "drug2": "alcohol",
+      "severity": "moderate",
+      "description": "Alcohol increases risk of lactic acidosis.",
+      "descriptionAr": "الكحول يزيد خطر الحماض اللبني.",
+      "recommendation": "Avoid excessive alcohol intake.",
+      "recommendationAr": "تجنب الإفراط في شرب الكحول."
+    },
+    {
+      "drug1": "propranolol",
+      "drug2": "insulin",
+      "severity": "moderate",
+      "description": "Beta blockers can mask hypoglycemia symptoms.",
+      "descriptionAr": "حاصرات بيتا قد تخفي أعراض هبوط السكر.",
+      "recommendation": "Monitor glucose closely and educate patient.",
+      "recommendationAr": "راقب السكر بدقة وقدم التثقيف للمريض."
+    },
+    {
+      "drug1": "sertraline",
+      "drug2": "ibuprofen",
+      "severity": "moderate",
+      "description": "Increased bleeding risk due to platelet inhibition.",
+      "descriptionAr": "زيادة خطر النزيف بسبب تثبيط الصفائح.",
+      "recommendation": "Use gastroprotection and monitor for bleeding.",
+      "recommendationAr": "استخدم حماية معدية وراقب النزيف."
+    },
+    {
+      "drug1": "prednisone",
+      "drug2": "ibuprofen",
+      "severity": "moderate",
+      "description": "Increased risk of GI ulceration and bleeding.",
+      "descriptionAr": "زيادة خطر تقرحات ونزيف الجهاز الهضمي.",
+      "recommendation": "Use gastroprotection and avoid prolonged combination.",
+      "recommendationAr": "استخدم حماية معدية وتجنب الجمع لفترات طويلة."
+    }
+  ],
+  "drugAliases": {
+    "paracetamol": ["acetaminophen", "panadol", "fevadol"],
+    "ibuprofen": ["advil", "motrin", "brufen", "nurofen"],
+    "aspirin": ["acetylsalicylic acid", "asa", "aspocid"],
+    "warfarin": ["coumadin"],
+    "metformin": ["glucophage"],
+    "simvastatin": ["zocor"],
+    "atorvastatin": ["lipitor"],
+    "rosuvastatin": ["crestor"],
+    "omeprazole": ["losec"],
+    "esomeprazole": ["nexium"],
+    "amoxicillin_clavulanate": ["augmentin"],
+    "clarithromycin": ["klacid"]
+  }
+}

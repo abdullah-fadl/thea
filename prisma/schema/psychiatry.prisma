@@ -1,0 +1,506 @@
+model PsychiatricAssessment {
+  id                 String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String      @db.Uuid
+  patientMasterId    String      @db.Uuid
+  episodeId          String?     @db.Uuid
+  encounterId        String?     @db.Uuid
+  assessedBy         String
+  assessmentDate     DateTime    @db.Timestamptz
+  chiefComplaint     String
+  presentingIllness  String?
+  psychiatricHistory String?
+  medicalHistory     String?
+  familyHistory      String?
+  substanceUse       Json?
+  mentalStatusExam   Json
+  riskAssessment     Json?
+  diagnosis          String?
+  icdCode            String?
+  dsm5Diagnosis      String?
+  formulation        String?
+  treatmentPlan      String?
+  disposition        String?
+  followUpDate       DateTime?   @db.Timestamptz
+  notes              PsychNote[]
+  createdAt          DateTime    @default(now()) @db.Timestamptz
+  updatedAt          DateTime    @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@map("psychiatric_assessments")
+}
+
+model PsychNote {
+  id           String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String                @db.Uuid
+  assessmentId String                @db.Uuid
+  assessment   PsychiatricAssessment @relation(fields: [assessmentId], references: [id])
+  authorId     String
+  noteDate     DateTime              @default(now()) @db.Timestamptz
+  noteType     String                @default("PROGRESS")
+  content      String
+  medications  Json?
+  moodRating   Int?
+  suicidalRisk String?
+  createdAt    DateTime              @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, assessmentId])
+  @@map("psych_notes")
+}
+
+model PsychMedication {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  patientMasterId String    @db.Uuid
+  assessmentId    String?   @db.Uuid
+  drug            String
+  dose            String
+  frequency       String
+  route           String    @default("ORAL")
+  indication      String?
+  startDate       DateTime  @db.Timestamptz
+  endDate         DateTime? @db.Timestamptz
+  prescribedBy    String
+  sideEffects     String?
+  adherence       String?
+  status          String    @default("ACTIVE")
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientMasterId])
+  @@map("psych_medications")
+}
+
+// =============================================================================
+// Psychiatry Restraint/Seclusion Log
+// =============================================================================
+
+model PsychRestraintLog {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String    @db.Uuid
+  patientMasterId       String    @db.Uuid
+  episodeId             String?   @db.Uuid
+  encounterId           String?   @db.Uuid
+  // Order details
+  orderedByUserId       String    @db.Uuid
+  orderedByName         String?
+  orderedAt             DateTime  @db.Timestamptz
+  orderExpiry           DateTime? @db.Timestamptz
+  renewals              Json? // [{renewedAt, renewedBy, newExpiry}]
+  // Type
+  interventionType      String // PHYSICAL_RESTRAINT, CHEMICAL_RESTRAINT, SECLUSION
+  restraintType         String? // WRIST, ANKLE, VEST, MITT, FOUR_POINT, BED_RAIL
+  seclusionRoom         String?
+  // Reason
+  reason                String // DANGER_TO_SELF, DANGER_TO_OTHERS, INTERFERING_WITH_TREATMENT, ELOPEMENT_RISK
+  behaviorDescription   String?
+  alternativesAttempted Json? // [{alternative, result}]
+  // Timing
+  startedAt             DateTime  @db.Timestamptz
+  endedAt               DateTime? @db.Timestamptz
+  totalDurationMin      Int?
+  // Monitoring
+  monitoringChecks      Json? // [{time, checkedBy, circulation, skin, emotional, hydration, toileting, notes}]
+  monitoringFreqMin     Int       @default(15)
+  // Assessment
+  patientResponse       String?
+  injuriesNoted         Boolean   @default(false)
+  injuryDescription     String?
+  // Physician face-to-face
+  physicianAssessedAt   DateTime? @db.Timestamptz
+  physicianAssessedBy   String?
+  physicianNotes        String?
+  // Debriefing
+  debriefCompleted      Boolean   @default(false)
+  debriefNotes          String?
+  patientDebriefNotes   String?
+  // Status
+  status                String    @default("ACTIVE") // ACTIVE, COMPLETED, CANCELLED
+  discontinuedReason    String?
+  notes                 String?
+  createdAt             DateTime  @default(now()) @db.Timestamptz
+  updatedAt             DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, status])
+  @@map("psych_restraint_logs")
+}
+
+// =============================================================================
+// Psychiatry Risk Assessment — Suicide/Violence Risk
+// =============================================================================
+
+model PsychRiskAssessment {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String    @db.Uuid
+  patientMasterId       String    @db.Uuid
+  episodeId             String?   @db.Uuid
+  encounterId           String?   @db.Uuid
+  assessedByUserId      String    @db.Uuid
+  assessedByName        String?
+  assessedAt            DateTime  @db.Timestamptz
+  assessmentType        String // SUICIDE, VIOLENCE, COMBINED
+  // Suicide risk (Columbia Suicide Severity Rating Scale - C-SSRS)
+  suicideIdeation       Boolean?
+  ideationType          String? // WISH_TO_DIE, NONSPECIFIC_THOUGHTS, ACTIVE_WITH_METHOD, ACTIVE_WITH_INTENT, ACTIVE_WITH_PLAN
+  ideationIntensity     Int? // 1-5
+  suicideBehavior       Boolean?
+  behaviorType          String? // PREPARATORY, ABORTED, INTERRUPTED, ACTUAL_ATTEMPT
+  nonSuicidalSelfInjury Boolean?
+  // PHQ-9 score
+  phq9Score             Int?
+  phq9Item9             Int? // Item 9 specifically about self-harm
+  // Violence risk (Brøset Violence Checklist)
+  brosetConfusion       Boolean?
+  brosetIrritability    Boolean?
+  brosetBoisterousness  Boolean?
+  brosetVerbalThreats   Boolean?
+  brosetPhysicalThreats Boolean?
+  brosetAttackObjects   Boolean?
+  brosetScore           Int? // 0-6
+  // Static risk factors
+  staticFactors         Json? // [{factor, present}]
+  // Dynamic risk factors
+  dynamicFactors        Json? // [{factor, present}]
+  // Protective factors
+  protectiveFactors     Json? // [{factor, present}]
+  // Overall
+  suicideRiskLevel      String? // LOW, MODERATE, HIGH, IMMINENT
+  violenceRiskLevel     String? // LOW, MODERATE, HIGH
+  overallRiskLevel      String? // LOW, MODERATE, HIGH, CRITICAL
+  // Safety plan
+  safetyPlanCreated     Boolean   @default(false)
+  safetyPlan            Json? // {warningsSigns, copingStrategies, reasonsToLive, contactPeople, professionals, safeEnvironment}
+  // Interventions
+  interventions         Json? // [{type, detail}]
+  dispositionPlan       String?
+  supervisionLevel      String? // CONSTANT, Q15MIN, Q30MIN, Q1H, ROUTINE
+  environmentalSafety   Boolean?
+  // Follow-up
+  reassessmentDue       DateTime? @db.Timestamptz
+  notes                 String?
+  createdAt             DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, overallRiskLevel])
+  @@map("psych_risk_assessments")
+}
+
+// =============================================================================
+// Psychiatry Mental Status Exam (MSE)
+// =============================================================================
+
+model PsychMentalStatusExam {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String   @db.Uuid
+  patientMasterId    String   @db.Uuid
+  episodeId          String?  @db.Uuid
+  encounterId        String?  @db.Uuid
+  assessedByUserId   String   @db.Uuid
+  assessedByName     String?
+  assessedAt         DateTime @db.Timestamptz
+  // Appearance
+  appearance         Json? // {grooming, hygiene, clothing, build, distinguishing}
+  // Behavior
+  behavior           Json? // {cooperation, eyeContact, psychomotor, mannerisms, gait}
+  // Speech
+  speech             Json? // {rate, volume, tone, articulation, spontaneity, latency}
+  // Mood & Affect
+  moodReported       String?
+  affectObserved     String? // EUTHYMIC, DYSPHORIC, ANXIOUS, IRRITABLE, EUPHORIC, FLAT, BLUNTED, LABILE, CONSTRICTED
+  affectCongruence   String? // CONGRUENT, INCONGRUENT
+  affectRange        String? // FULL, RESTRICTED, BLUNTED, FLAT
+  // Thought Process
+  thoughtProcess     String? // LINEAR, CIRCUMSTANTIAL, TANGENTIAL, LOOSE_ASSOCIATIONS, FLIGHT_OF_IDEAS, THOUGHT_BLOCKING, PERSEVERATION, NEOLOGISMS
+  // Thought Content
+  thoughtContent     Json? // {suicidal, homicidal, delusions, obsessions, phobias, preoccupations}
+  delusionType       String? // PARANOID, GRANDIOSE, SOMATIC, REFERENTIAL, EROTOMANIC, JEALOUS, NIHILISTIC
+  // Perceptions
+  perceptions        Json? // {hallucinations: {auditory, visual, tactile, olfactory, gustatory}, illusions, derealization, depersonalization}
+  // Cognition
+  cognition          Json? // {orientation: {person, place, time, situation}, attention, concentration, memory: {immediate, recent, remote}}
+  mmseScore          Int? // Mini-Mental State Exam 0-30
+  mocaScore          Int? // Montreal Cognitive Assessment 0-30
+  // Insight & Judgment
+  insight            String? // GOOD, FAIR, POOR, ABSENT
+  judgment           String? // GOOD, FAIR, POOR, IMPAIRED
+  // Reliability
+  reliability        String? // GOOD, FAIR, POOR
+  // Summary
+  summary            String?
+  clinicalImpression String?
+  notes              String?
+  createdAt          DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientMasterId])
+  @@map("psych_mental_status_exams")
+}
+
+// =============================================================================
+// 3.1 — Psychiatry Treatment Plan
+// =============================================================================
+
+model PsychTreatmentPlan {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  patientMasterId     String    @db.Uuid
+  episodeId           String?   @db.Uuid
+  encounterId         String?   @db.Uuid
+  createdByUserId     String    @db.Uuid
+  createdByName       String?
+  // Diagnosis
+  dsm5Diagnosis       String?
+  icdCode             String?
+  diagnosisNotes      String?
+  // Problem list
+  psychiatricProblems Json? // [{problem, priority, status}]
+  medicalProblems     Json? // [{problem, priority, status}]
+  // Goals
+  goals               Json? // [{id, type: SHORT_TERM|LONG_TERM, description, targetDate, status: NOT_STARTED|IN_PROGRESS|ACHIEVED|MODIFIED, interventions: [{type, detail, responsibleClinician}], reviewNotes, lastReviewed}]
+  // Patient/family involvement
+  patientInvolved     Boolean   @default(false)
+  familyInvolved      Boolean   @default(false)
+  participationNotes  String?
+  // Review
+  reviewSchedule      String? // WEEKLY, BIWEEKLY, MONTHLY
+  nextReviewDate      DateTime? @db.Timestamptz
+  lastReviewedAt      DateTime? @db.Timestamptz
+  lastReviewedBy      String?
+  reviewHistory       Json? // [{reviewedAt, reviewedBy, notes, goalsUpdated}]
+  // Status
+  status              String    @default("ACTIVE") // ACTIVE, COMPLETED, DISCONTINUED
+  discontinuedReason  String?
+  notes               String?
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+  updatedAt           DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, status])
+  @@map("psych_treatment_plans")
+}
+
+// =============================================================================
+// 3.2 — Psychiatry Progress Notes (DAP Format)
+// =============================================================================
+
+model PsychProgressNote {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @db.Uuid
+  patientMasterId    String    @db.Uuid
+  episodeId          String?   @db.Uuid
+  encounterId        String?   @db.Uuid
+  treatmentPlanId    String?   @db.Uuid
+  authorUserId       String    @db.Uuid
+  authorName         String?
+  noteDate           DateTime  @default(now()) @db.Timestamptz
+  noteType           String    @default("INDIVIDUAL") // INDIVIDUAL, GROUP, FAMILY, CRISIS, DISCHARGE
+  // DAP format
+  dataSection        String? // Observations, patient statements, behaviors
+  assessmentSection  String? // Clinical interpretation, diagnostic impression
+  planSection        String? // Next steps, treatment changes
+  // Linked modules
+  goalProgress       Json? // [{goalId, goalDescription, progressRating: 1-5, progressNotes}]
+  // Medication response
+  medicationResponse Json? // [{drug, effectiveness: EFFECTIVE|PARTIAL|INEFFECTIVE, sideEffects, adherence: GOOD|PARTIAL|NON_ADHERENT}]
+  // Risk reassessment
+  riskReassessment   Json? // {suicideRisk, violenceRisk, overallRisk, changes}
+  // Brief MSE summary
+  briefMse           Json? // {mood, affect, thoughtProcess, insight, judgment}
+  // Group therapy link
+  groupSessionId     String?   @db.Uuid
+  // Session
+  sessionDurationMin Int?
+  nextSessionDate    DateTime? @db.Timestamptz
+  status             String    @default("DRAFT") // DRAFT, SIGNED, AMENDED, COSIGNED
+  signedAt           DateTime? @db.Timestamptz
+  signedBy           String?
+  cosignedBy         String?
+  cosignedAt         DateTime? @db.Timestamptz
+  amendmentNotes     String?
+  createdAt          DateTime  @default(now()) @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, treatmentPlanId])
+  @@index([tenantId, noteType])
+  @@map("psych_progress_notes")
+}
+
+// =============================================================================
+// 3.3 — Psychometric Scales Engine
+// =============================================================================
+
+model PsychScaleAdministration {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String   @db.Uuid
+  patientMasterId      String   @db.Uuid
+  episodeId            String?  @db.Uuid
+  encounterId          String?  @db.Uuid
+  administeredByUserId String   @db.Uuid
+  administeredByName   String?
+  administeredAt       DateTime @db.Timestamptz
+  // Scale identification
+  scaleType            String // PHQ9, GAD7, MADRS, AUDIT, PCL5, PANSS, CUSTOM
+  scaleName            String // Human-readable name
+  scaleVersion         String?
+  // Responses and scoring
+  responses            Json // [{itemNumber, itemText, responseValue, responseLabel}]
+  totalScore           Int
+  subscaleScores       Json? // [{subscale, score}] for PANSS positive/negative/general
+  // Interpretation
+  severityLevel        String? // NONE, MINIMAL, MILD, MODERATE, MODERATELY_SEVERE, SEVERE
+  severityLabel        String?
+  interpretation       String?
+  // Clinical context
+  clinicianNotes       String?
+  treatmentPlanId      String?  @db.Uuid
+  // Status
+  status               String   @default("COMPLETED") // COMPLETED, PARTIAL, VOIDED
+  createdAt            DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, scaleType])
+  @@map("psych_scale_administrations")
+}
+
+// =============================================================================
+// 3.4 — Involuntary Hold
+// =============================================================================
+
+model PsychInvoluntaryHold {
+  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId                String    @db.Uuid
+  patientMasterId         String    @db.Uuid
+  episodeId               String?   @db.Uuid
+  encounterId             String?   @db.Uuid
+  orderedByUserId         String    @db.Uuid
+  orderedByName           String?
+  orderedAt               DateTime  @db.Timestamptz
+  legalBasis              String?
+  dangerToSelf            Boolean   @default(false)
+  dangerToSelfEvidence    String?
+  dangerToOthers          Boolean   @default(false)
+  dangerToOthersEvidence  String?
+  gravelyDisabled         Boolean   @default(false)
+  gravelyDisabledEvidence String?
+  additionalCriteria      String?
+  holdType                String    @default("INITIAL_72H") // INITIAL_72H, EXTENSION, COURT_ORDER
+  holdStartAt             DateTime  @db.Timestamptz
+  holdExpiresAt           DateTime  @db.Timestamptz
+  extensionRequested      Boolean   @default(false)
+  extensionReason         String?
+  courtOrderRef           String?
+  courtOrderDate          DateTime? @db.Timestamptz
+  psychiatricEvalAt       DateTime? @db.Timestamptz
+  psychiatricEvalBy       String?
+  evalFindings            String?
+  patientNotified         Boolean   @default(false)
+  patientNotifiedAt       DateTime? @db.Timestamptz
+  legalRepNotified        Boolean   @default(false)
+  legalRepNotifiedAt      DateTime? @db.Timestamptz
+  appealInfo              String?
+  rightsDocumented        Boolean   @default(false)
+  familyNotified          Boolean   @default(false)
+  familyNotifiedAt        DateTime? @db.Timestamptz
+  familyNotifiedBy        String?
+  familyContactName       String?
+  reviews                 Json? // [{reviewDate, reviewedBy, justificationContinues, notes}]
+  status                  String    @default("ACTIVE") // ACTIVE, EXPIRED, CONVERTED_VOLUNTARY, DISCHARGED, COURT_RELEASED
+  resolvedAt              DateTime? @db.Timestamptz
+  resolvedBy              String?
+  resolutionNotes         String?
+  conversionToVoluntary   Boolean   @default(false)
+  voluntaryConsentAt      DateTime? @db.Timestamptz
+  notes                   String?
+  createdAt               DateTime  @default(now()) @db.Timestamptz
+  updatedAt               DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, status])
+  @@map("psych_involuntary_holds")
+}
+
+// =============================================================================
+// 3.5 — Group Therapy
+// =============================================================================
+
+model PsychGroupDefinition {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  groupName         String
+  groupType         String // CBT_GROUP, PROCESS, PSYCHOEDUCATION, AA_NA, DBT_SKILLS, SUPPORT, OTHER
+  description       String?
+  facilitatorUserId String    @db.Uuid
+  facilitatorName   String?
+  coFacilitatorId   String?   @db.Uuid
+  coFacilitatorName String?
+  schedule          String?
+  maxParticipants   Int       @default(12)
+  location          String?
+  roster            Json? // [{patientMasterId, patientName, mrn, enrolledAt, status: ACTIVE|DISCHARGED|DROPPED}]
+  status            String    @default("ACTIVE") // ACTIVE, PAUSED, COMPLETED, CANCELLED
+  startDate         DateTime? @db.Timestamptz
+  endDate           DateTime? @db.Timestamptz
+  notes             String?
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+
+  sessions PsychGroupSession[]
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("psych_group_definitions")
+}
+
+model PsychGroupSession {
+  id                     String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId               String               @db.Uuid
+  groupId                String               @db.Uuid
+  group                  PsychGroupDefinition @relation(fields: [groupId], references: [id])
+  sessionNumber          Int
+  sessionDate            DateTime             @db.Timestamptz
+  facilitatorUserId      String               @db.Uuid
+  facilitatorName        String?
+  theme                  String?
+  topicsCovered          String?
+  keyDiscussions         String?
+  materialsUsed          String?
+  attendance             Json? // [{patientMasterId, patientName, attended, engagementRating: 1-5, notes}]
+  attendedCount          Int                  @default(0)
+  absentCount            Int                  @default(0)
+  sessionNotes           String?
+  facilitatorReflections String?
+  nextSessionPlan        String?
+  status                 String               @default("SCHEDULED") // SCHEDULED, COMPLETED, CANCELLED
+  cancelledReason        String?
+  durationMin            Int?
+  createdAt              DateTime             @default(now()) @db.Timestamptz
+  updatedAt              DateTime             @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, groupId])
+  @@map("psych_group_sessions")
+}

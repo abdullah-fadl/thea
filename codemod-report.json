@@ -1,0 +1,111 @@
+{
+  "results": [
+    {
+      "file": "app/api/admin/ehr/audit/route.ts",
+      "route": "/api/admin/ehr/audit",
+      "success": true,
+      "changes": [
+        "Added withAuthTenant import",
+        "Wrapped GET handler with withAuthTenant"
+      ],
+      "errors": [],
+      "needsManualReview": false
+    },
+    {
+      "file": "app/api/admin/ehr/encounters/route.ts",
+      "route": "/api/admin/ehr/encounters",
+      "success": true,
+      "changes": [
+        "Already wrapped with withAuthTenant"
+      ],
+      "errors": [],
+      "needsManualReview": false
+    },
+    {
+      "file": "app/api/admin/ehr/notes/route.ts",
+      "route": "/api/admin/ehr/notes",
+      "success": true,
+      "changes": [
+        "Already wrapped with withAuthTenant"
+      ],
+      "errors": [],
+      "needsManualReview": false
+    },
+    {
+      "file": "app/api/admin/ehr/orders/route.ts",
+      "route": "/api/admin/ehr/orders",
+      "success": true,
+      "changes": [
+        "Already wrapped with withAuthTenant"
+      ],
+      "errors": [],
+      "needsManualReview": false
+    },
+    {
+      "file": "app/api/admin/ehr/patients/[id]/route.ts",
+      "route": "/api/admin/ehr/patients/[id]",
+      "success": true,
+      "changes": [
+        "Already wrapped with withAuthTenant"
+      ],
+      "errors": [],
+      "needsManualReview": false
+    },
+    {
+      "file": "app/api/admin/ehr/patients/route.ts",
+      "route": "/api/admin/ehr/patients",
+      "success": true,
+      "changes": [
+        "Already wrapped with withAuthTenant"
+      ],
+      "errors": [],
+      "needsManualReview": false
+    },
+    {
+      "file": "app/api/admin/ehr/privileges/grant/route.ts",
+      "route": "/api/admin/ehr/privileges/grant",
+      "success": true,
+      "changes": [
+        "Already wrapped with withAuthTenant"
+      ],
+      "errors": [],
+      "needsManualReview": false
+    },
+    {
+      "file": "app/api/admin/ehr/privileges/revoke/route.ts",
+      "route": "/api/admin/ehr/privileges/revoke",
+      "success": true,
+      "changes": [
+        "Already wrapped with withAuthTenant"
+      ],
+      "errors": [],
+      "needsManualReview": false
+    },
+    {
+      "file": "app/api/admin/ehr/tasks/route.ts",
+      "route": "/api/admin/ehr/tasks",
+      "success": true,
+      "changes": [
+        "Already wrapped with withAuthTenant"
+      ],
+      "errors": [],
+      "needsManualReview": false
+    },
+    {
+      "file": "app/api/admin/ehr/users/route.ts",
+      "route": "/api/admin/ehr/users",
+      "success": true,
+      "changes": [
+        "Added withAuthTenant import",
+        "Wrapped POST handler with withAuthTenant"
+      ],
+      "errors": [],
+      "needsManualReview": false
+    }
+  ],
+  "summary": {
+    "successful": 10,
+    "failed": 0,
+    "needsReview": 0
+  }
+}

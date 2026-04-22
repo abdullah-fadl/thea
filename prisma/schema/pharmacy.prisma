@@ -1,0 +1,214 @@
+// =============================================================================
+// Pharmacy Domain — Inventory, Prescriptions, Stock Movements
+// =============================================================================
+
+model PharmacyInventory {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  medicationId     String?
+  medicationName   String
+  medicationNameAr String?
+  barcode          String?
+  batchNumber      String?
+  currentStock     Int       @default(0)
+  minStock         Int       @default(0)
+  unitPrice        Decimal?  @db.Decimal(12, 2)
+  expiryDate       DateTime? @db.Date
+  status           String    @default("IN_STOCK") // IN_STOCK, LOW_STOCK, OUT_OF_STOCK
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+  lastUpdated      DateTime? @db.Timestamptz
+  createdBy        String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, medicationName])
+  @@map("pharmacy_inventory")
+}
+
+model PharmacyPrescription {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @db.Uuid
+  patientId          String?
+  patientName        String?
+  mrn                String?
+  encounterId        String?   @db.Uuid
+  medication         String?
+  medicationAr       String?
+  genericName        String?
+  strength           String?
+  form               String?
+  route              String?
+  frequency          String?
+  duration           String?
+  quantity           Int?
+  refills            Int?
+  instructions       String?
+  instructionsAr     String?
+  doctorId           String?
+  doctorName         String?
+  priority           String?
+  status             String    @default("PENDING") // PENDING, VERIFIED, DISPENSED, PICKED_UP, CANCELLED
+  prescribedAt       DateTime? @db.Timestamptz
+  prescribedBy       String?
+  prescriberName     String?
+  verifiedAt         DateTime? @db.Timestamptz
+  verifiedBy         String?
+  verifierName       String?
+  verificationNotes  String?
+  dispensedAt        DateTime? @db.Timestamptz
+  dispensedBy        String?
+  dispenserName      String?
+  pharmacistNotes    String?
+  pickedUpAt         DateTime? @db.Timestamptz
+  pickedUpRecordedBy String?
+  cancelledAt        DateTime? @db.Timestamptz
+  cancelledBy        String?
+  cancellationReason String?
+  // Link back to the OrdersHub entry that created this prescription
+  ordersHubId        String?   @db.Uuid
+  createdAt          DateTime  @default(now()) @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, patientId])
+  @@index([tenantId, ordersHubId])
+  @@map("pharmacy_prescriptions")
+}
+
+model PharmacyStockMovement {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String   @db.Uuid
+  inventoryId   String   @db.Uuid
+  medicationId  String?
+  type          String // IN, OUT, ADJUSTMENT
+  quantity      Int
+  previousStock Int?
+  newStock      Int?
+  reason        String?
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  createdBy     String?
+  createdByName String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, inventoryId])
+  @@map("pharmacy_stock_movements")
+}
+
+// =============================================================================
+// Pharmacy Unit Dose — Individual dose preparation & tracking
+// =============================================================================
+
+model PharmacyUnitDose {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String    @db.Uuid
+  prescriptionId       String?   @db.Uuid
+  episodeId            String?   @db.Uuid
+  patientId            String?   @db.Uuid
+  patientName          String?
+  mrn                  String?
+  wardUnit             String?
+  bedLabel             String?
+  medication           String
+  genericName          String?
+  strength             String?
+  form                 String? // TABLET, CAPSULE, INJECTION, SYRUP, INHALER, PATCH
+  route                String?
+  dose                 String?
+  frequency            String?
+  scheduledTime        DateTime? @db.Timestamptz
+  // Preparation
+  preparedByUserId     String?   @db.Uuid
+  preparedByName       String?
+  preparedAt           DateTime? @db.Timestamptz
+  // Verification
+  verifiedByUserId     String?   @db.Uuid
+  verifiedByName       String?
+  verifiedAt           DateTime? @db.Timestamptz
+  // Dispensing
+  dispensedByUserId    String?   @db.Uuid
+  dispensedByName      String?
+  dispensedAt          DateTime? @db.Timestamptz
+  // Administration
+  administeredByUserId String?   @db.Uuid
+  administeredByName   String?
+  administeredAt       DateTime? @db.Timestamptz
+  administrationNotes  String?
+  // Status
+  status               String    @default("PENDING") // PENDING, PREPARED, VERIFIED, DISPENSED, ADMINISTERED, RETURNED, WASTED
+  returnReason         String?
+  wasteReason          String?
+  wasteWitnessUserId   String?   @db.Uuid
+  wasteWitnessName     String?
+  notes                String?
+  createdAt            DateTime  @default(now()) @db.Timestamptz
+  updatedAt            DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, wardUnit])
+  @@index([tenantId, patientId])
+  @@map("pharmacy_unit_doses")
+}
+
+// =============================================================================
+// Pharmacy Controlled Substance Log — DEA Schedule II-V tracking
+// =============================================================================
+
+model PharmacyControlledSubstanceLog {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  medication          String
+  genericName         String?
+  schedule            String? // II, III, IV, V
+  strength            String?
+  form                String?
+  // Transaction
+  transactionType     String // RECEIVE, DISPENSE, WASTE, RETURN, ADJUST, TRANSFER
+  quantity            Float
+  unit                String? // TABLET, ML, MG, AMPULE, VIAL, PATCH
+  balanceBefore       Float?
+  balanceAfter        Float?
+  // Patient info (for dispense/administer)
+  patientId           String?   @db.Uuid
+  patientName         String?
+  mrn                 String?
+  prescriptionId      String?   @db.Uuid
+  // Personnel
+  performedByUserId   String    @db.Uuid
+  performedByName     String?
+  witnessUserId       String?   @db.Uuid
+  witnessName         String?
+  // Waste details
+  wasteMethod         String? // WITNESSED_WASTE, PHARMACEUTICAL_WASTE, RETURN_TO_PHARMACY
+  wasteAmount         Float?
+  // Source/destination
+  sourceLocation      String?
+  destinationLocation String?
+  lotNumber           String?
+  expiryDate          DateTime? @db.Date
+  // Verification
+  verifiedByUserId    String?   @db.Uuid
+  verifiedByName      String?
+  verifiedAt          DateTime? @db.Timestamptz
+  discrepancyFound    Boolean   @default(false)
+  discrepancyNote     String?
+  discrepancyResolved Boolean   @default(false)
+  resolvedByUserId    String?   @db.Uuid
+  resolvedAt          DateTime? @db.Timestamptz
+  notes               String?
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, medication])
+  @@index([tenantId, transactionType])
+  @@index([tenantId, createdAt])
+  @@map("pharmacy_controlled_substance_logs")
+}

@@ -1,0 +1,134 @@
+// =============================================================================
+// Patient Portal Domain — Portal Users, Messages, Conversations, History
+// =============================================================================
+
+model PatientPortalUser {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  mobile          String
+  patientMasterId String?  @db.Uuid
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, mobile])
+  @@map("patient_portal_users")
+}
+
+model PatientPortalRateLimit {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String?  @db.Uuid
+  type      String
+  key       String
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, type, key, createdAt])
+  @@map("patient_portal_rate_limits")
+}
+
+model PatientPortalPendingRegistration {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  fullName        String?
+  idType          String?
+  idNumber        String?
+  mobile          String
+  patientMasterId String?   @db.Uuid
+  status          String    @default("PENDING")
+  attempts        Int       @default(0)
+  completedAt     DateTime? @db.Timestamptz
+  expiresAt       DateTime? @db.Timestamptz
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, expiresAt])
+  @@map("patient_portal_pending_registrations")
+}
+
+model PatientConversation {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String    @db.Uuid
+  patientId     String    @db.Uuid
+  providerId    String?
+  lastMessage   String?
+  lastMessageAt DateTime? @db.Timestamptz
+  unreadCount   Int       @default(0)
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@map("patient_conversations")
+}
+
+model PatientMessage {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  conversationId String    @db.Uuid
+  senderId       String
+  senderType     String // patient, provider
+  senderName     String?
+  content        String
+  read           Boolean   @default(false)
+  readAt         DateTime? @db.Timestamptz
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, conversationId])
+  @@map("patient_messages")
+}
+
+model PatientClinicalHistory {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  patientId String   @db.Uuid
+  history   Json?
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, patientId])
+  @@map("patient_clinical_history")
+}
+
+model PatientChatSession {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  patientId String   @db.Uuid
+  messages  Json?
+  topic     String?
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@map("patient_chat_sessions")
+}
+
+model PatientExplainHistory {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  patientId String   @db.Uuid
+  type      String?
+  request   String?
+  response  Json?
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@map("patient_explain_history")
+}

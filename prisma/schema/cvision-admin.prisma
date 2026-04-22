@@ -1,0 +1,907 @@
+// =============================================================================
+// CVision Admin Domain — Requests, Notifications, Workflows, Policies,
+// Letters, Audit, Org Design, Integrations, Surveys, and System Models
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// Enums
+// -----------------------------------------------------------------------------
+
+enum CvisionRequestType {
+  LEAVE
+  SALARY_CERTIFICATE
+  EMPLOYMENT_LETTER
+  EXPENSE_CLAIM
+  COMPLAINT
+  TRANSFER
+  TRAINING
+  EQUIPMENT
+  PAYROLL_ISSUE
+  OTHER
+}
+
+enum CvisionRequestStatus {
+  OPEN
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  ESCALATED
+  CLOSED
+}
+
+enum CvisionRequestPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// -----------------------------------------------------------------------------
+// Requests & Ticketing
+// -----------------------------------------------------------------------------
+
+model CvisionRequest {
+  id                      String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId                String                 @db.Uuid
+  requestNumber           String
+  type                    CvisionRequestType
+  priority                CvisionRequestPriority @default(MEDIUM)
+  title                   String
+  description             String
+  requesterEmployeeId     String
+  targetManagerEmployeeId String?
+  departmentId            String
+  status                  CvisionRequestStatus   @default(OPEN)
+  statusChangedAt         DateTime?              @db.Timestamptz
+  statusReason            String?
+  confidentiality         String                 @default("normal") // normal, confidential, anonymous
+  assignedToUserId        String?
+  assignedAt              DateTime?              @db.Timestamptz
+  escalatedAt             DateTime?              @db.Timestamptz
+  escalationReason        String?
+  slaDueAt                DateTime?              @db.Timestamptz
+  slaBreached             Boolean                @default(false)
+  closedAt                DateTime?              @db.Timestamptz
+  closedBy                String?
+  resolution              String?
+  resolvedAt              DateTime?              @db.Timestamptz
+  attachments             Json?
+  isArchived              Boolean                @default(false)
+  metadata                Json?
+
+  createdAt DateTime  @default(now()) @db.Timestamptz
+  updatedAt DateTime  @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+  deletedAt DateTime? @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, requestNumber])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, requesterEmployeeId])
+  @@map("cvision_requests")
+}
+
+model CvisionRequestEvent {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String  @db.Uuid
+  requestId   String
+  actorUserId String
+  actorRole   String?
+  eventType   String // created, comment, status_change, escalated, assigned, attachment_added
+  payload     Json
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, requestId])
+  @@map("cvision_request_events")
+}
+
+// -----------------------------------------------------------------------------
+// Notifications
+// -----------------------------------------------------------------------------
+
+model CvisionNotification {
+  id       String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String    @db.Uuid
+  userId   String
+  type     String
+  title    String
+  message  String?
+  link     String?
+  isRead   Boolean   @default(false)
+  readAt   DateTime? @db.Timestamptz
+  metadata Json?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, userId, isRead])
+  @@map("cvision_notifications")
+}
+
+model CvisionNotificationPreference {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String  @db.Uuid
+  userId     String
+  channel    String // email, push, in_app
+  categories Json? // which notification types to receive
+  isEnabled  Boolean @default(true)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId, channel])
+  @@index([tenantId])
+  @@map("cvision_notification_preferences")
+}
+
+// -----------------------------------------------------------------------------
+// Announcements & Communications
+// -----------------------------------------------------------------------------
+
+model CvisionAnnouncement {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  title             String
+  titleAr           String?
+  content           String
+  contentAr         String?
+  priority          String    @default("normal")
+  targetDepartments Json?
+  targetRoles       Json?
+  publishedAt       DateTime? @db.Timestamptz
+  expiresAt         DateTime? @db.Timestamptz
+  isActive          Boolean   @default(true)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_announcements")
+}
+
+// -----------------------------------------------------------------------------
+// Letters & Templates
+// -----------------------------------------------------------------------------
+
+model CvisionLetter {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @db.Uuid
+  employeeId  String
+  templateId  String?
+  type        String // salary_certificate, employment_letter, experience_letter, warning_letter, custom
+  content     String?
+  contentAr   String?
+  generatedAt DateTime  @db.Timestamptz
+  status      String    @default("draft") // draft, approved, issued
+  issuedAt    DateTime? @db.Timestamptz
+  issuedBy    String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, employeeId])
+  @@map("cvision_letters")
+}
+
+model CvisionLetterTemplate {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String  @db.Uuid
+  name      String
+  type      String
+  content   String
+  contentAr String?
+  variables Json? // list of merge fields
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_letter_templates")
+}
+
+// -----------------------------------------------------------------------------
+// Policies & Acknowledgments
+// -----------------------------------------------------------------------------
+
+model CvisionPolicy {
+  id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId               String    @db.Uuid
+  title                  String
+  titleAr                String?
+  content                String
+  contentAr              String?
+  category               String?
+  version                Int       @default(1)
+  effectiveDate          DateTime? @db.Date
+  isActive               Boolean   @default(true)
+  requiresAcknowledgment Boolean   @default(false)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_policies")
+}
+
+model CvisionPolicyAcknowledgment {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @db.Uuid
+  policyId       String
+  employeeId     String
+  acknowledgedAt DateTime @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, policyId, employeeId])
+  @@index([tenantId])
+  @@map("cvision_policy_acknowledgments")
+}
+
+// -----------------------------------------------------------------------------
+// Workflows & Approvals
+// -----------------------------------------------------------------------------
+
+model CvisionWorkflow {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String  @db.Uuid
+  name        String
+  description String?
+  triggerType String // leave, requisition, expense, promotion, etc.
+  steps       Json // array of workflow steps
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_workflows")
+}
+
+model CvisionWorkflowInstance {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String    @db.Uuid
+  workflowId   String
+  resourceType String
+  resourceId   String
+  currentStep  Int       @default(0)
+  status       String    @default("active") // active, completed, cancelled, failed
+  data         Json?
+  startedAt    DateTime? @db.Timestamptz
+  completedAt  DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, workflowId])
+  @@index([tenantId, resourceType, resourceId])
+  @@map("cvision_workflow_instances")
+}
+
+model CvisionApprovalMatrix {
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String  @db.Uuid
+  requestType   String
+  departmentId  String?
+  approverRoles Json // array of role/level combos
+  thresholds    Json? // e.g., amount limits
+  isActive      Boolean @default(true)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_approval_matrix")
+}
+
+model CvisionDelegation {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String   @db.Uuid
+  delegatorEmployeeId String
+  delegateeEmployeeId String
+  permissions         Json // array of delegated permissions
+  startDate           DateTime @db.Date
+  endDate             DateTime @db.Date
+  reason              String?
+  isActive            Boolean  @default(true)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, delegateeEmployeeId])
+  @@map("cvision_delegations")
+}
+
+// -----------------------------------------------------------------------------
+// Audit & Auth Events
+// -----------------------------------------------------------------------------
+
+model CvisionAuditLog {
+  id           String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String  @db.Uuid
+  action       String // CREATE, UPDATE, DELETE, STATUS_CHANGE, APPROVE, REJECT, etc.
+  resourceType String // EMPLOYEE, DEPARTMENT, REQUISITION, etc.
+  resourceId   String
+  actorUserId  String
+  actorRole    String?
+  actorEmail   String?
+  success      Boolean @default(true)
+  errorMessage String?
+  changes      Json? // { before, after }
+  ip           String?
+  userAgent    String?
+  metadata     Json?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, resourceType, resourceId])
+  @@index([tenantId, actorUserId])
+  @@index([createdAt])
+  @@map("cvision_audit_logs")
+}
+
+model CvisionAuthEvent {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String  @db.Uuid
+  userId    String
+  eventType String // login, logout, failed_login, password_change
+  ip        String?
+  userAgent String?
+  metadata  Json?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, userId])
+  @@map("cvision_auth_events")
+}
+
+// -----------------------------------------------------------------------------
+// Tenant Settings & Configuration
+// -----------------------------------------------------------------------------
+
+model CvisionTenantSettings {
+  id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String @unique @db.Uuid
+  settings     Json?
+  branding     Json? // { primaryColor, secondaryColor, logo }
+  modules      Json? // which CVision modules are enabled
+  workSchedule Json? // default work schedule config
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_tenant_settings")
+}
+
+model CvisionSequence {
+  id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String @db.Uuid
+  entityType   String // EMP, REQ, JR, CND, CON, etc.
+  prefix       String
+  currentValue Int    @default(0)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, entityType])
+  @@index([tenantId])
+  @@map("cvision_sequences")
+}
+
+// -----------------------------------------------------------------------------
+// Import & Export
+// -----------------------------------------------------------------------------
+
+model CvisionImportJob {
+  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String @db.Uuid
+  type          String
+  fileName      String
+  status        String @default("pending") // pending, processing, completed, failed
+  totalRows     Int?
+  processedRows Int    @default(0)
+  errors        Json?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_import_jobs")
+}
+
+model CvisionDeletedRecord {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @db.Uuid
+  resourceType String
+  resourceId   String
+  data         Json
+  deletedBy    String
+  deletedAt    DateTime @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, resourceType])
+  @@map("cvision_deleted_records")
+}
+
+model CvisionSavedReport {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  name            String
+  reportType      String
+  filters         Json?
+  columns         Json?
+  createdByUserId String
+  isShared        Boolean @default(false)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_saved_reports")
+}
+
+// -----------------------------------------------------------------------------
+// Calendar & Events
+// -----------------------------------------------------------------------------
+
+model CvisionCalendarEvent {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  title          String
+  titleAr        String?
+  date           DateTime  @db.Date
+  endDate        DateTime? @db.Date
+  type           String // holiday, event, reminder
+  isRecurring    Boolean   @default(false)
+  recurrenceRule String?
+  departmentId   String?
+  isActive       Boolean   @default(true)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, date])
+  @@map("cvision_calendar_events")
+}
+
+// -----------------------------------------------------------------------------
+// Surveys & Feedback
+// -----------------------------------------------------------------------------
+
+model CvisionSurvey {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  title             String
+  titleAr           String?
+  description       String?
+  questions         Json
+  targetDepartments Json?
+  targetRoles       Json?
+  startDate         DateTime? @db.Date
+  endDate           DateTime? @db.Date
+  isAnonymous       Boolean   @default(true)
+  status            String    @default("draft") // draft, active, closed
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_surveys")
+}
+
+model CvisionSurveyResponse {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @db.Uuid
+  surveyId     String
+  respondentId String?
+  answers      Json
+  submittedAt  DateTime @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, surveyId])
+  @@map("cvision_survey_responses")
+}
+
+// -----------------------------------------------------------------------------
+// Recognition & Rewards
+// -----------------------------------------------------------------------------
+
+model CvisionRecognition {
+  id                  String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String  @db.Uuid
+  recipientEmployeeId String
+  nominatorEmployeeId String?
+  category            String
+  title               String
+  description         String?
+  points              Int     @default(0)
+  status              String  @default("active")
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, recipientEmployeeId])
+  @@map("cvision_recognitions")
+}
+
+model CvisionRewardPoint {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String    @db.Uuid
+  employeeId String
+  points     Int
+  reason     String?
+  source     String // recognition, performance, milestone
+  expiresAt  DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, employeeId])
+  @@map("cvision_reward_points")
+}
+
+// -----------------------------------------------------------------------------
+// Organizational Development
+// -----------------------------------------------------------------------------
+
+model CvisionOrgHealthAssessment {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  assessmentDate  DateTime @db.Date
+  scores          Json
+  recommendations Json?
+  status          String   @default("draft")
+  createdBy       String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_org_health_assessments")
+}
+
+model CvisionOrgDesign {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String   @db.Uuid
+  version       Int
+  structure     Json
+  effectiveDate DateTime @db.Date
+  status        String   @default("draft")
+  notes         String?
+  createdBy     String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_org_designs")
+}
+
+model CvisionChangeInitiative {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @db.Uuid
+  title       String
+  description String?
+  objectives  Json?
+  status      String    @default("planned") // planned, in_progress, completed, cancelled
+  startDate   DateTime? @db.Date
+  endDate     DateTime? @db.Date
+  ownerId     String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_change_initiatives")
+}
+
+model CvisionCultureAssessment {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @db.Uuid
+  title          String
+  assessmentDate DateTime @db.Date
+  dimensions     Json
+  overallScore   Decimal?
+  status         String   @default("draft")
+  createdBy      String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_culture_assessments")
+}
+
+model CvisionStrategicAlignment {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @db.Uuid
+  objective      String
+  departmentId   String?
+  alignmentScore Decimal?
+  details        Json?
+  period         String
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_strategic_alignment")
+}
+
+// -----------------------------------------------------------------------------
+// Teams
+// -----------------------------------------------------------------------------
+
+model CvisionTeam {
+  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String  @db.Uuid
+  name           String
+  nameAr         String?
+  description    String?
+  leadEmployeeId String?
+  members        Json // array of employee IDs
+  departmentId   String?
+  isActive       Boolean @default(true)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_teams")
+}
+
+// -----------------------------------------------------------------------------
+// Muqeem (Saudi HR — Iqama & Visa)
+// -----------------------------------------------------------------------------
+
+model CvisionMuqeemRecord {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  employeeId     String
+  iqamaNumber    String?
+  expiryDate     DateTime? @db.Date
+  borderNumber   String?
+  passportNumber String?
+  passportExpiry DateTime? @db.Date
+  visaType       String?
+  status         String    @default("active")
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, employeeId])
+  @@map("cvision_muqeem_records")
+}
+
+model CvisionMuqeemAlert {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  employeeId     String
+  alertType      String // iqama_expiry, passport_expiry, visa_expiry
+  expiryDate     DateTime  @db.Date
+  daysRemaining  Int
+  isAcknowledged Boolean   @default(false)
+  acknowledgedBy String?
+  acknowledgedAt DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, employeeId])
+  @@map("cvision_muqeem_alerts")
+}
+
+// -----------------------------------------------------------------------------
+// Integrations (Qiwa, GOSI, ZATCA, etc.)
+// -----------------------------------------------------------------------------
+
+model CvisionIntegrationConfig {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String    @db.Uuid
+  provider   String // qiwa, gosi, zatca, muqeem, etc.
+  config     Json
+  isActive   Boolean   @default(true)
+  lastSyncAt DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_integration_configs")
+}
+
+model CvisionIntegrationLog {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  configId        String
+  action          String
+  status          String // success, failed
+  requestPayload  Json?
+  responsePayload Json?
+  errorMessage    String?
+  duration        Int? // milliseconds
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, configId])
+  @@map("cvision_integration_logs")
+}
+
+// -----------------------------------------------------------------------------
+// Retention
+// -----------------------------------------------------------------------------
+
+model CvisionRetentionScore {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @db.Uuid
+  employeeId   String
+  score        Decimal
+  riskLevel    String // low, medium, high, critical
+  factors      Json
+  calculatedAt DateTime @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, employeeId])
+  @@map("cvision_retention_scores")
+}
+
+model CvisionRetentionAlert {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String    @db.Uuid
+  employeeId String
+  alertType  String
+  message    String?
+  isResolved Boolean   @default(false)
+  resolvedBy String?
+  resolvedAt DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, employeeId])
+  @@map("cvision_retention_alerts")
+}
+
+// -----------------------------------------------------------------------------
+// Custom Dashboards
+// -----------------------------------------------------------------------------
+
+model CvisionDashboard {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  name            String
+  widgets         Json
+  createdByUserId String
+  isDefault       Boolean @default(false)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("cvision_dashboards")
+}

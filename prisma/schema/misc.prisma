@@ -1,0 +1,565 @@
+// =============================================================================
+// Misc Domain — Org Nodes, Departments, Equipment, Nursing, Identity, Dental, OB/GYN, etc.
+// =============================================================================
+
+model OrgNode {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @db.Uuid
+  type         String? // department, unit, floor, room, section, committee, custom
+  name         String
+  code         String?
+  description  String?
+  parentId     String?  @db.Uuid
+  level        Int?
+  path         String?
+  departmentId String?
+  isActive     Boolean  @default(true)
+  metadata     Json?
+  createdAt    DateTime @default(now()) @db.Timestamptz
+  updatedAt    DateTime @updatedAt @db.Timestamptz
+  createdBy    String?
+  updatedBy    String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, parentId])
+  @@map("org_nodes")
+}
+
+model FloorDepartment {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @db.Uuid
+  floorId        String?
+  departmentId   String?
+  departmentName String?
+  departmentCode String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("floor_departments")
+}
+
+model DepartmentEntry {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  encounterCoreId String    @db.Uuid
+  patientId       String?   @db.Uuid
+  departmentKey   String
+  enteredAt       DateTime? @db.Timestamptz
+  exitedAt        DateTime? @db.Timestamptz
+  status          String    @default("IN") // IN, OUT
+  createdByUserId String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, encounterCoreId])
+  @@map("department_entries")
+}
+
+model NursingAssignment {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  nurseId           String?
+  nurseName         String?
+  employeeId        String?
+  position          String?
+  isTeamLeader      Boolean   @default(false)
+  isChargeNurse     Boolean   @default(false)
+  weekStartDate     DateTime? @db.Date
+  weekEndDate       DateTime? @db.Date
+  assignments       Json?
+  totalWeeklyHours  Int?
+  targetWeeklyHours Int?
+  overtimeHours     Int?
+  undertimeHours    Int?
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("nursing_assignments")
+}
+
+model NursingShiftMetric {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @db.Uuid
+  department     String?
+  shift          String? // DAY, EVENING, NIGHT
+  date           DateTime @db.Date
+  nursesOnDuty   Int      @default(0)
+  patientCount   Int      @default(0)
+  completedTasks Int      @default(0)
+  pendingTasks   Int      @default(0)
+  criticalAlerts Int      @default(0)
+  avgResponseMin Float?
+  createdAt      DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, date])
+  @@map("nursing_shift_metrics")
+}
+
+model Group {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  name        String
+  description String?
+  type        String?
+  members     Json?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+  createdBy   String?
+
+  tenant Tenant @relation("TenantMiscGroups", fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("groups")
+}
+
+// Identity Domain
+
+model IdentityLookup {
+  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId               String   @db.Uuid
+  userId                 String?
+  clientRequestId        String?
+  identityType           String?
+  identityLast4          String?
+  identityValueHash      String?
+  identityValueEncrypted String?
+  dob                    String?
+  contextArea            String?
+  status                 String?
+  matchLevel             String?
+  payload                Json?
+  provider               String?
+  providerTraceId        String?
+  dedupeKey              String?
+  patientMasterId        String?  @db.Uuid
+  reasonCode             String?
+  createdAt              DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("identity_lookups")
+}
+
+model IdentityRateLimit {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String   @db.Uuid
+  userId     String
+  tokens     Int      @default(10)
+  lastRefill DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, userId])
+  @@map("identity_rate_limits")
+}
+
+model IdentityApplyIdempotency {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  userId    String
+  requestId String
+  response  Json?
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, userId, requestId])
+  @@map("identity_apply_idempotency")
+}
+
+model AbsherVerificationLog {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  idNumber  String?
+  idType    String?
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  createdBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("absher_verification_logs")
+}
+
+model NafisVisitLog {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  request   Json?
+  response  Json?
+  success   Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  createdBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("nafis_visit_logs")
+}
+
+model NafisStatisticsLog {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  request   Json?
+  response  Json?
+  success   Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  createdBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("nafis_statistics_logs")
+}
+
+model NafisDiseaseReport {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  request   Json?
+  response  Json?
+  success   Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  createdBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("nafis_disease_reports")
+}
+
+// Specialty Clinical
+
+model DentalChart {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String   @db.Uuid
+  patientId  String   @db.Uuid
+  conditions Json?
+  createdAt  DateTime @default(now()) @db.Timestamptz
+  updatedAt  DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, patientId])
+  @@map("dental_charts")
+}
+
+model DentalTreatment {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  patientId       String    @db.Uuid
+  toothNumber     String?
+  surface         String?
+  procedureCode   String?
+  procedureName   String?
+  procedureNameAr String?
+  fee             Decimal?  @db.Decimal(12, 2)
+  status          String    @default("PLANNED")
+  priority        String?
+  notes           String?
+  completedAt     DateTime? @db.Timestamptz
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+  createdBy       String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@map("dental_treatments")
+}
+
+model ObgynForm {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  patientId String   @db.Uuid
+  type      String?
+  data      Json?
+  createdAt DateTime @default(now()) @db.Timestamptz
+  createdBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@map("obgyn_forms")
+}
+
+model FailedCancellation {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  bookingId String?  @db.Uuid
+  steps     Json?
+  reason    String?
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("failed_cancellations")
+}
+
+model PatientExperience {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  patientId String?  @db.Uuid
+  type      String?
+  data      Json?
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("patient_experience")
+}
+
+model PxCase {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  visitId           String?   @db.Uuid
+  status            String    @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, CLOSED, ESCALATED
+  severity          String? // LOW, MEDIUM, HIGH, CRITICAL
+  assignedDeptKey   String?
+  dueAt             DateTime? @db.Timestamptz
+  escalationLevel   Int       @default(0)
+  resolvedAt        DateTime? @db.Timestamptz
+  resolutionMinutes Int?
+  detailsEn         String?
+  detailsAr         String?
+  active            Boolean   @default(true)
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("px_cases")
+}
+
+// Platform-level status checks (no tenantId needed)
+model StatusCheck {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clientName String
+  timestamp  DateTime @default(now()) @db.Timestamptz
+
+  @@map("status_checks")
+}
+
+// =============================================================================
+// Dental Procedures — detailed procedure logging per tooth
+// =============================================================================
+
+model DentalProcedure {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  patientId       String    @db.Uuid
+  treatmentId     String?   @db.Uuid
+  toothNumber     String
+  surface         String?
+  procedureCode   String?
+  procedureName   String?
+  procedureNameAr String?
+  icdCode         String?
+  anesthesiaType  String?
+  duration        Int?
+  materials       Json?
+  complications   String?
+  status          String    @default("COMPLETED")
+  performedBy     String
+  performedAt     DateTime  @db.Timestamptz
+  nextVisitDate   DateTime? @db.Timestamptz
+  notes           String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@map("dental_procedures")
+}
+
+// =============================================================================
+// Periodontal Records — full periodontal charting per patient
+// =============================================================================
+
+model PeriodontalRecord {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  patientId       String   @db.Uuid
+  recordDate      DateTime @db.Timestamptz
+  recordedBy      String
+  pocketDepths    Json
+  bleedingOnProbe Json?
+  furcation       Json?
+  mobility        Json?
+  plaqScore       Float?
+  gingiScore      Float?
+  diagnosis       String?
+  treatmentPlan   String?
+  notes           String?
+  createdAt       DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@map("periodontal_records")
+}
+
+// =============================================================================
+// Newborn / NICU Records
+// =============================================================================
+
+model NewbornRecord {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String    @db.Uuid
+  motherPatientId      String    @db.Uuid
+  laborRecordId        String?   @db.Uuid
+  // Birth details
+  dateOfBirth          DateTime  @db.Timestamptz
+  timeOfBirth          DateTime? @db.Timestamptz
+  gestationalAge       Int? // weeks
+  gestationalAgeDays   Int? // additional days
+  birthWeight          Decimal?  @db.Decimal(8, 2) // grams
+  birthLength          Decimal?  @db.Decimal(8, 2) // cm
+  headCircumference    Decimal?  @db.Decimal(8, 2) // cm
+  gender               String? // MALE, FEMALE, AMBIGUOUS
+  deliveryType         String? // SVD, CS, INSTRUMENTAL_VACUUM, INSTRUMENTAL_FORCEPS
+  presentation         String? // CEPHALIC, BREECH, TRANSVERSE
+  // APGAR scores
+  apgar1Min            Int? // 0-10
+  apgar5Min            Int? // 0-10
+  apgar10Min           Int? // 0-10
+  // Resuscitation
+  resuscitationNeeded  Boolean   @default(false)
+  resuscitationSteps   Json? // [{step, time}]
+  // Vitals at birth
+  heartRate            Int?
+  respiratoryRate      Int?
+  temperature          Decimal?  @db.Decimal(4, 1)
+  oxygenSaturation     Int?
+  // Newborn exam
+  skinColor            String? // PINK, ACROCYANOSIS, CYANOTIC, JAUNDICED, PALE
+  cry                  String? // STRONG, WEAK, ABSENT
+  tone                 String? // GOOD, DECREASED, FLOPPY
+  reflexes             String? // NORMAL, DECREASED, ABSENT
+  anomalies            Json? // [{system, finding, details}]
+  // Cord
+  cordBloodGas         Json? // {arterialPH, arterialBE, venousPH, venousBE}
+  cordClamped          Boolean   @default(false)
+  cordClampTime        DateTime? @db.Timestamptz
+  cordBloodBanked      Boolean   @default(false)
+  // Vitamin K & Eye prophylaxis
+  vitaminKGiven        Boolean   @default(false)
+  eyeProphylaxis       Boolean   @default(false)
+  // Feeding
+  firstFeedTime        DateTime? @db.Timestamptz
+  feedingType          String? // BREAST, FORMULA, MIXED, NPO
+  skinToSkin           Boolean   @default(false)
+  skinToSkinTime       DateTime? @db.Timestamptz
+  // Identification
+  bandApplied          Boolean   @default(false)
+  footprintsTaken      Boolean   @default(false)
+  // NICU
+  nicuAdmission        Boolean   @default(false)
+  nicuAdmissionReason  String?
+  nicuAdmittedAt       DateTime? @db.Timestamptz
+  // Status
+  status               String    @default("ACTIVE") // ACTIVE, DISCHARGED, TRANSFERRED, DECEASED
+  dischargedAt         DateTime? @db.Timestamptz
+  attendingPhysician   String?
+  attendingPhysicianId String?   @db.Uuid
+  notes                String?
+  createdAt            DateTime  @default(now()) @db.Timestamptz
+  updatedAt            DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, motherPatientId])
+  @@index([tenantId, status])
+  @@map("newborn_records")
+}
+
+// =============================================================================
+// 4.15 — Periodontal Charting
+// =============================================================================
+
+model PeriodontalChart {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String   @db.Uuid
+  patientId        String   @db.Uuid
+  chartDate        DateTime @db.Timestamptz
+  teeth            Json // array of {toothNumber, probingDepths:{MB,B,DB,ML,L,DL}, recession:{...}, bleedingOnProbing:{...}, mobility:0-3, furcation:0-3}
+  bopPercentage    Float?
+  summary          String?
+  examinedByUserId String   @db.Uuid
+  createdAt        DateTime @default(now()) @db.Timestamptz
+  updatedAt        DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@map("periodontal_charts")
+}
+
+// =============================================================================
+// 4.16 — Orthodontic Module
+// =============================================================================
+
+model OrthodonticCase {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @db.Uuid
+  patientId          String    @db.Uuid
+  status             String    @default("PLANNING") // PLANNING, ACTIVE_TREATMENT, RETENTION, COMPLETED
+  applianceType      String // BRACES_METAL, BRACES_CERAMIC, ALIGNERS, RETAINER, EXPANDER
+  treatmentStartDate DateTime? @db.Timestamptz
+  estimatedDuration  Int? // months
+  treatmentPlan      Json?
+  cephalometricData  Json?
+  retentionPlan      Json?
+  notes              String?
+  doctorId           String    @db.Uuid
+  createdAt          DateTime  @default(now()) @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@map("orthodontic_cases")
+}
+
+model OrthodonticVisit {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  caseId           String    @db.Uuid
+  visitDate        DateTime  @db.Timestamptz
+  visitType        String // ADJUSTMENT, WIRE_CHANGE, BRACKET_REPLACEMENT, BONDING, DEBOND, CHECK
+  wireDetails      Json?
+  bracketsReplaced Json?
+  elastics         Json?
+  progressPhotos   Json?
+  notes            String?
+  nextVisitDate    DateTime? @db.Timestamptz
+  doctorId         String    @db.Uuid
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, caseId])
+  @@map("orthodontic_visits")
+}

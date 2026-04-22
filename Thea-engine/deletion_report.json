@@ -1,0 +1,12 @@
+{
+  "data_directory": "/Users/yousef/Downloads/HospitalOS 2/policy-engine/data",
+  "tenant_id": "default",
+  "deleted_policies": [],
+  "deleted_files": {
+    "job_files": [],
+    "policy_directories": [],
+    "manifest_files": [],
+    "global_manifest_entries": []
+  },
+  "errors": []
+}

@@ -1,0 +1,78 @@
+// =============================================================================
+// Equipment Management Domain — Registry, Maintenance, Issues
+// =============================================================================
+
+model Equipment {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  assetTag        String
+  name            String
+  category        String // VENTILATOR, MONITOR, PUMP, IMAGING, LAB, SURGICAL, DEFIBRILLATOR, OTHER
+  manufacturer    String?
+  model           String?
+  serialNumber    String?
+  purchaseDate    DateTime? @db.Date
+  warrantyExpiry  DateTime? @db.Date
+  location        String? // department/room
+  status          String    @default("OPERATIONAL") // OPERATIONAL, UNDER_MAINTENANCE, OUT_OF_SERVICE, CALIBRATION_DUE
+  notes           String?
+  createdByUserId String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+
+  maintenanceRecords EquipmentMaintenance[]
+  issues             EquipmentIssue[]
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, category])
+  @@map("equipment")
+}
+
+model EquipmentMaintenance {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  equipmentId     String    @db.Uuid
+  equipment       Equipment @relation(fields: [equipmentId], references: [id])
+  maintenanceType String // PREVENTIVE, CORRECTIVE, CALIBRATION, INSPECTION
+  performedBy     String    @db.Uuid // userId
+  performedAt     DateTime  @db.Timestamptz
+  nextDueDate     DateTime? @db.Timestamptz
+  findings        String?
+  partsReplaced   Json      @default("[]") // [{part, quantity, lotNumber}]
+  calibrationData Json? // {standard, result, pass}
+  cost            Float?
+  status          String    @default("COMPLETED") // COMPLETED, PENDING, IN_PROGRESS
+  notes           String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, equipmentId])
+  @@map("equipment_maintenance")
+}
+
+model EquipmentIssue {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @db.Uuid
+  equipmentId String    @db.Uuid
+  equipment   Equipment @relation(fields: [equipmentId], references: [id])
+  reportedBy  String    @db.Uuid // userId
+  reportedAt  DateTime  @default(now()) @db.Timestamptz
+  severity    String // LOW, MEDIUM, HIGH, CRITICAL
+  description String
+  status      String    @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  resolvedBy  String?   @db.Uuid
+  resolvedAt  DateTime? @db.Timestamptz
+  resolution  String?
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, equipmentId])
+  @@index([tenantId, status])
+  @@map("equipment_issues")
+}

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <!-- Icon gradient -->
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0891B2"/>
+      <stop offset="50%" style="stop-color:#0E7490"/>
+      <stop offset="100%" style="stop-color:#155E75"/>
+    </linearGradient>
+    
+    <!-- Soft shadow -->
+    <filter id="iconShadow">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#0891B2" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="#F0FDFA"/>
+  <circle cx="32" cy="32" r="28" fill="none" stroke="url(#iconGradient)" stroke-width="1.5"/>
+  
+  <!-- Simplified T mark -->
+  <g filter="url(#iconShadow)">
+    <!-- T horizontal bar -->
+    <rect x="14" y="16" width="36" height="8" rx="4" fill="url(#iconGradient)"/>
+    <!-- T vertical bar -->
+    <rect x="28" y="16" width="8" height="32" rx="4" fill="url(#iconGradient)"/>
+    
+    <!-- Small health cross -->
+    <rect x="36" y="28" width="12" height="5" rx="2.5" fill="#22D3EE"/>
+    <rect x="39.5" y="24.5" width="5" height="12" rx="2.5" fill="#22D3EE"/>
+  </g>
+  
+  <!-- Mini pulse line -->
+  <path d="M12 54 L20 54 L23 50 L26 58 L29 52 L32 54 L52 54" 
+        stroke="url(#iconGradient)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

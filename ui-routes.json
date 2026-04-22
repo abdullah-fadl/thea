@@ -1,0 +1,1175 @@
+[
+  {
+    "path": "/",
+    "url": "/",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:public"
+    ]
+  },
+  {
+    "path": "/account",
+    "url": "/account",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/admin",
+    "url": "/admin",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/admin",
+    "url": "/admin/admin",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/audit-coverage",
+    "url": "/admin/audit-coverage",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/clinical-infra",
+    "url": "/admin/clinical-infra",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/clinical-infra/beds",
+    "url": "/admin/clinical-infra/beds",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/clinical-infra/clinics",
+    "url": "/admin/clinical-infra/clinics",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/clinical-infra/facilities",
+    "url": "/admin/clinical-infra/facilities",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/clinical-infra/floors",
+    "url": "/admin/clinical-infra/floors",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/clinical-infra/providers",
+    "url": "/admin/clinical-infra/providers",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/clinical-infra/rooms",
+    "url": "/admin/clinical-infra/rooms",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/clinical-infra/specialties",
+    "url": "/admin/clinical-infra/specialties",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/clinical-infra/units",
+    "url": "/admin/clinical-infra/units",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/data-admin",
+    "url": "/admin/data-admin",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/delete-sample-data",
+    "url": "/admin/delete-sample-data",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/entitlements",
+    "url": "/admin/entitlements",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/groups-hospitals",
+    "url": "/admin/groups-hospitals",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/integrations",
+    "url": "/admin/integrations",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/organization-profile",
+    "url": "/admin/organization-profile",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/platform-access",
+    "url": "/admin/platform-access",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/quotas",
+    "url": "/admin/quotas",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/roles",
+    "url": "/admin/roles",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/structure-management",
+    "url": "/admin/structure-management",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/admin/users",
+    "url": "/admin/users",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:admin"
+    ]
+  },
+  {
+    "path": "/alignment",
+    "url": "/alignment",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/billing/charge-catalog",
+    "url": "/billing/charge-catalog",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/billing/charge-events",
+    "url": "/billing/charge-events",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/billing/claims",
+    "url": "/billing/claims",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/billing/diagnosis-catalog",
+    "url": "/billing/diagnosis-catalog",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/billing/insurance",
+    "url": "/billing/insurance",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/billing/invoice-draft",
+    "url": "/billing/invoice-draft",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/billing/lab-catalog",
+    "url": "/billing/lab-catalog",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/billing/medication-catalog",
+    "url": "/billing/medication-catalog",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/billing/payments",
+    "url": "/billing/payments",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/billing/pricing-packages",
+    "url": "/billing/pricing-packages",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/billing/procedure-catalog",
+    "url": "/billing/procedure-catalog",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/billing/radiology-catalog",
+    "url": "/billing/radiology-catalog",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/billing/service-catalog",
+    "url": "/billing/service-catalog",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/billing/statement",
+    "url": "/billing/statement",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/billing/supplies-catalog",
+    "url": "/billing/supplies-catalog",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/dashboard",
+    "url": "/dashboard",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/demo-limit",
+    "url": "/demo-limit",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/downtime/pack",
+    "url": "/downtime/pack",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/equipment/master",
+    "url": "/equipment/master",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/er/beds",
+    "url": "/er/beds",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/er/board",
+    "url": "/er/board",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/er/charge",
+    "url": "/er/charge",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/er/command",
+    "url": "/er/command",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/er/doctor",
+    "url": "/er/doctor",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/er/metrics",
+    "url": "/er/metrics",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/er/notifications",
+    "url": "/er/notifications",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/er/nursing",
+    "url": "/er/nursing",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/er/register",
+    "url": "/er/register",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/er/respiratory-screen",
+    "url": "/er/respiratory-screen",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/er/results-console",
+    "url": "/er/results-console",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/handover",
+    "url": "/handover",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/health",
+    "url": "/health",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/integrity",
+    "url": "/integrity",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/ipd/audit",
+    "url": "/ipd/audit",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/ipd/episodes",
+    "url": "/ipd/episodes",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/ipd/intake",
+    "url": "/ipd/intake",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/ipd/live-beds",
+    "url": "/ipd/live-beds",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/login",
+    "url": "/login",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:public"
+    ]
+  },
+  {
+    "path": "/notifications",
+    "url": "/notifications",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/nursing/operations",
+    "url": "/nursing/operations",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/opd/analytics",
+    "url": "/opd/analytics",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/opd/appointments",
+    "url": "/opd/appointments",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/opd/daily-stats",
+    "url": "/opd/daily-stats",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/opd/data-import",
+    "url": "/opd/data-import",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/opd/doctor-worklist",
+    "url": "/opd/doctor-worklist",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/opd/home",
+    "url": "/opd/home",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/opd/nurse-roster",
+    "url": "/opd/nurse-roster",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/opd/nurse-station",
+    "url": "/opd/nurse-station",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/opd/registration",
+    "url": "/opd/registration",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/opd/room-schedule",
+    "url": "/opd/room-schedule",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/opd/staff-setup",
+    "url": "/opd/staff-setup",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/opd/waiting-list",
+    "url": "/opd/waiting-list",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:health",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/orders",
+    "url": "/orders",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/orders/sets",
+    "url": "/orders/sets",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/owner",
+    "url": "/owner",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:owner"
+    ]
+  },
+  {
+    "path": "/owner/setup",
+    "url": "/owner/setup",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:owner"
+    ]
+  },
+  {
+    "path": "/owner/tenants",
+    "url": "/owner/tenants",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:owner"
+    ]
+  },
+  {
+    "path": "/owner/users",
+    "url": "/owner/users",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:owner"
+    ]
+  },
+  {
+    "path": "/p",
+    "url": "/p",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/p/appointments",
+    "url": "/p/appointments",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/p/book",
+    "url": "/p/book",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/p/login",
+    "url": "/p/login",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/p/reports",
+    "url": "/p/reports",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/patient-experience",
+    "url": "/patient-experience",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/patient-experience/analytics",
+    "url": "/patient-experience/analytics",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/patient-experience/cases",
+    "url": "/patient-experience/cases",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/patient-experience/dashboard",
+    "url": "/patient-experience/dashboard",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/patient-experience/delete-all-data",
+    "url": "/patient-experience/delete-all-data",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/patient-experience/reports",
+    "url": "/patient-experience/reports",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/patient-experience/seed-data",
+    "url": "/patient-experience/seed-data",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/patient-experience/setup",
+    "url": "/patient-experience/setup",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/patient-experience/visit",
+    "url": "/patient-experience/visit",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/patient-experience/visits",
+    "url": "/patient-experience/visits",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/platforms",
+    "url": "/platforms",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:public"
+    ]
+  },
+  {
+    "path": "/platforms/sam",
+    "url": "/platforms/sam",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/platforms/thea-health",
+    "url": "/platforms/thea-health",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/quality/incidents",
+    "url": "/quality/incidents",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/quality/kpis",
+    "url": "/quality/kpis",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/registration",
+    "url": "/registration",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/registration/insurance",
+    "url": "/registration/insurance",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/results",
+    "url": "/results",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/risk-detector",
+    "url": "/risk-detector",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/sam",
+    "url": "/sam",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/sam/assistant",
+    "url": "/sam/assistant",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/sam/conflicts",
+    "url": "/sam/conflicts",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/sam/drafts",
+    "url": "/sam/drafts",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/sam/gaps",
+    "url": "/sam/gaps",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/sam/home",
+    "url": "/sam/home",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/sam/issues",
+    "url": "/sam/issues",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/sam/library",
+    "url": "/sam/library",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/sam/setup",
+    "url": "/sam/setup",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "platform:sam",
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/scheduling/calendar",
+    "url": "/scheduling/calendar",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/scheduling/resources",
+    "url": "/scheduling/resources",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/scheduling/templates",
+    "url": "/scheduling/templates",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/search",
+    "url": "/search",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/select-platform",
+    "url": "/select-platform",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/subscription-error",
+    "url": "/subscription-error",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/tasks",
+    "url": "/tasks",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:authenticated"
+    ]
+  },
+  {
+    "path": "/welcome",
+    "url": "/welcome",
+    "isDynamic": false,
+    "dynamicParams": [],
+    "tags": [
+      "access:public"
+    ]
+  },
+  {
+    "path": "/owner/tenants/[tenantId]",
+    "url": "/owner/tenants/test-tenant-a",
+    "isDynamic": true,
+    "dynamicParams": [
+      "tenantId"
+    ],
+    "placeholders": {
+      "tenantId": "test-tenant-a"
+    },
+    "tags": [
+      "access:owner"
+    ]
+  }
+]

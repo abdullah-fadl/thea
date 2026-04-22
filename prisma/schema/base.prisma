@@ -1,0 +1,197 @@
+// =============================================================================
+// Thea Platform — Prisma Base Configuration
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================================================
+// Shared Enums
+// =============================================================================
+
+enum UserRole {
+  THEA_OWNER
+  ADMIN
+  GROUP_ADMIN
+  HOSPITAL_ADMIN
+  SUPERVISOR
+  STAFF
+  VIEWER
+}
+
+enum TenantStatus {
+  ACTIVE
+  BLOCKED
+  EXPIRED
+}
+
+enum PlanType {
+  DEMO
+  TRIAL
+  PAID
+  ENTERPRISE
+}
+
+enum PatientGender {
+  MALE
+  FEMALE
+  OTHER
+  UNKNOWN
+}
+
+enum PatientMasterStatus {
+  KNOWN
+  UNKNOWN
+  MERGED
+}
+
+enum EncounterType {
+  ER
+  OPD
+  IPD
+  PROCEDURE
+}
+
+enum EncounterCoreStatus {
+  CREATED
+  ACTIVE
+  CLOSED
+}
+
+enum EncounterSourceSystem {
+  REGISTRATION
+  ER
+  IPD
+  OPD
+}
+
+// OPD Enums
+enum OpdVisitType {
+  FVC
+  FVH
+  FU
+  RV
+  REF
+}
+
+enum OpdFlowState {
+  ARRIVED
+  WAITING_NURSE
+  IN_NURSING
+  READY_FOR_DOCTOR
+  WAITING_DOCTOR
+  IN_DOCTOR
+  PROCEDURE_PENDING
+  PROCEDURE_DONE_WAITING
+  COMPLETED
+}
+
+enum OpdArrivalState {
+  NOT_ARRIVED
+  ARRIVED
+  IN_ROOM
+  LEFT
+}
+
+enum OpdArrivalSource {
+  RECEPTION
+  PATIENT
+  WALK_IN
+  APPOINTMENT
+  REFERRAL
+  TRANSFER
+}
+
+enum OpdStatus {
+  OPEN
+  COMPLETED
+}
+
+enum OpdPaymentStatus {
+  PAID
+  SKIPPED
+  PENDING
+}
+
+enum OpdPaymentServiceType {
+  CONSULTATION
+  FOLLOW_UP
+}
+
+enum OpdPaymentMethod {
+  CASH
+  CARD
+  ONLINE
+}
+
+enum OpdDoctorNoteType {
+  SOAP
+  FREE
+}
+
+enum OpdFallRiskLabel {
+  LOW
+  MED
+  HIGH
+}
+
+enum OpdDispositionType {
+  OPD_REFERRAL
+  ER_REFERRAL
+  ADMISSION
+}
+
+enum OpdPriority {
+  URGENT
+  HIGH
+  NORMAL
+  LOW
+}
+
+// ER Enums
+enum ErStatus {
+  ARRIVED
+  REGISTERED
+  TRIAGE_IN_PROGRESS
+  TRIAGE_COMPLETED
+  WAITING_BED
+  IN_BED
+  SEEN_BY_DOCTOR
+  ORDERS_IN_PROGRESS
+  RESULTS_PENDING
+  DECISION
+  DISCHARGED
+  ADMITTED
+  TRANSFERRED
+  CANCELLED
+}
+
+enum ErArrivalMethod {
+  WALKIN
+  AMBULANCE
+  TRANSFER
+}
+
+enum ErPaymentStatus {
+  INSURANCE
+  CASH
+  PENDING
+}
+
+enum ErBedState {
+  VACANT
+  OCCUPIED
+  CLEANING
+  RESERVED
+}
+
+enum ErStaffAssignmentRole {
+  PRIMARY_DOCTOR
+  PRIMARY_NURSE
+  TRIAGE_NURSE
+}

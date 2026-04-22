@@ -1,0 +1,800 @@
+// =============================================================================
+// IPD Domain — Episodes, Admissions, Beds, Vitals, Downtime Incidents
+// =============================================================================
+
+model IpdEpisode {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String    @db.Uuid
+  encounterId           String    @db.Uuid
+  encounterType         String?
+  patient               Json? // {id, fullName}
+  serviceUnit           String?
+  admittingDoctorUserId String?
+  bedClass              String?
+  admissionNotes        String?
+  status                String    @default("ACTIVE") // ACTIVE, DISCHARGE_READY, DISCHARGED
+  source                Json? // {type, encounterId} or {type, handoffId}
+  location              Json? // {ward, unit, room, bed}
+  ownership             Json? // {attendingPhysicianUserId, primaryInpatientNurseUserId}
+  reasonForAdmission    String?
+  doctorSummary         String?
+  nursingSummary        String?
+  pendingTasks          Json?
+  pendingResults        Json?
+  riskFlags             Json?
+  closedAt              DateTime? @db.Timestamptz
+  createdAt             DateTime  @default(now()) @db.Timestamptz
+  updatedAt             DateTime  @updatedAt @db.Timestamptz
+  createdByUserId       String?
+  updatedByUserId       String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, encounterId])
+  @@index([tenantId, status])
+  @@map("ipd_episodes")
+}
+
+model IpdAdmission {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  episodeId        String?   @db.Uuid
+  encounterId      String?   @db.Uuid
+  patientMasterId  String?   @db.Uuid
+  bedId            String?   @db.Uuid
+  patientId        String?
+  patientName      String?
+  admissionDate    DateTime? @db.Date
+  admissionTime    String?
+  doctorName       String?
+  diagnosis        String?
+  dischargeDate    DateTime? @db.Date
+  assignedAt       DateTime? @db.Timestamptz
+  assignedByUserId String?
+  releasedAt       DateTime? @db.Timestamptz
+  releasedByUserId String?
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, episodeId])
+  @@index([tenantId, bedId])
+  @@index([tenantId, isActive])
+  @@map("ipd_admissions")
+}
+
+model IpdBed {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @db.Uuid
+  bedLabel       String?
+  label          String?
+  ward           String?
+  room           String?
+  unit           String?
+  departmentId   String?
+  departmentName String?
+  roomLabel      String?
+  roomId         String?
+  unitLabel      String?
+  unitId         String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, departmentId])
+  @@map("ipd_beds")
+}
+
+model IpdVitals {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  episodeId        String    @db.Uuid
+  recordedAt       DateTime? @db.Timestamptz
+  recordedByUserId String?
+  vitals           Json? // {systolic, diastolic, hr, rr, temp, spo2}
+  painScore        Int?
+  avpu             String?
+  critical         Boolean   @default(false)
+  criticalReasons  Json?
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, episodeId])
+  @@map("ipd_vitals")
+}
+
+model IpdDowntimeIncident {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  episodeId       String    @db.Uuid
+  startedAt       DateTime? @db.Timestamptz
+  endedAt         DateTime? @db.Timestamptz
+  notes           String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  createdByUserId String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, episodeId])
+  @@map("ipd_downtime_incidents")
+}
+
+// =============================================================================
+// IPD ICU Events — ICU admission/transfer/discharge events
+// =============================================================================
+
+model IpdIcuEvent {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  episodeId       String  @db.Uuid
+  encounterCoreId String? @db.Uuid
+  type            String // ADMIT, TRANSFER, DISCHARGE
+  destination     String? // ICU, WARD, etc.
+  source          String? // ER, IPD, etc.
+  note            String?
+  createdByUserId String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, episodeId])
+  @@map("ipd_icu_events")
+}
+
+// =============================================================================
+// IPD Care Plans
+// =============================================================================
+
+model IpdCarePlan {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  episodeId       String  @db.Uuid
+  problem         String?
+  goals           String?
+  interventions   String?
+  status          String  @default("ACTIVE") // ACTIVE, RESOLVED, CANCELLED
+  createdByUserId String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, episodeId])
+  @@map("ipd_care_plans")
+}
+
+// =============================================================================
+// IPD Medication Order Events — lifecycle status changes for med orders
+// =============================================================================
+
+model IpdMedOrderEvent {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  episodeId       String  @db.Uuid
+  orderId         String  @db.Uuid
+  status          String // ORDERED, ACTIVE, HELD, DISCONTINUED, COMPLETED
+  reason          String?
+  createdByUserId String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, episodeId])
+  @@index([tenantId, orderId])
+  @@map("ipd_med_order_events")
+}
+
+// =============================================================================
+// IPD MAR Events — Medication Administration Record entries
+// =============================================================================
+
+model IpdMarEvent {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  episodeId         String    @db.Uuid
+  orderId           String    @db.Uuid
+  scheduledFor      DateTime? @db.Timestamptz
+  performedAt       DateTime? @db.Timestamptz
+  status            String? // GIVEN, HELD, REFUSED, MISSED
+  dose              String?
+  route             String?
+  note              String?
+  performedByUserId String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, episodeId])
+  @@index([tenantId, orderId])
+  @@index([tenantId, episodeId, scheduledFor])
+  @@map("ipd_mar_events")
+}
+
+// =============================================================================
+// IPD Nursing Assessments
+// =============================================================================
+
+model IpdNursingAssessment {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  episodeId       String  @db.Uuid
+  assessment      Json? // { consciousness, painControlled, fallRisk, pressureUlcerRisk, ivLine, oxygenTherapy, mobility, diet }
+  createdByUserId String?
+
+  // Extended nursing assessment fields (aligned with OPD nursing)
+  mewsScore        Int?
+  mewsLevel        String?
+  fallRiskScore    Int?
+  fallRiskLevel    String?
+  gcsScore         Int?
+  bradenScore      Int?
+  bradenRisk       String?
+  consciousness    String?
+  painData         Json?
+  bradenData       Json?
+  ioData           Json?
+  sbarData         Json?
+  familyCommData   Json?
+  proceduresData   Json?
+  carePlanData     Json?
+  handoverData     Json?
+  nursingTasksData Json?
+  marData          Json?
+  icuMonitoring    Json? // {ventilator, hemodynamics, drips}
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, episodeId])
+  @@map("ipd_nursing_assessments")
+}
+
+// =============================================================================
+// IPD Nursing Daily Progress
+// =============================================================================
+
+model IpdNursingDailyProgress {
+  id                 String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String  @db.Uuid
+  episodeId          String  @db.Uuid
+  date               String? // YYYY-MM-DD date string
+  responseToCarePlan String?
+  vitalsSummary      String?
+  issues             String?
+  escalations        String?
+  createdByUserId    String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, episodeId])
+  @@index([tenantId, episodeId, date])
+  @@map("ipd_nursing_daily_progress")
+}
+
+// =============================================================================
+// IPD Orders — Lab, Imaging, Nursing orders within IPD episodes
+// =============================================================================
+
+model IpdOrder {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  episodeId       String  @db.Uuid
+  encounterId     String? // encounter core ID
+  kind            String // LAB, IMAGING, NURSING
+  title           String
+  notes           String?
+  status          String  @default("DRAFT") // DRAFT, ORDERED, IN_PROGRESS, COMPLETED, CANCELLED
+  createdByUserId String?
+  updatedByUserId String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, episodeId])
+  @@index([tenantId, status])
+  @@map("ipd_orders")
+}
+
+// =============================================================================
+// IPD Ventilator Records — ICU ventilator settings and weaning
+// =============================================================================
+
+model VentilatorRecord {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  episodeId      String    @db.Uuid
+  startedAt      DateTime  @db.Timestamptz
+  endedAt        DateTime? @db.Timestamptz
+  mode           String // AC_VC, AC_PC, SIMV, PSV, CPAP, BIPAP, HFNC
+  settings       Json // {fio2, tv, rr, peep, ps, ie_ratio, flow}
+  recordings     Json      @default("[]") // [{time, pip, pplat, compliance, fio2, spo2, etco2}]
+  weaningPlan    String?
+  extubationTime DateTime? @db.Timestamptz
+  extubationNote String?
+  recordedBy     String    @db.Uuid // userId
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, episodeId])
+  @@map("ventilator_records")
+}
+
+// =============================================================================
+// IPD Fluid Balance — shift-based I/O tracking
+// =============================================================================
+
+model FluidBalanceEntry {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  episodeId   String   @db.Uuid
+  shift       String // MORNING, AFTERNOON, NIGHT
+  shiftDate   DateTime @db.Date
+  enteredBy   String   @db.Uuid // userId
+  intakes     Json     @default("[]") // [{time, type, route, volume}] type: IV_FLUID, ORAL, NG, BLOOD, MEDICATION
+  outputs     Json     @default("[]") // [{time, type, volume}] type: URINE, DRAIN, EMESIS, STOOL, INSENSIBLE
+  totalIntake Float    @default(0)
+  totalOutput Float    @default(0)
+  netBalance  Float    @default(0)
+  notes       String?
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, episodeId])
+  @@index([tenantId, episodeId, shiftDate])
+  @@map("fluid_balance_entries")
+}
+
+// =============================================================================
+// IPD Admission Intake — links ER handoff to IPD episode creation
+// =============================================================================
+
+model IpdAdmissionIntake {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  handoffId       String  @db.Uuid
+  episodeId       String? @db.Uuid
+  encounterId     String? // encounter core ID
+  createdByUserId String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, handoffId])
+  @@index([tenantId])
+  @@index([tenantId, episodeId])
+  @@map("ipd_admission_intake")
+}
+
+// =============================================================================
+// ICU Care Plans — daily goals, bundles, sedation/pain/delirium tracking
+// =============================================================================
+
+model IcuCarePlan {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  episodeId       String   @db.Uuid
+  date            DateTime @db.Date
+  shift           String   @default("MORNING")
+  nurseId         String
+  dailyGoals      Json
+  careBundle      Json?
+  sedationLevel   String?
+  painScore       Int?
+  deliriumScreen  String?
+  mobilityGoal    String?
+  nutritionStatus String?
+  notes           String?
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, episodeId])
+  @@map("icu_care_plans")
+}
+
+// =============================================================================
+// SOFA Score — Sequential Organ Failure Assessment (ICU)
+// =============================================================================
+
+model SofaScore {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @db.Uuid
+  episodeId      String   @db.Uuid
+  scoredAt       DateTime @db.Timestamptz
+  scoredBy       String
+  respiratory    Int
+  coagulation    Int
+  liver          Int
+  cardiovascular Int
+  cns            Int
+  renal          Int
+  totalScore     Int
+  notes          String?
+  createdAt      DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, episodeId])
+  @@map("sofa_scores")
+}
+
+// =============================================================================
+// ICU Ventilator Checks — hourly/shift ventilator parameter logging
+// =============================================================================
+
+model IcuVentilatorCheck {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  episodeId       String   @db.Uuid
+  checkedAt       DateTime @db.Timestamptz
+  checkedBy       String
+  mode            String?
+  fio2            Float?
+  tidalVolume     Int?
+  respiratoryRate Int?
+  peep            Float?
+  pip             Float?
+  pplat           Float?
+  compliance      Float?
+  minuteVolume    Float?
+  spo2            Float?
+  etco2           Float?
+  alarms          Json?
+  createdAt       DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, episodeId])
+  @@map("icu_ventilator_checks")
+}
+
+// =============================================================================
+// ICU APACHE II Score — Acute Physiology and Chronic Health Evaluation
+// =============================================================================
+
+model IcuApacheScore {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String   @db.Uuid
+  episodeId            String   @db.Uuid
+  scoredAt             DateTime @db.Timestamptz
+  scoredByUserId       String   @db.Uuid
+  scoredByName         String?
+  version              String   @default("II") // II, IV
+  // Acute Physiology Score (worst values in first 24h)
+  temperature          Float?
+  meanArterialPressure Float?
+  heartRate            Int?
+  respiratoryRate      Int?
+  oxygenation          Float? // PaO2 or A-aDO2
+  fio2                 Float?
+  arterialPh           Float?
+  serumSodium          Float?
+  serumPotassium       Float?
+  serumCreatinine      Float?
+  hematocrit           Float?
+  whiteBloodCount      Float?
+  glasgowComaScale     Int?
+  // Individual component scores
+  temperatureScore     Int?
+  mapScore             Int?
+  hrScore              Int?
+  rrScore              Int?
+  oxygenScore          Int?
+  phScore              Int?
+  sodiumScore          Int?
+  potassiumScore       Int?
+  creatinineScore      Int?
+  hctScore             Int?
+  wbcScore             Int?
+  gcsScore             Int?
+  // Age & chronic health
+  agePoints            Int?
+  chronicHealthPoints  Int?
+  isEmergencySurgery   Boolean  @default(false)
+  chronicConditions    Json? // [{condition}] e.g. liver, cardiovascular, renal, immunocompromised, respiratory
+  // Total
+  acutePhysiologyScore Int?
+  totalScore           Int?
+  predictedMortality   Float? // Percentage
+  notes                String?
+  createdAt            DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, episodeId])
+  @@map("icu_apache_scores")
+}
+
+// =============================================================================
+// ICU Sedation Assessment — RASS (Richmond Agitation-Sedation Scale) / SAS
+// =============================================================================
+
+model IcuSedationAssessment {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String   @db.Uuid
+  episodeId        String   @db.Uuid
+  assessedAt       DateTime @db.Timestamptz
+  assessedByUserId String   @db.Uuid
+  assessedByName   String?
+  scaleType        String   @default("RASS") // RASS, SAS
+  // RASS Score (-5 to +4)
+  rassScore        Int?
+  rassLabel        String? // UNAROUSABLE, DEEP_SEDATION, MODERATE_SEDATION, LIGHT_SEDATION, DROWSY, ALERT_CALM, RESTLESS, AGITATED, VERY_AGITATED, COMBATIVE
+  // SAS Score (1-7)
+  sasScore         Int?
+  sasLabel         String? // UNAROUSABLE, VERY_SEDATED, SEDATED, CALM, AGITATED, VERY_AGITATED, DANGEROUS
+  // Target
+  targetRass       Int?
+  targetSas        Int?
+  isOnTarget       Boolean?
+  // Sedation details
+  sedationDrugs    Json? // [{drug, dose, rate, unit}]
+  painScore        Int? // 0-10 NRS or BPS
+  painTool         String? // NRS, BPS, CPOT
+  bpsScore         Int?
+  cpotScore        Int?
+  // Interventions
+  interventions    Json? // [{action, detail}]
+  notes            String?
+  createdAt        DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, episodeId])
+  @@index([tenantId, episodeId, assessedAt])
+  @@map("icu_sedation_assessments")
+}
+
+// =============================================================================
+// ICU Delirium Screening — CAM-ICU (Confusion Assessment Method for ICU)
+// =============================================================================
+
+model IcuDeliriumScreen {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String   @db.Uuid
+  episodeId             String   @db.Uuid
+  screenedAt            DateTime @db.Timestamptz
+  screenedByUserId      String   @db.Uuid
+  screenedByName        String?
+  toolUsed              String   @default("CAM_ICU") // CAM_ICU, ICDSC
+  // CAM-ICU Features
+  feature1AcuteOnset    Boolean? // Acute onset or fluctuating course
+  feature2Inattention   Boolean? // Inattention (ASE letters/pictures)
+  aseLetterScore        Int? // Number of errors in ASE letters
+  asePictureScore       Int? // Number of errors in ASE pictures
+  feature3AlteredLOC    Boolean? // Altered level of consciousness (RASS != 0)
+  currentRass           Int?
+  feature4Disorganized  Boolean? // Disorganized thinking (yes/no questions + command)
+  questionErrors        Int?
+  commandFollowed       Boolean?
+  // Result
+  camIcuPositive        Boolean? // true = delirium present
+  deliriumType          String? // HYPERACTIVE, HYPOACTIVE, MIXED
+  // ICDSC (alternative tool, 0-8)
+  icdscScore            Int?
+  icdscItems            Json? // [{item, present}]
+  // Risk factors
+  riskFactors           Json? // [{factor}] e.g. age>65, cognitive impairment, surgery, infection, medications
+  // Interventions
+  nonPharmInterventions Json? // [{intervention}] e.g. reorientation, sleep hygiene, mobilization, sensory aids
+  pharmInterventions    Json? // [{drug, dose, route}]
+  notes                 String?
+  createdAt             DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, episodeId])
+  @@index([tenantId, episodeId, screenedAt])
+  @@map("icu_delirium_screens")
+}
+
+// =============================================================================
+// ICU Bundle Compliance — VAP, CLABSI, CAUTI Prevention Bundles
+// =============================================================================
+
+model IcuBundleCompliance {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String    @db.Uuid
+  episodeId            String    @db.Uuid
+  auditDate            DateTime  @db.Date
+  auditedByUserId      String    @db.Uuid
+  auditedByName        String?
+  bundleType           String // VAP, CLABSI, CAUTI
+  // VAP Bundle (Ventilator-Associated Pneumonia)
+  vapHobElevated       Boolean? // Head of bed ≥30°
+  vapDailyWean         Boolean? // Daily sedation vacation + spontaneous breathing trial
+  vapOralCare          Boolean? // Oral care with chlorhexidine
+  vapDvtProphylaxis    Boolean? // DVT prophylaxis
+  vapPepticProphylaxis Boolean? // Peptic ulcer prophylaxis
+  vapSubglotticSuction Boolean? // Subglottic suctioning if available
+  vapCircuitNotChanged Boolean? // Vent circuit not routinely changed
+  // CLABSI Bundle (Central Line-Associated Bloodstream Infection)
+  clabsiHandHygiene    Boolean?
+  clabsiMaxBarrier     Boolean? // Full barrier precautions during insertion
+  clabsiChlorhexidine  Boolean? // Chlorhexidine skin antisepsis
+  clabsiOptimalSite    Boolean? // Optimal catheter site selection (subclavian preferred)
+  clabsiDailyReview    Boolean? // Daily review of line necessity
+  clabsiDressingIntact Boolean? // Dressing clean, dry, intact
+  clabsiLineDate       DateTime? @db.Date // Line insertion date
+  clabsiLineDays       Int? // Line days
+  // CAUTI Bundle (Catheter-Associated Urinary Tract Infection)
+  cautiIndication      Boolean? // Appropriate indication documented
+  cautiAsepticInsert   Boolean? // Aseptic insertion technique
+  cautiSecured         Boolean? // Catheter properly secured
+  cautiBagBelow        Boolean? // Drainage bag below bladder
+  cautiDailyReview     Boolean? // Daily review of necessity
+  cautiRemovalDate     DateTime? @db.Date // Planned removal date
+  cautiCathDays        Int?
+  // Compliance
+  totalElements        Int?
+  compliantElements    Int?
+  compliancePercent    Float?
+  deviationNotes       String?
+  actionPlan           String?
+  createdAt            DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, episodeId])
+  @@index([tenantId, bundleType])
+  @@index([tenantId, auditDate])
+  @@map("icu_bundle_compliance")
+}
+
+// =============================================================================
+// ICU Code Blue Documentation — ACLS Flowsheet
+// =============================================================================
+
+model IcuCodeBlue {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  episodeId        String?   @db.Uuid
+  patientMasterId  String?   @db.Uuid
+  location         String? // Ward, ICU bed, etc.
+  // Event
+  codeCalledAt     DateTime  @db.Timestamptz
+  codeCalledBy     String?
+  teamArrivedAt    DateTime? @db.Timestamptz
+  initialRhythm    String? // VF, VT, PEA, ASYSTOLE, BRADYCARDIA, TACHYCARDIA, ROSC
+  // Timeline
+  events           Json      @default("[]") // [{time, action, detail, performedBy}]
+  // CPR
+  cprStartedAt     DateTime? @db.Timestamptz
+  cprEndedAt       DateTime? @db.Timestamptz
+  totalCprMin      Int?
+  // Defibrillation
+  shocks           Json? // [{time, joules, rhythm_before, rhythm_after}]
+  // Medications
+  medications      Json? // [{time, drug, dose, route}]
+  // Airway
+  airwayManagement String? // BVM, ETT, LMA, CRICOTHYROTOMY
+  intubatedAt      DateTime? @db.Timestamptz
+  intubatedBy      String?
+  // IV access
+  ivAccess         Json? // [{type, site, gauge, time}]
+  ioAccess         Boolean?  @default(false)
+  ioSite           String?
+  // Team
+  teamLeader       String?
+  cprProvider1     String?
+  cprProvider2     String?
+  airwayManager    String?
+  medicationNurse  String?
+  recorder         String?
+  // Outcome
+  outcome          String? // ROSC, DEATH, ONGOING
+  roscAt           DateTime? @db.Timestamptz
+  timeOfDeath      DateTime? @db.Timestamptz
+  postRoscPlan     String?
+  // Family
+  familyNotified   Boolean   @default(false)
+  familyNotifiedAt DateTime? @db.Timestamptz
+  familyNotifiedBy String?
+  // Debrief
+  debriefCompleted Boolean   @default(false)
+  debriefNotes     String?
+  status           String    @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, episodeId])
+  @@index([tenantId, codeCalledAt])
+  @@map("icu_code_blues")
+}
+
+// =============================================================================
+// 4.3 — Brain Death Protocol
+// =============================================================================
+
+model BrainDeathProtocol {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @db.Uuid
+  episodeId          String    @db.Uuid
+  patientId          String    @db.Uuid
+  status             String    @default("PREREQUISITES") // PREREQUISITES, EXAM1, WAITING, EXAM2, CONFIRMATORY, DECLARED, ABORTED
+  prerequisites      Json? // {normothermia, normotension, noCnsDepressants, noMetabolicDerangement} each: {checked, value, checkedByUserId, checkedAt}
+  exam1              Json? // {pupilReflexAbsent, cornealReflexAbsent, oculocephalicAbsent, oculovestibularAbsent, gagReflexAbsent, coughReflexAbsent, noMotorResponse, apneaTestResult, examinerUserId, examAt}
+  waitingPeriodHours Int?      @default(6)
+  exam2              Json? // same structure as exam1
+  confirmatoryTest   Json? // {testType: EEG/ANGIOGRAPHY/TCD, result, performedAt, performedByUserId}
+  declaredAt         DateTime? @db.Timestamptz
+  declaredByUserId   String?   @db.Uuid
+  scotNotified       Boolean   @default(false)
+  scotNotifiedAt     DateTime? @db.Timestamptz
+  abortedReason      String?
+  createdByUserId    String?   @db.Uuid
+  createdAt          DateTime  @default(now()) @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, episodeId])
+  @@index([tenantId, status])
+  @@map("brain_death_protocols")
+}
+
+// =============================================================================
+// 4.4 — Organ Donation Workflow
+// =============================================================================
+
+model OrganDonation {
+  id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId               String    @db.Uuid
+  brainDeathProtocolId   String    @db.Uuid
+  patientId              String    @db.Uuid
+  status                 String    @default("IDENTIFIED") // IDENTIFIED, SCOT_NOTIFIED, FAMILY_APPROACHED, CONSENTED, REFUSED, DONOR_MANAGEMENT, PROCUREMENT_SCHEDULED, COMPLETED, WITHDRAWN
+  scotReferralAt         DateTime? @db.Timestamptz
+  scotReferenceNumber    String?
+  familyApproach         Json? // {approachedByUserId, approachedAt, familyMemberName, relationship, outcome, consentDocumentId}
+  donorManagement        Json? // {hemodynamicOptimization, organViabilityLabs, activeIssues}
+  organAllocation        Json? // array of {organ, status, recipientCenter}
+  procurementOrCaseId    String?   @db.Uuid
+  procurementScheduledAt DateTime? @db.Timestamptz
+  notes                  String?
+  createdByUserId        String?   @db.Uuid
+  createdAt              DateTime  @default(now()) @db.Timestamptz
+  updatedAt              DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("organ_donations")
+}

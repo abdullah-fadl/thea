@@ -1,0 +1,470 @@
+// =============================================================================
+// Quality Domain — Incidents, Root Cause Analysis
+// =============================================================================
+
+model QualityIncident {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  type            String?
+  severity        String?
+  location        String?
+  encounterCoreId String?   @db.Uuid
+  episodeId       String?   @db.Uuid
+  description     String?
+  status          String    @default("OPEN")
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  createdByUserId String?
+  updatedAt       DateTime? @db.Timestamptz
+  updatedByUserId String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("quality_incidents")
+}
+
+model QualityRca {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String   @db.Uuid
+  incidentId       String   @db.Uuid
+  whatHappened     String?
+  why              String?
+  correctiveAction String?
+  createdAt        DateTime @default(now()) @db.Timestamptz
+  createdByUserId  String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, incidentId])
+  @@map("quality_rca")
+}
+
+// =============================================================================
+// Quality — Advanced RCA, FMEA, and Sentinel Event Tracking
+// =============================================================================
+
+model RcaAnalysis {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  incidentId          String?   @db.Uuid
+  title               String
+  incidentDate        DateTime  @db.Timestamptz
+  analysisDate        DateTime  @db.Timestamptz
+  facilitatorId       String
+  teamMembers         Json? // [{userId, name, role}]
+  problemStatement    String
+  timeline            Json? // [{time, event, who}]
+  fishbone            Json? // {manpower:[], materials:[], methods:[], machines:[], environment:[], measurement:[]}
+  whyChain            Json? // [{level, why, because}]
+  rootCauses          Json // [{cause, category, contributing}]
+  contributingFactors Json?
+  recommendations     Json // [{action, responsible, dueDate, priority}]
+  status              String    @default("DRAFT") // DRAFT, IN_REVIEW, APPROVED, CLOSED
+  approvedBy          String?
+  approvedAt          DateTime? @db.Timestamptz
+  lessonsLearned      String?
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+  updatedAt           DateTime  @updatedAt @db.Timestamptz
+  createdByUserId     String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("rca_analyses")
+}
+
+model FmeaAnalysis {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  processName     String
+  processScope    String?
+  team            Json? // [{userId, name, role}]
+  conductedDate   DateTime @db.Timestamptz
+  facilitatorId   String
+  status          String   @default("DRAFT") // DRAFT, IN_PROGRESS, COMPLETED
+  summary         String?
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?
+
+  steps FmeaStep[]
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("fmea_analyses")
+}
+
+model FmeaStep {
+  id                String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String       @db.Uuid
+  analysisId        String       @db.Uuid
+  analysis          FmeaAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  stepNumber        Int
+  processStep       String
+  failureMode       String
+  failureEffect     String
+  failureCause      String
+  severity          Int // 1-10
+  occurrence        Int // 1-10
+  detectability     Int // 1-10
+  rpn               Int // severity x occurrence x detectability
+  currentControls   String?
+  recommendedAction String?
+  actionOwner       String?
+  targetDate        DateTime?    @db.Timestamptz
+  actionTaken       String?
+  newSeverity       Int?
+  newOccurrence     Int?
+  newDetectability  Int?
+  newRpn            Int?
+  createdAt         DateTime     @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, analysisId])
+  @@map("fmea_steps")
+}
+
+model SentinelEvent {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @db.Uuid
+  reportedBy         String
+  reportDate         DateTime  @db.Timestamptz
+  eventDate          DateTime  @db.Timestamptz
+  eventType          String // WRONG_PATIENT, WRONG_SITE, WRONG_PROCEDURE, WRONG_DRUG, WRONG_DOSE, FALL, UNEXPECTED_DEATH, OTHER
+  description        String
+  patientMasterId    String?   @db.Uuid
+  immediateActions   String?
+  disclosureDate     DateTime? @db.Timestamptz
+  jciCategory        String?
+  rcaCompleted       Boolean   @default(false)
+  rcaId              String?   @db.Uuid
+  status             String    @default("REPORTED") // REPORTED, UNDER_INVESTIGATION, RCA_COMPLETED, CLOSED
+  closedAt           DateTime? @db.Timestamptz
+  preventiveMeasures String?
+  createdAt          DateTime  @default(now()) @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @db.Timestamptz
+  createdByUserId    String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("sentinel_events")
+}
+
+// =============================================================================
+// Quality — Care Gap Scanner Rules & Readmission Tracking
+// =============================================================================
+
+model CareGapRule {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String    @db.Uuid
+  name          String
+  nameAr        String?
+  description   String
+  descriptionAr String?
+  category      String // preventive, chronic_disease, medication, follow_up, screening
+  gapType       String // screening_overdue, vaccination_due, follow_up_missed, lab_overdue, medication_refill, referral_pending, preventive_care
+  isActive      Boolean   @default(true)
+  criteria      Json // Rule definition: {ageMin?, ageMax?, gender?, diagnosisCodes?, labCode?, intervalMonths?, ...}
+  severity      String    @default("moderate") // low, moderate, high, critical
+  frequency     String    @default("monthly") // daily, weekly, monthly
+  lastRunAt     DateTime? @db.Timestamptz
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, isActive])
+  @@map("care_gap_rules")
+}
+
+model CareGapFinding {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  patientId       String    @db.Uuid
+  patientName     String?
+  gapType         String // screening_overdue, vaccination_due, follow_up_missed, lab_overdue, medication_refill, referral_pending, preventive_care
+  category        String // preventive, chronic_disease, medication, follow_up, screening
+  description     String
+  descriptionAr   String?
+  severity        String    @default("moderate") // low, moderate, high, critical
+  status          String    @default("open") // open, addressed, dismissed, auto_closed
+  dueDate         DateTime? @db.Timestamptz
+  identifiedAt    DateTime  @default(now()) @db.Timestamptz
+  addressedAt     DateTime? @db.Timestamptz
+  addressedBy     String?
+  dismissedReason String?
+  ruleId          String?   @db.Uuid // Which scanning rule found this
+  metadata        Json?     @default("{}")
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, patientId, ruleId, gapType]) // One finding per patient per rule — idempotent
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, status])
+  @@index([tenantId, gapType])
+  @@index([tenantId, severity])
+  @@map("care_gap_findings")
+}
+
+model ReadmissionRecord {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String    @db.Uuid
+  patientId             String    @db.Uuid
+  patientName           String?
+  originalEncounterId   String    @db.Uuid
+  originalAdmitDate     DateTime  @db.Timestamptz
+  originalDischargeDate DateTime  @db.Timestamptz
+  originalDiagnosis     String?
+  originalDepartment    String?
+  readmitEncounterId    String    @db.Uuid
+  readmitDate           DateTime  @db.Timestamptz
+  readmitDiagnosis      String?
+  readmitDepartment     String?
+  daysBetween           Int
+  isPreventable         String    @default("unknown") // yes, no, unknown, under_review
+  rootCause             String? // premature_discharge, inadequate_follow_up, medication_issue, social_factors, disease_progression, complication
+  rootCauseAr           String?
+  reviewStatus          String    @default("pending") // pending, reviewed, action_taken
+  reviewedBy            String?
+  reviewedAt            DateTime? @db.Timestamptz
+  reviewNotes           String?
+  actionPlan            String?
+  createdAt             DateTime  @default(now()) @db.Timestamptz
+  updatedAt             DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, readmitEncounterId]) // One record per readmission encounter
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, reviewStatus])
+  @@index([tenantId, readmitDate])
+  @@map("readmission_records")
+}
+
+// =============================================================================
+// CBAHI Accreditation — Assessments and Evidence
+// =============================================================================
+
+model CbahiAssessment {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  assessmentDate DateTime  @default(now()) @db.Timestamptz
+  assessorId     String?
+  assessorName   String?
+  overallScore   Float     @default(0)
+  domainScores   Json      @default("{}") // {LD: 85, PC: 72, ...}
+  status         String    @default("draft") // draft, in_progress, completed, submitted
+  findings       Json      @default("[]") // ComplianceResult[]
+  actionPlan     Json      @default("[]") // [{standardId, gap, action, owner, dueDate, priority, status}]
+  nextReviewDate DateTime? @db.Timestamptz
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("cbahi_assessments")
+}
+
+model CbahiEvidence {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String    @db.Uuid
+  assessmentId  String    @db.Uuid
+  standardId    String // e.g., "PC.1"
+  elementId     String? // e.g., "PC.1.ME1"
+  evidenceType  String // document, screenshot, report, log, certificate
+  title         String
+  description   String?
+  fileUrl       String?
+  status        String    @default("pending") // pending, accepted, rejected
+  reviewerNotes String?
+  uploadedBy    String
+  uploadedAt    DateTime  @default(now()) @db.Timestamptz
+  reviewedAt    DateTime? @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, assessmentId])
+  @@index([tenantId, standardId])
+  @@map("cbahi_evidence")
+}
+
+// =============================================================================
+// CDO — Clinical Data Officer Quality Models
+// =============================================================================
+
+model CdoOutcomeEvent {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String    @db.Uuid
+  encounterId  String?   @db.Uuid
+  patientId    String?   @db.Uuid
+  outcomeType  String // FAILURE_TO_RESCUE, UNEXPECTED_DEATH, READMISSION, COMPLICATION, ICU_TRANSFER_DELAY
+  severity     String? // LOW, MEDIUM, HIGH, CRITICAL
+  careSetting  String? // ED, WARD, ICU
+  occurredAt   DateTime  @db.Timestamptz
+  description  String?
+  contributing Json? // contributing factors
+  isNegative   Boolean   @default(false)
+  reviewedBy   String?
+  reviewedAt   DateTime? @db.Timestamptz
+  createdAt    DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, outcomeType])
+  @@index([tenantId, occurredAt])
+  @@map("cdo_outcome_events")
+}
+
+model CdoResponseTimeMetric {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @db.Uuid
+  encounterId       String?  @db.Uuid
+  metricType        String // RECOGNITION, ESCALATION, INTERVENTION, ICU_TRANSFER
+  careSetting       String? // ED, WARD, ICU
+  timeMinutes       Float
+  thresholdMin      Float?
+  exceededThreshold Boolean  @default(false)
+  occurredAt        DateTime @db.Timestamptz
+  createdAt         DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, metricType])
+  @@map("cdo_response_time_metrics")
+}
+
+model ClinicalDecisionPrompt {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  encounterId     String?   @db.Uuid
+  patientId       String?   @db.Uuid
+  promptType      String // EARLY_WARNING, SEPSIS_ALERT, CRITICAL_LAB, MED_INTERACTION
+  severity        String    @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  title           String?
+  description     String?
+  suggestedAction String?
+  status          String    @default("ACTIVE") // ACTIVE, ACKNOWLEDGED, DISMISSED, RESOLVED
+  acknowledgedBy  String?
+  acknowledgedAt  DateTime? @db.Timestamptz
+  resolvedAt      DateTime? @db.Timestamptz
+  careSetting     String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("clinical_decision_prompts")
+}
+
+// ── 3.22 IPSG (International Patient Safety Goals) Assessment ─────────────
+model IpsgAssessment {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @db.Uuid
+  assessmentDate DateTime @db.Timestamptz
+  assessorId     String // userId
+  assessorName   String?
+  period         String // e.g. "2024-Q1", "2024-03"
+  // IPSG 1: Identify Patients Correctly
+  ipsg1Score     Int? // 0-100
+  ipsg1Findings  Json? // [{item, compliant, notes}]
+  // IPSG 2: Improve Effective Communication
+  ipsg2Score     Int?
+  ipsg2Findings  Json?
+  // IPSG 3: Improve Safety of High-Alert Medications
+  ipsg3Score     Int?
+  ipsg3Findings  Json?
+  // IPSG 4: Ensure Safe Surgery
+  ipsg4Score     Int?
+  ipsg4Findings  Json?
+  // IPSG 5: Reduce Risk of Health Care–Associated Infections
+  ipsg5Score     Int?
+  ipsg5Findings  Json?
+  // IPSG 6: Reduce Risk of Patient Harm from Falls
+  ipsg6Score     Int?
+  ipsg6Findings  Json?
+  overallScore   Float?
+  status         String   @default("DRAFT") // DRAFT | SUBMITTED | APPROVED
+  actionItems    Json? // [{ipsg, finding, action, responsible, dueDate, status}]
+  notes          String?
+  createdAt      DateTime @default(now()) @db.Timestamptz
+  updatedAt      DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, period])
+  @@map("ipsg_assessments")
+}
+
+// ── 3.23 Mortality Review ─────────────────────────────────────────────────
+model MortalityReview {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  patientMasterId     String    @db.Uuid
+  encounterId         String?   @db.Uuid
+  episodeId           String?   @db.Uuid
+  dateOfDeath         DateTime  @db.Timestamptz
+  ageAtDeath          Int?
+  gender              String?
+  primaryDiagnosis    String
+  icdCode             String?
+  secondaryDiagnoses  Json? // [{diagnosis, icdCode}]
+  department          String
+  attendingPhysician  String
+  admissionDate       DateTime? @db.Timestamptz
+  lengthOfStay        Int? // days
+  // Death Classification
+  deathType           String // EXPECTED | UNEXPECTED | PERIOPERATIVE | ICU | ED
+  preventability      String    @default("UNKNOWN") // DEFINITELY_PREVENTABLE | PROBABLY_PREVENTABLE | NOT_PREVENTABLE | UNKNOWN
+  // Review Process
+  reviewDate          DateTime? @db.Timestamptz
+  reviewerId          String?
+  reviewerName        String?
+  reviewCommittee     Json? // [{userId, name, role}]
+  // Clinical Analysis
+  timelineOfCare      Json? // [{dateTime, event, by, notes}]
+  contributingFactors Json? // [{factor, category, impact}]
+  systemIssues        Json? // [{issue, category}]
+  qualityOfCare       String? // APPROPRIATE | PARTIALLY_APPROPRIATE | INAPPROPRIATE
+  delayInDiagnosis    Boolean   @default(false)
+  delayInTreatment    Boolean   @default(false)
+  communicationIssue  Boolean   @default(false)
+  handoffIssue        Boolean   @default(false)
+  // Outcomes
+  findings            String?
+  recommendations     Json? // [{recommendation, responsible, dueDate, priority, status}]
+  lessonsLearned      String?
+  actionPlan          String?
+  // Status
+  status              String    @default("PENDING") // PENDING | IN_REVIEW | COMMITTEE_REVIEW | COMPLETED | CLOSED
+  mAndMPresented      Boolean   @default(false) // Presented at Morbidity & Mortality conference
+  mAndMDate           DateTime? @db.Timestamptz
+  notes               String?
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+  updatedAt           DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, status])
+  @@index([tenantId, dateOfDeath])
+  @@map("mortality_reviews")
+}

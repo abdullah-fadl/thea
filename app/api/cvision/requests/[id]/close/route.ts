@@ -1,0 +1,156 @@
+import { logger } from '@/lib/monitoring/logger';
+/**
+ * CVision Request Close API
+ * POST /api/cvision/requests/[id]/close - Close request
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { v4 as uuidv4 } from 'uuid';
+import { withAuthTenant } from '@/lib/cvision/infra';
+import {
+  getCVisionCollection,
+  findById,
+  createTenantFilter,
+} from '@/lib/cvision/db';
+import {
+  logCVisionAudit,
+  createCVisionAuditContext,
+} from '@/lib/cvision/audit';
+import { closeRequestSchema } from '@/lib/cvision/validation';
+import { CVISION_PERMISSIONS } from '@/lib/cvision/constants';
+import type { CVisionRequest, CVisionRequestEvent, RequestStatus } from '@/lib/cvision/types';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+// POST - Close request
+export const POST = withAuthTenant(
+  async (request, { tenantId, userId, role, user }, params) => {
+    try {
+      const resolvedParams = await params;
+      const id = resolvedParams?.id as string;
+
+      if (!id) {
+        return NextResponse.json(
+          { error: 'Request ID is required' },
+          { status: 400 }
+        );
+      }
+
+      const body = await request.json();
+      const data = closeRequestSchema.parse(body);
+
+      const collection = await getCVisionCollection<CVisionRequest>(
+        tenantId,
+        'requests'
+      );
+
+      const requestDoc = await findById(collection, tenantId, id);
+      if (!requestDoc) {
+        return NextResponse.json(
+          { error: 'Request not found' },
+          { status: 404 }
+        );
+      }
+
+      // Check if request is already closed
+      if (requestDoc.status === 'closed') {
+        return NextResponse.json({
+          success: true,
+          message: 'Request is already closed',
+          request: requestDoc,
+        });
+      }
+
+      const now = new Date();
+      const previousStatus = requestDoc.status;
+
+      // Determine final status
+      let finalStatus: RequestStatus = 'closed';
+      if (data.status === 'approved') {
+        finalStatus = 'approved';
+      } else if (data.status === 'rejected') {
+        finalStatus = 'rejected';
+      }
+
+      // Update request
+      const updateData: Partial<CVisionRequest> = {
+        status: finalStatus,
+        statusChangedAt: now,
+        closedAt: now,
+        closedBy: userId,
+        resolution: data.resolution,
+        updatedAt: now,
+        updatedBy: userId,
+      };
+
+      await collection.updateOne(
+        createTenantFilter(tenantId, { id }),
+        { $set: updateData }
+      );
+
+      // Create event
+      const eventCollection = await getCVisionCollection<CVisionRequestEvent>(
+        tenantId,
+        'requestEvents'
+      );
+
+      const closeEvent: CVisionRequestEvent = {
+        id: uuidv4(),
+        tenantId,
+        requestId: id,
+        actorUserId: userId,
+        actorRole: role,
+        eventType: 'status_change',
+        payloadJson: {
+          previousStatus,
+          newStatus: finalStatus,
+          resolution: data.resolution,
+          action: 'closed',
+        },
+        createdAt: now,
+        updatedAt: now,
+        createdBy: userId,
+        updatedBy: userId,
+      };
+
+      await eventCollection.insertOne(closeEvent);
+
+      // Audit log
+      await logCVisionAudit(
+        createCVisionAuditContext({ userId, role, tenantId, user }, request),
+        'request_update',
+        'request',
+        {
+          resourceId: id,
+          changes: {
+            before: { status: previousStatus },
+            after: { status: finalStatus, resolution: data.resolution },
+          },
+          metadata: { eventType: 'closed' },
+        }
+      );
+
+      const updated = await findById(collection, tenantId, id);
+
+      return NextResponse.json({
+        success: true,
+        request: updated,
+        event: closeEvent,
+      });
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return NextResponse.json(
+          { error: 'Validation error', details: error.errors },
+          { status: 400 }
+        );
+      }
+      logger.error('[CVision Request Close POST]', error?.message || String(error));
+      return NextResponse.json(
+        { error: 'Internal server error', message: error.message },
+        { status: 500 }
+      );
+    }
+  },
+  { platformKey: 'cvision', permissionKey: CVISION_PERMISSIONS.REQUESTS_APPROVE }
+);

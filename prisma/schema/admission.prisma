@@ -1,0 +1,203 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Admission Office Domain — Centralized admission workflow
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Central admission request from any source (OPD, ER, Scheduled OR, External, Direct)
+model AdmissionRequest {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String    @db.Uuid
+  source               String // OPD, ER, SCHEDULED_OR, EXTERNAL, DIRECT
+  sourceEncounterId    String?   @db.Uuid
+  sourceHandoffId      String?   @db.Uuid
+  patientMasterId      String    @db.Uuid
+  patientName          String
+  mrn                  String?
+  requestingDoctorId   String    @db.Uuid
+  requestingDoctorName String
+  admittingDoctorId    String?   @db.Uuid
+  admittingDoctorName  String?
+  targetDepartment     String
+  targetUnit           String?
+  urgency              String    @default("ELECTIVE") // ELECTIVE, URGENT, EMERGENCY
+  bedType              String    @default("GENERAL") // GENERAL, ICU, ISOLATION, VIP, NICU, PICU
+  primaryDiagnosis     String?
+  primaryDiagnosisCode String? // ICD-10
+  clinicalSummary      String?
+  reasonForAdmission   String?
+  pendingOrders        Json      @default("[]")
+  allergies            Json      @default("[]")
+  status               String    @default("PENDING") // PENDING, INSURANCE_REVIEW, VERIFIED, BED_ASSIGNED, ADMITTED, CANCELLED
+  cancelReason         String?
+  cancelledBy          String?   @db.Uuid
+  cancelledAt          DateTime? @db.Timestamptz
+  expectedLOS          Int? // estimated days
+  isolationRequired    Boolean   @default(false)
+  isolationType        String?
+  episodeId            String?   @db.Uuid
+  bedReservationId     String?   @db.Uuid
+  createdByUserId      String?   @db.Uuid
+  updatedByUserId      String?   @db.Uuid
+
+  // ── Financial Fields ──────────────────────────────────────────────
+  paymentType  String? // CASH, INSURANCE, GOVERNMENT
+  insuranceId  String? @db.Uuid // → PatientInsurance.id
+  insurerName  String? // denormalized for display
+  policyNumber String?
+  memberId     String?
+
+  // ── Insurance Verification ────────────────────────────────────────
+  eligibilityCheckId   String?   @db.Uuid // → NphiesEligibilityLog.id
+  eligibilityStatus    String? // ELIGIBLE, NOT_ELIGIBLE, PENDING, SKIPPED
+  eligibilityCheckedAt DateTime? @db.Timestamptz
+
+  // ── Pre-Authorization ─────────────────────────────────────────────
+  preauthId     String? @db.Uuid // → NphiesPriorAuth.id
+  preauthStatus String? // APPROVED, DENIED, PENDING, NOT_REQUIRED
+  preauthNumber String? // authorization number for display
+
+  // ── Cost Estimation ───────────────────────────────────────────────
+  estimatedCost          Decimal? @db.Decimal(12, 2)
+  estimatedCostBreakdown Json? // {bedPerDay, totalBed, services[], total}
+
+  // ── Deposit (Cash patients) ───────────────────────────────────────
+  depositRequired      Decimal?  @db.Decimal(12, 2)
+  depositCollected     Decimal?  @db.Decimal(12, 2)
+  depositPaymentId     String?   @db.Uuid // → BillingPayment.id
+  depositMethod        String? // CASH, CARD, BANK_TRANSFER
+  depositReceiptNumber String?
+  depositCollectedAt   DateTime? @db.Timestamptz
+
+  // ── Billing Link (set at admission) ───────────────────────────────
+  billingEncounterCoreId String? @db.Uuid
+  payerContextId         String? @db.Uuid
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, paymentType])
+  @@map("admission_requests")
+}
+
+/// Pre-admission verification checklist (auto-created with each AdmissionRequest)
+model AdmissionChecklist {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String   @db.Uuid
+  admissionRequestId   String   @db.Uuid
+  items                Json     @default("[]") // [{key, labelEn, labelAr, completed, completedBy, completedAt, notes, required}]
+  completionPercentage Float    @default(0)
+  allRequiredComplete  Boolean  @default(false)
+  createdAt            DateTime @default(now()) @db.Timestamptz
+  updatedAt            DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, admissionRequestId])
+  @@index([tenantId])
+  @@map("admission_checklists")
+}
+
+/// Temporary bed hold for pending admissions (4-hour default expiry)
+model BedReservation {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String   @db.Uuid
+  admissionRequestId String   @db.Uuid
+  bedId              String   @db.Uuid
+  reservedBy         String   @db.Uuid
+  reservedAt         DateTime @default(now()) @db.Timestamptz
+  expiresAt          DateTime @db.Timestamptz
+  status             String   @default("ACTIVE") // ACTIVE, CONFIRMED, EXPIRED, CANCELLED
+  createdAt          DateTime @default(now()) @db.Timestamptz
+  updatedAt          DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, admissionRequestId])
+  @@index([tenantId, bedId, status])
+  @@map("bed_reservations")
+}
+
+/// Inter-ward transfer request with clinical handoff
+model WardTransferRequest {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String    @db.Uuid
+  episodeId             String    @db.Uuid
+  patientMasterId       String    @db.Uuid
+  patientName           String
+  fromWard              String?
+  fromBed               String?
+  fromUnit              String?
+  toWard                String
+  toUnit                String?
+  toBedType             String?
+  toBedId               String?   @db.Uuid
+  reason                String
+  clinicalJustification String?
+  requestedBy           String    @db.Uuid
+  requestedAt           DateTime  @default(now()) @db.Timestamptz
+  approvedBy            String?   @db.Uuid
+  approvedAt            DateTime? @db.Timestamptz
+  completedBy           String?   @db.Uuid
+  completedAt           DateTime? @db.Timestamptz
+  transferSummary       String?
+  nursingHandoff        Json? // {pendingTasks, medsDue, vitalsTrend}
+
+  // ── Transfer Classification ──────────────────────────────────────
+  transferType   String  @default("REGULAR") // REGULAR, ESCALATION, STEP_DOWN
+  urgency        String  @default("ROUTINE") // ROUTINE, URGENT, EMERGENCY
+  targetUnitType String? // ICU, CCU, WARD
+
+  // ── Approval Workflow ────────────────────────────────────────────
+  requiresApproval Boolean   @default(true)
+  rejectedBy       String?   @db.Uuid
+  rejectedAt       DateTime? @db.Timestamptz
+  rejectionReason  String?
+
+  // ── Clinical Data (snapshot at time of request) ──────────────────
+  escalationCriteria Json? // {reasons: string[], clinicalFindings: string, deteriorationTimeline: string}
+  acuityData         Json? // {sofaScore: {...}, apacheScore: {...}, mewsScore: number, gcsScore: number, capturedAt: string}
+  sbarData           Json? // Full SBAR handoff data from lib/clinical/sbarTemplate.ts
+
+  // ── ICU Integration ──────────────────────────────────────────────
+  icuEventId      String? @db.Uuid // Links to IpdIcuEvent created on completion
+  orderTemplateId String? @db.Uuid // AdmissionOrderTemplate applied on completion
+  ordersApplied   Json? // [{orderId, title, kind}] snapshot of orders created
+
+  status    String   @default("REQUESTED") // REQUESTED, APPROVED, BED_ASSIGNED, COMPLETED, CANCELLED, REJECTED
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, episodeId])
+  @@index([tenantId, status])
+  @@index([tenantId, transferType])
+  @@index([tenantId, urgency])
+  @@map("ward_transfer_requests")
+}
+
+/// Admission order set templates (reusable per department/diagnosis)
+model AdmissionOrderTemplate {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String   @db.Uuid
+  name          String
+  nameAr        String?
+  departmentKey String
+  diagnosisCode String? // ICD-10 for auto-suggest
+  items         Json     @default("[]") // [{kind, orderCode, orderName, orderNameAr, priority, defaults, isRequired}]
+  isActive      Boolean  @default(true)
+  isDefault     Boolean  @default(false)
+  createdBy     String   @db.Uuid
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, departmentKey])
+  @@index([tenantId, isActive])
+  @@map("admission_order_templates")
+}

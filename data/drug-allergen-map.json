@@ -1,0 +1,197 @@
+{
+  "allergenClasses": {
+    "PENICILLIN": {
+      "name": "Penicillins",
+      "nameAr": "البنسلينات",
+      "drugs": [
+        "penicillin",
+        "amoxicillin",
+        "ampicillin",
+        "piperacillin",
+        "oxacillin",
+        "nafcillin",
+        "dicloxacillin",
+        "ticarcillin"
+      ],
+      "crossReactivity": {
+        "CEPHALOSPORIN": { "risk": "moderate", "percentage": "1-2%" }
+      }
+    },
+    "CEPHALOSPORIN": {
+      "name": "Cephalosporins",
+      "nameAr": "السيفالوسبورينات",
+      "drugs": [
+        "cephalexin",
+        "cefazolin",
+        "ceftriaxone",
+        "cefuroxime",
+        "cefixime",
+        "ceftazidime",
+        "cefepime",
+        "cefotaxime"
+      ],
+      "crossReactivity": {
+        "PENICILLIN": { "risk": "low", "percentage": "0.5-1%" }
+      }
+    },
+    "SULFONAMIDE": {
+      "name": "Sulfonamides",
+      "nameAr": "السلفوناميدات",
+      "drugs": [
+        "sulfamethoxazole",
+        "sulfasalazine",
+        "sulfadiazine",
+        "trimethoprim-sulfamethoxazole",
+        "bactrim",
+        "septra"
+      ],
+      "crossReactivity": {}
+    },
+    "NSAID": {
+      "name": "NSAIDs",
+      "nameAr": "مضادات الالتهاب",
+      "drugs": [
+        "ibuprofen",
+        "naproxen",
+        "aspirin",
+        "diclofenac",
+        "ketorolac",
+        "indomethacin",
+        "meloxicam",
+        "celecoxib"
+      ],
+      "crossReactivity": {
+        "ASPIRIN": { "risk": "high", "percentage": "cross-reactive" }
+      }
+    },
+    "OPIOID": {
+      "name": "Opioids",
+      "nameAr": "المسكنات الأفيونية",
+      "drugs": [
+        "morphine",
+        "codeine",
+        "tramadol",
+        "fentanyl",
+        "hydrocodone",
+        "oxycodone",
+        "meperidine"
+      ],
+      "crossReactivity": {}
+    },
+    "FLUOROQUINOLONE": {
+      "name": "Fluoroquinolones",
+      "nameAr": "الفلوروكينولونات",
+      "drugs": [
+        "ciprofloxacin",
+        "levofloxacin",
+        "moxifloxacin",
+        "ofloxacin",
+        "norfloxacin"
+      ],
+      "crossReactivity": {}
+    },
+    "MACROLIDE": {
+      "name": "Macrolides",
+      "nameAr": "الماكروليدات",
+      "drugs": ["azithromycin", "erythromycin", "clarithromycin"],
+      "crossReactivity": {}
+    },
+    "ACE_INHIBITOR": {
+      "name": "ACE Inhibitors",
+      "nameAr": "مثبطات ACE",
+      "drugs": [
+        "lisinopril",
+        "enalapril",
+        "ramipril",
+        "captopril",
+        "benazepril",
+        "fosinopril",
+        "quinapril"
+      ],
+      "crossReactivity": {}
+    },
+    "STATIN": {
+      "name": "Statins",
+      "nameAr": "الستاتينات",
+      "drugs": [
+        "atorvastatin",
+        "simvastatin",
+        "rosuvastatin",
+        "pravastatin",
+        "lovastatin",
+        "fluvastatin"
+      ],
+      "crossReactivity": {}
+    },
+    "CONTRAST": {
+      "name": "Iodinated Contrast",
+      "nameAr": "صبغة اليود",
+      "drugs": [
+        "iohexol",
+        "iopamidol",
+        "iodixanol",
+        "ioversol",
+        "contrast",
+        "iodine contrast"
+      ],
+      "crossReactivity": {}
+    },
+    "LOCAL_ANESTHETIC": {
+      "name": "Local Anesthetics",
+      "nameAr": "المخدرات الموضعية",
+      "drugs": [
+        "lidocaine",
+        "bupivacaine",
+        "ropivacaine",
+        "mepivacaine",
+        "procaine",
+        "benzocaine"
+      ],
+      "crossReactivity": {}
+    },
+    "LATEX": {
+      "name": "Latex",
+      "nameAr": "اللاتكس",
+      "drugs": ["latex"],
+      "crossReactivity": {
+        "BANANA": { "risk": "moderate", "percentage": "30-50%" },
+        "AVOCADO": { "risk": "moderate", "percentage": "30-50%" },
+        "KIWI": { "risk": "moderate", "percentage": "30-50%" }
+      }
+    }
+  },
+  "severityLevels": {
+    "contraindicated": {
+      "level": 1,
+      "name": "Contraindicated",
+      "nameAr": "ممنوع",
+      "color": "#DC2626",
+      "action": "BLOCK",
+      "requiresOverride": true
+    },
+    "high": {
+      "level": 2,
+      "name": "High Risk",
+      "nameAr": "خطورة عالية",
+      "color": "#EA580C",
+      "action": "WARN_HARD",
+      "requiresOverride": true
+    },
+    "moderate": {
+      "level": 3,
+      "name": "Moderate Risk",
+      "nameAr": "خطورة متوسطة",
+      "color": "#D97706",
+      "action": "WARN_SOFT",
+      "requiresOverride": false
+    },
+    "low": {
+      "level": 4,
+      "name": "Low Risk",
+      "nameAr": "خطورة منخفضة",
+      "color": "#65A30D",
+      "action": "INFO",
+      "requiresOverride": false
+    }
+  }
+}

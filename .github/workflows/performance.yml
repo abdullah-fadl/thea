@@ -1,0 +1,62 @@
+# ==============================================================================
+# Thea EHR — Performance Benchmarks
+# ==============================================================================
+# Runs weekly (Monday 3 AM UTC) and on manual dispatch.
+# Generates a performance report artifact with response time benchmarks.
+# ==============================================================================
+
+name: Performance Benchmarks
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  performance:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: thea_test
+          POSTGRES_PASSWORD: thea_test_pass
+          POSTGRES_DB: thea_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    env:
+      DATABASE_URL: postgresql://thea_test:thea_test_pass@localhost:5432/thea_test
+      DIRECT_URL: postgresql://thea_test:thea_test_pass@localhost:5432/thea_test
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-test-secret-do-not-use-in-production
+      THEA_OWNER_EMAIL: ci@thea.com.sa
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: npx prisma generate
+      - run: npx prisma db push --skip-generate || true
+      - run: yarn seed:test || true
+      - run: yarn dev &
+      - run: npx wait-on http://localhost:3000 --timeout 60000
+      - run: yarn test:perf:report
+      - uses: actions/upload-artifact@v4
+        with:
+          name: performance-report
+          path: test-results/performance-report.md
