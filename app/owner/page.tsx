@@ -45,7 +45,7 @@ export default function OwnerDashboardPage() {
 
     const userRole = me.user?.role;
     
-    if (userRole === 'thea-owner') {
+    if (userRole === 'thea-owner' || userRole === 'THEA_OWNER') {
       setIsOwner(true);
       fetchStats();
     } else {
