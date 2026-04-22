@@ -68,6 +68,7 @@ const COMMON_ROUTES = [
 ];
 
 const HEALTH_ROUTES = [
+  '/admin',
   '/dashboard', // Main dashboard for Thea Health
   '/registration',
   '/search',
@@ -139,6 +140,7 @@ const SAM_API_ROUTES = [
 
 // Health API routes
 const HEALTH_API_ROUTES = [
+  '/api/admin',
   '/api/departments',
   '/api/patients',
   '/api/encounters',

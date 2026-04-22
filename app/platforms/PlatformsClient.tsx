@@ -319,6 +319,45 @@ export default function PlatformsClient({ userName, hospitalName, entitlements }
     }
   }, [currentPlatform, router, mutatePlatform, toast]);
 
+  const handleAdminClick = useCallback(async () => {
+    // Admin UI lives under health routes, so ensure health platform is active first.
+    if (currentPlatform !== 'health') {
+      setIsSwitching('health');
+      try {
+        const response = await fetch('/api/platform/switch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ platform: 'health' }),
+          credentials: 'include',
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          toast({
+            title: tr('تعذر فتح لوحة الإدارة', 'Unable to open admin panel'),
+            description: data?.message || tr('ليس لديك صلاحية منصة الصحة', 'You are not entitled to Thea Health platform'),
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        await mutatePlatform();
+      } catch {
+        toast({
+          title: tr('خطأ في الشبكة', 'Network error'),
+          description: tr('تعذر التبديل إلى منصة الصحة', 'Failed to switch to Thea Health platform'),
+          variant: 'destructive',
+        });
+        return;
+      } finally {
+        setIsSwitching(null);
+      }
+    }
+
+    router.push('/admin');
+    router.refresh();
+  }, [currentPlatform, mutatePlatform, router, toast, tr]);
+
   // Keyboard shortcuts for accessibility
   useEffect(() => {
     if (!accessibilitySettings.keyboardNavigation) return;
@@ -531,11 +570,11 @@ export default function PlatformsClient({ userName, hospitalName, entitlements }
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => router.push('/admin')}
+                    onClick={handleAdminClick}
                     className="gap-2"
                   >
                     <Settings className="h-4 w-4" />
-                    Admin
+                    {tr('الإدارة', 'Admin')}
                   </Button>
                 )}
                 <Button
