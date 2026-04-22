@@ -296,6 +296,10 @@ export default function TenantDetailsPage() {
     if (!tenant || !tenantId) return;
     setIsSaving(true);
     try {
+      const normalizedSubscriptionEndsAt = tenant.subscriptionEndsAt
+        ? new Date(tenant.subscriptionEndsAt).toISOString()
+        : undefined;
+
       const response = await fetch(`/api/owner/tenants/${tenantId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -304,7 +308,7 @@ export default function TenantDetailsPage() {
           status: tenant.status,
           planType: tenant.planType,
           maxUsers: tenant.maxUsers,
-          subscriptionEndsAt: tenant.subscriptionEndsAt?.toISOString(),
+          subscriptionEndsAt: normalizedSubscriptionEndsAt,
         }),
         credentials: 'include',
       });
@@ -352,9 +356,12 @@ export default function TenantDetailsPage() {
         await fetchTenant();
       } else {
         const error = await response.json();
-        const errorMessage = error.details 
-          ? `${error.error || 'Invalid request'}: ${JSON.stringify(error.details)}`
-          : error.message || error.error || 'Failed to create admin';
+        const passwordErrors = Array.isArray(error?.details?.password)
+          ? error.details.password.join(', ')
+          : '';
+        const errorMessage = passwordErrors
+          ? tr(`كلمة المرور غير صالحة: ${passwordErrors}`, `Invalid password: ${passwordErrors}`)
+          : error.message || error.error || tr('فشل إنشاء المدير', 'Failed to create admin');
         throw new Error(errorMessage);
       }
     } catch (error) {
@@ -939,10 +946,10 @@ export default function TenantDetailsPage() {
                           type="password"
                           value={adminForm.password}
                           onChange={(e) => setAdminForm({ ...adminForm, password: e.target.value })}
-                          minLength={6}
+                          minLength={8}
                         />
                         <p className="text-xs text-muted-foreground mt-1">
-                          {tr('يجب أن تكون 6 أحرف على الأقل', 'Must be at least 6 characters')}
+                          {tr('يجب أن تكون 8 أحرف على الأقل', 'Must be at least 8 characters')}
                         </p>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
@@ -974,7 +981,7 @@ export default function TenantDetailsPage() {
                           isSaving || 
                           !adminForm.email || 
                           !adminForm.password || 
-                          adminForm.password.length < 6 ||
+                          adminForm.password.length < 8 ||
                           !adminForm.firstName ||
                           !adminForm.lastName
                         }
