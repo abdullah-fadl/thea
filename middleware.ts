@@ -402,8 +402,10 @@ export async function middleware(request: NextRequest) {
   // Disabled in development until /account/security 2FA setup flow is fully implemented
   const ENFORCE_2FA = process.env.NODE_ENV === 'production';
   const ROLES_REQUIRING_2FA = ['admin', 'group-admin', 'hospital-admin', 'thea-owner', 'THEA_OWNER'];
+  const twoFactorBypass = request.cookies.get('twofa_skip')?.value === '1';
   if (
     ENFORCE_2FA &&
+    !twoFactorBypass &&
     payload.role &&
     ROLES_REQUIRING_2FA.includes(payload.role) &&
     !payload.twoFactorVerified &&

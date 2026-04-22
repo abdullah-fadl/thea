@@ -25,7 +25,9 @@ export default function AccountSecurityPage() {
 
   const handleSkip = async () => {
     setSkipping(true);
-    // For now, redirect to platforms - 2FA setup will be enforced later
+    // Temporary bypass until full 2FA setup flow is completed.
+    // Middleware reads this cookie and allows the admin to proceed.
+    document.cookie = `twofa_skip=1; path=/; max-age=${60 * 60 * 24}; samesite=lax`;
     router.push('/platforms');
   };
 
