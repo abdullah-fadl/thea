@@ -9,7 +9,6 @@
  */
 
 import { cvisionDb, type PrismaCollection, type PrismaDb } from '@/lib/cvision/prisma-db';
-import { prisma } from '@/lib/db/prisma';
 import { CVISION_COLLECTIONS, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from './constants';
 import type { CVisionBaseRecord, CVisionListParams, CVisionListResponse } from './types';
 
@@ -193,6 +192,7 @@ export async function generateSequenceNumber(
   prefix: string,
   padLength = 6
 ): Promise<string> {
+  const { prisma } = await import('@/lib/db/prisma');
   try {
     const existing = await prisma.cvisionSequence.findFirst({
       where: { tenantId, entityType: prefix },

@@ -2,9 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { isAuthenticatedFromTokenCookie } from '@/lib/shell/auth';
 import { ACTIVE_PLATFORM_COOKIE, parseActivePlatform, platformHomePath } from '@/lib/shell/platform';
-import dynamic from 'next/dynamic';
-
-const WebsiteHomePage = dynamic(() => import('@/components/website/WebsiteHomePage'), { ssr: false });
+import WebsiteHomePage from '@/components/website/WebsiteHomePage';
 
 export default async function HomePage() {
   const cookieStore = await cookies();
