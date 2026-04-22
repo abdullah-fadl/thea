@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client';
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -191,7 +190,7 @@ export default function AdminRolesPage() {
         }),
       });
       if (!response.ok) {
-        const data = await response.json().catch(() => ({} as Prisma.InputJsonValue));
+        const data = await response.json().catch(() => ({} as Record<string, unknown>));
         const code = typeof data?.code === 'string' ? data.code : '';
 
         if (code === 'ROLE_KEY_BLOCKED') {
