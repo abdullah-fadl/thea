@@ -34,6 +34,35 @@ export default function GlobalError({
 
   const tr = (ar: string, en: string) => lang === 'ar' ? ar : en;
   const isRTL = lang === 'ar';
+  const goBack = () => {
+    if (typeof window === 'undefined') return;
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    window.location.href = '/platforms';
+  };
+
+  const forceLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {
+      // Ignore network issues and continue clearing local state.
+    }
+
+    try {
+      localStorage.removeItem('thea:platform');
+      localStorage.removeItem('thea:selectedPlatform');
+      sessionStorage.clear();
+    } catch {
+      // Best effort cleanup only.
+    }
+
+    window.location.href = '/login';
+  };
 
   return (
     <html lang={lang} dir={isRTL ? 'rtl' : 'ltr'}>
@@ -95,7 +124,7 @@ export default function GlobalError({
           </p>
         )}
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
           <button
             onClick={() => reset()}
             style={{
@@ -112,7 +141,7 @@ export default function GlobalError({
             {tr('حاول مرة أخرى', 'Try Again')}
           </button>
           <button
-            onClick={() => (window.location.href = '/platforms')}
+            onClick={goBack}
             style={{
               padding: '0.5rem 1.25rem',
               backgroundColor: '#f3f4f6',
@@ -124,7 +153,22 @@ export default function GlobalError({
               fontWeight: 500,
             }}
           >
-            {tr('الصفحة الرئيسية', 'Go to Dashboard')}
+            {tr('رجوع', 'Go Back')}
+          </button>
+          <button
+            onClick={forceLogout}
+            style={{
+              padding: '0.5rem 1.25rem',
+              backgroundColor: '#fff7ed',
+              color: '#9a3412',
+              border: '1px solid #fdba74',
+              borderRadius: '0.5rem',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+            }}
+          >
+            {tr('تسجيل الخروج', 'Sign Out')}
           </button>
         </div>
       </body>
