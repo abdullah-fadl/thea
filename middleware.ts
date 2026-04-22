@@ -500,6 +500,7 @@ export async function middleware(request: NextRequest) {
       // Block owner from accessing tenant pages (policies, dashboard, etc.)
       // Only allow /owner, /platforms (hub), /login, /welcome
       if (!pathname.startsWith('/owner') && 
+          !pathname.startsWith('/account/security') &&
           pathname !== '/platforms' && 
           pathname !== '/login' && 
           pathname !== '/welcome' &&
@@ -597,7 +598,15 @@ export async function middleware(request: NextRequest) {
   // If user is logged in but no platform cookie, redirect to platform selection
   // Skip this check for /owner routes (owner doesn't need platform cookie)
   // Skip for owner without approved access (they should be in /owner)
-  if (!platform && !pathname.startsWith(apiPrefix) && !pathname.startsWith('/owner') && pathname !== '/platforms' && pathname !== '/welcome' && pathname !== '/select-platform') {
+  if (
+    !platform &&
+    !pathname.startsWith(apiPrefix) &&
+    !pathname.startsWith('/owner') &&
+    !pathname.startsWith('/account/security') &&
+    pathname !== '/platforms' &&
+    pathname !== '/welcome' &&
+    pathname !== '/select-platform'
+  ) {
     // For owner without approved access, redirect to /owner
     if (isOwnerRole && !approvedAccessValid && !ownerBypass) {
       return NextResponse.redirect(new URL('/owner', request.url));
