@@ -21,6 +21,16 @@ function getLocalIPs() {
 const nextConfig = {
   // Standalone output for Docker deployments (Dockerfile copies .next/standalone).
   output: 'standalone',
+  // Avoid running ESLint in `next build` on Vercel to prevent heap OOM on very large codebases.
+  // Keep lint enforcement via `yarn lint` in CI/local workflows.
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  // Type checking can exceed memory limits on hosted builders for this monorepo-scale app.
+  // Keep strict checks in a separate `yarn typecheck` step instead of blocking deploy builds.
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   // Keep Prisma client external so its internal "graph" is not broken in production (avoids "reading 'graph'" error).
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client', '@prisma/adapter-pg'],
