@@ -14,24 +14,55 @@ import { logger } from '@/lib/monitoring/logger';
 
 const isDev = process.env.NODE_ENV === 'development';
 
+/** True while `next build` / `next export` analyzes routes — env may be unset in CI. */
+function isNextJsCompilationPhase(): boolean {
+  return (
+    process.env.NEXT_PHASE === 'phase-production-build' ||
+    process.env.NEXT_PHASE === 'phase-export'
+  );
+}
+
+/**
+ * Stub values used only during Next.js build so importing `@/lib/env` via route
+ * graphs (e.g. `@/lib/auth`) does not throw before serverless runtime env applies.
+ * Real DATABASE_URL / JWT_SECRET must still be set in Vercel (Production) at runtime.
+ */
+const BUILD_PHASE_ENV_FALLBACK: Record<'DATABASE_URL' | 'JWT_SECRET', string> = {
+  DATABASE_URL: 'postgresql://build:build@127.0.0.1:5432/build_placeholder?schema=public',
+  JWT_SECRET:
+    '__next_build_placeholder_jwt_secret_must_be_replaced_at_runtime_0123456789__',
+};
+
 /**
  * Validates that a required environment variable is present
  */
 function requireEnv(key: string): string {
   const value = process.env[key];
-  
+
   if (!value || value.trim() === '') {
+    if (
+      isNextJsCompilationPhase() &&
+      (key === 'DATABASE_URL' || key === 'JWT_SECRET')
+    ) {
+      return BUILD_PHASE_ENV_FALLBACK[key];
+    }
+
     const errorMessage = `Required environment variable "${key}" is missing or empty.`;
-    
+
     if (isDev) {
       logger.error(errorMessage, { category: 'system', key });
-      logger.error('Available env vars hint', { category: 'system', matchingKeys: Object.keys(process.env).filter(k => k.includes(key.toUpperCase().replace('_', ''))) });
+      logger.error('Available env vars hint', {
+        category: 'system',
+        matchingKeys: Object.keys(process.env).filter((k) =>
+          k.includes(key.toUpperCase().replace('_', '')),
+        ),
+      });
       logger.error('Tip: Copy .env.example to .env.local and fill in the values.', { category: 'system' });
     }
-    
+
     throw new Error(errorMessage);
   }
-  
+
   return value;
 }
 
