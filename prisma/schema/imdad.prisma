@@ -1,0 +1,4155 @@
+// =============================================================================
+// Imdad (Supply Chain) Domain
+// Auto-generated from database introspection - 2026-04-01
+// =============================================================================
+
+enum ImdadAdjustmentReason {
+  PHYSICAL_COUNT
+  DAMAGE
+  EXPIRY
+  THEFT
+  SYSTEM_CORRECTION
+  RETURN
+  DONATION
+  SAMPLE
+  TRANSFER_CORRECTION
+  OTHER
+}
+
+enum ImdadAlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum ImdadAnnualPlanStatus {
+  DRAFT
+  DEPARTMENT_REVIEW
+  HOSPITAL_REVIEW
+  CORPORATE_REVIEW
+  APPROVED
+  PARTIALLY_APPROVED
+  REJECTED
+  REVISION_REQUESTED
+  FINALIZED
+}
+
+enum ImdadApprovalDocumentType {
+  PURCHASE_REQUISITION
+  PURCHASE_ORDER
+  CONTRACT
+  BUDGET
+  ASSET_DISPOSAL
+  BUDGET_TRANSFER
+  INVOICE
+}
+
+enum ImdadApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  DELEGATED
+  ESCALATED
+  TIMED_OUT
+}
+
+enum ImdadApproverType {
+  SPECIFIC_USER
+  ROLE
+  DEPARTMENT_HEAD
+  COST_CENTER_OWNER
+}
+
+enum ImdadAssetStatus {
+  IN_SERVICE
+  OUT_OF_SERVICE
+  UNDER_MAINTENANCE
+  CALIBRATION_DUE
+  CONDEMNED
+  DISPOSED
+  IN_STORAGE
+  TRANSFERRED
+}
+
+enum ImdadAttachmentCategory {
+  VENDOR_DOCUMENT
+  CONTRACT
+  INVOICE
+  GRN_PHOTO
+  QUALITY_CERTIFICATE
+  SFDA_REGISTRATION
+  INSURANCE_CERTIFICATE
+  DELIVERY_NOTE
+  CORRESPONDENCE
+  OTHER
+}
+
+enum ImdadAuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  APPROVE
+  REJECT
+  SUBMIT
+  RECEIVE
+  DISPENSE
+  TRANSFER
+  ADJUST
+  RESERVE
+  RELEASE
+  OVERRIDE
+  ESCALATE
+  CONFIGURE
+  LOGIN
+  EXPORT
+  IMPORT_DATA
+}
+
+enum ImdadAuditOutcome {
+  COMPLIANT
+  MINOR_FINDINGS
+  MAJOR_FINDINGS
+  CRITICAL_FINDINGS
+  NON_COMPLIANT
+}
+
+enum ImdadBatchStatus {
+  ACTIVE
+  QUARANTINE
+  EXPIRED
+  CONSUMED
+  RECALLED
+  RETURNED
+}
+
+enum ImdadBenchmarkMetric {
+  COST_PER_BED
+  EQUIPMENT_AGE_RATIO
+  MAINTENANCE_COST_RATIO
+  SUPPLY_COST_PER_PATIENT
+  UTILIZATION_RATE
+  DOWNTIME_RATIO
+  PROCUREMENT_CYCLE_TIME
+  BUDGET_VARIANCE
+}
+
+enum ImdadBinStatus {
+  AVAILABLE
+  OCCUPIED
+  RESERVED
+  MAINTENANCE
+  BLOCKED
+}
+
+enum ImdadBudgetPeriodType {
+  MONTHLY
+  QUARTERLY
+  SEMI_ANNUAL
+  ANNUAL
+  PROJECT
+}
+
+enum ImdadBudgetStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  ACTIVE
+  FROZEN
+  CLOSED
+  REJECTED
+}
+
+enum ImdadBudgetTransferStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXECUTED
+}
+
+enum ImdadCertificateType {
+  SFDA_REGISTRATION
+  GMP_CERTIFICATE
+  ISO_CERTIFICATE
+  HALAL_CERTIFICATE
+  COA
+  COC
+  INSURANCE
+  IMPORT_LICENSE
+  STORAGE_LICENSE
+  OTHER
+}
+
+enum ImdadChargeStatus {
+  PENDING
+  CHARGED
+  REVERSED
+  VOIDED
+  BILLED
+}
+
+enum ImdadChargeType {
+  CONSUMPTION
+  REQUISITION
+  PO_RECEIPT
+  RETURN_CREDIT
+  ADJUSTMENT
+  WASTE
+  INTERDEPT
+}
+
+enum ImdadConfigScope {
+  GLOBAL
+  ORGANIZATION
+  DEPARTMENT
+  USER
+}
+
+enum ImdadContractStatus {
+  DRAFT
+  PENDING_APPROVAL
+  ACTIVE
+  EXPIRING_SOON
+  EXPIRED
+  TERMINATED
+  SUSPENDED
+}
+
+enum ImdadContractType {
+  SUPPLY_AGREEMENT
+  FRAMEWORK_AGREEMENT
+  SERVICE_AGREEMENT
+  CONSIGNMENT
+  BLANKET_ORDER
+}
+
+enum ImdadCycleCountFrequency {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  ANNUAL
+}
+
+enum ImdadDecisionActionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  SKIPPED
+  CANCELLED
+}
+
+enum ImdadDecisionActionType {
+  PURCHASE_REQUISITION
+  TRANSFER_REQUEST
+  MAINTENANCE_ORDER
+  VENDOR_EVALUATION
+  BUDGET_REALLOCATION
+  ALERT_NOTIFICATION
+  SCHEDULE_INSPECTION
+  EMERGENCY_ORDER
+  DISPOSAL_REQUEST
+  CONTRACT_RENEWAL
+}
+
+enum ImdadDecisionStatus {
+  GENERATED
+  PENDING_REVIEW
+  AUTO_APPROVED
+  APPROVED
+  REJECTED
+  EXECUTING
+  COMPLETED
+  OVERRIDDEN
+  EXPIRED
+}
+
+enum ImdadDecisionType {
+  DEVICE_REPLACEMENT
+  BUDGET_ALLOCATION
+  SUPPLY_REORDER
+  VENDOR_SWITCH
+  RISK_MITIGATION
+  COST_OPTIMIZATION
+  PHASED_INVESTMENT
+  COMPLIANCE_ACTION
+  CAPACITY_EXPANSION
+  EMERGENCY_PROCUREMENT
+}
+
+enum ImdadDepreciationMethod {
+  STRAIGHT_LINE
+  DECLINING_BALANCE
+  SUM_OF_YEARS
+  UNITS_OF_PRODUCTION
+}
+
+enum ImdadDeviceReplacementUrgency {
+  IMMEDIATE
+  WITHIN_6_MONTHS
+  WITHIN_1_YEAR
+  WITHIN_2_YEARS
+  WITHIN_3_YEARS
+  MONITOR_ONLY
+}
+
+enum ImdadDiscrepancyResolution {
+  ACCEPT_AS_IS
+  RETURN_TO_VENDOR
+  CREDIT_NOTE
+  REPLACEMENT
+  PARTIAL_ACCEPT
+}
+
+enum ImdadDispenseStatus {
+  PENDING
+  PICKING
+  PICKED
+  VERIFIED
+  DISPENSED
+  PARTIALLY_DISPENSED
+  RETURNED
+  CANCELLED
+}
+
+enum ImdadDisposalMethod {
+  SOLD
+  DONATED
+  SCRAPPED
+  RETURNED_VENDOR
+  TRADED_IN
+  RECYCLED
+}
+
+enum ImdadEscalationLevel {
+  NONE
+  DEPARTMENT
+  HOSPITAL
+  CORPORATE
+}
+
+enum ImdadEventBusChannel {
+  INVENTORY
+  PROCUREMENT
+  WAREHOUSE
+  FINANCIAL
+  CLINICAL
+  QUALITY
+  ASSET
+  ANALYTICS
+  PLATFORM
+}
+
+enum ImdadEventBusStatus {
+  PENDING
+  PROCESSING
+  DELIVERED
+  FAILED
+  DEAD_LETTER
+}
+
+enum ImdadFormularyStatus {
+  ACTIVE
+  RESTRICTED
+  NON_FORMULARY
+  DISCONTINUED
+  PENDING_REVIEW
+}
+
+enum ImdadGRNStatus {
+  DRAFT
+  PENDING_QC
+  ACCEPTED
+  PARTIALLY_ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+enum ImdadInspectionStatus {
+  SCHEDULED
+  IN_PROGRESS
+  PASSED
+  FAILED
+  CONDITIONAL_PASS
+  CANCELLED
+  ON_HOLD
+}
+
+enum ImdadInspectionType {
+  INCOMING
+  IN_PROCESS
+  OUTGOING
+  RANDOM
+  COMPLAINT_DRIVEN
+  PERIODIC
+  RECALL
+}
+
+enum ImdadInvestmentPhase {
+  PHASE_1
+  PHASE_2
+  PHASE_3
+  SINGLE_PHASE
+}
+
+enum ImdadInvoiceStatus {
+  DRAFT
+  RECEIVED
+  VERIFIED
+  MATCHED
+  DISPUTED
+  APPROVED
+  PAID
+  PARTIALLY_PAID
+  CANCELLED
+  VOIDED
+}
+
+enum ImdadItemStatus {
+  ACTIVE
+  INACTIVE
+  DISCONTINUED
+  PENDING_APPROVAL
+  RECALLED
+}
+
+enum ImdadItemType {
+  PHARMACEUTICAL
+  MEDICAL_SUPPLY
+  MEDICAL_DEVICE
+  LABORATORY
+  SURGICAL
+  GENERAL
+  FOOD_SERVICE
+  MAINTENANCE
+  IT_EQUIPMENT
+  FURNITURE
+  LINEN
+  CLEANING
+  IMPLANT
+  REAGENT
+}
+
+enum ImdadKpiPeriodType {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  ANNUAL
+}
+
+enum ImdadMaintenanceStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+  CANCELLED
+  DEFERRED
+}
+
+enum ImdadMaintenanceType {
+  PREVENTIVE
+  CORRECTIVE
+  CALIBRATION
+  SAFETY_CHECK
+  UPGRADE
+  INSTALLATION
+}
+
+enum ImdadMovementType {
+  RECEIPT
+  ISSUE
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+  TRANSFER_IN
+  TRANSFER_OUT
+  RETURN_TO_VENDOR
+  RETURN_FROM_DEPARTMENT
+  WRITE_OFF
+  DISPENSING
+  CONSUMPTION
+}
+
+enum ImdadNotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum ImdadNotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum ImdadPOStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  SENT
+  ACKNOWLEDGED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  INVOICED
+  CLOSED
+  CANCELLED
+}
+
+enum ImdadPRStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  PARTIALLY_APPROVED
+  REJECTED
+  CANCELLED
+  CONVERTED
+}
+
+enum ImdadPaymentMethod {
+  BANK_TRANSFER
+  CHECK
+  ELECTRONIC
+  CREDIT_CARD
+  CASH
+}
+
+enum ImdadPaymentStatus {
+  PENDING
+  APPROVED
+  SUBMITTED
+  PROCESSED
+  FAILED
+  CANCELLED
+}
+
+enum ImdadPickStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  PICKED
+  PACKED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum ImdadPlatformKey {
+  IMDAD
+}
+
+enum ImdadProposalCategory {
+  CAPITAL_EQUIPMENT
+  OPERATIONAL_SUPPLY
+  MAINTENANCE_CONTRACT
+  TECHNOLOGY_UPGRADE
+  FACILITY_IMPROVEMENT
+  STAFFING
+  TRAINING
+  REGULATORY_COMPLIANCE
+  EMERGENCY_RESERVE
+}
+
+enum ImdadProposalPriority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  DEFERRED
+}
+
+enum ImdadPutAwayStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ImdadRecallSeverity {
+  CLASS_I
+  CLASS_II
+  CLASS_III
+  VOLUNTARY
+}
+
+enum ImdadRecallStatus {
+  DRAFT
+  INITIATED
+  IN_PROGRESS
+  PARTIALLY_COMPLETED
+  COMPLETED
+  CLOSED
+  CANCELLED
+}
+
+enum ImdadReorderMethod {
+  MIN_MAX
+  PAR_LEVEL
+  ECONOMIC_ORDER_QTY
+  DEMAND_FORECAST
+  MANUAL
+}
+
+enum ImdadReturnReason {
+  PATIENT_DISCHARGE
+  MEDICATION_CHANGE
+  ADVERSE_REACTION
+  EXPIRED
+  DAMAGED
+  DUPLICATE_ORDER
+  CANCELLED_ORDER
+  OTHER
+}
+
+enum ImdadRoleType {
+  IMDAD_CORPORATE_DIRECTOR
+  IMDAD_CORPORATE_MANAGER
+  IMDAD_CORPORATE_ANALYST
+  IMDAD_CORPORATE_AUDITOR
+  IMDAD_HOSPITAL_DIRECTOR
+  IMDAD_HOSPITAL_MANAGER
+  IMDAD_PROCUREMENT_OFFICER
+  IMDAD_PROCUREMENT_STAFF
+  IMDAD_WAREHOUSE_MANAGER
+  IMDAD_WAREHOUSE_STAFF
+  IMDAD_INVENTORY_MANAGER
+  IMDAD_INVENTORY_STAFF
+  IMDAD_QUALITY_OFFICER
+  IMDAD_BUDGET_CONTROLLER
+  IMDAD_DEPARTMENT_REQUESTER
+  IMDAD_DEPARTMENT_HEAD
+  IMDAD_NURSE_REQUESTER
+  IMDAD_PHARMACIST
+  IMDAD_CABINET_TECHNICIAN
+  IMDAD_VENDOR_PORTAL
+  IMDAD_ASSET_MANAGER
+  IMDAD_FINANCE_OFFICER
+  IMDAD_COMPLIANCE_OFFICER
+  IMDAD_VIEWER
+}
+
+enum ImdadSessionStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum ImdadSignalSeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  INFO
+}
+
+enum ImdadSignalType {
+  LIFECYCLE_BREACH
+  FAILURE_SPIKE
+  STOCKOUT_RISK
+  EXPIRY_WARNING
+  BUDGET_OVERRUN
+  COMPLIANCE_GAP
+  DEMAND_SURGE
+  VENDOR_RISK
+  TEMPERATURE_BREACH
+  COMPATIBILITY_GAP
+  UTILIZATION_DROP
+  MAINTENANCE_COST_SPIKE
+  SAFETY_ALERT
+  RECALL_TRIGGER
+}
+
+enum ImdadStockCountStatus {
+  DRAFT
+  IN_PROGRESS
+  PENDING_REVIEW
+  APPROVED
+  CANCELLED
+}
+
+enum ImdadSupplyRequestPriority {
+  ROUTINE
+  URGENT
+  EMERGENCY
+}
+
+enum ImdadSupplyRequestStatus {
+  DRAFT
+  SUBMITTED
+  IN_APPROVAL
+  APPROVED
+  REJECTED
+  PO_GENERATED
+  WORK_ORDER_CREATED
+  TRANSFER_INITIATED
+  BUDGET_APPROVED
+  COMPLETED
+  DELIVERED
+}
+
+enum ImdadSupplyRequestType {
+  SUPPLY_REQUEST
+  MAINTENANCE_REQUEST
+  TRANSFER_REQUEST
+  BUDGET_REQUEST
+  REPLENISHMENT_REQUEST
+}
+
+enum ImdadTemperatureZone {
+  AMBIENT
+  COOL
+  FROZEN
+  DEEP_FROZEN
+  CONTROLLED_ROOM
+}
+
+enum ImdadTransferStatus {
+  DRAFT
+  REQUESTED
+  APPROVED
+  IN_TRANSIT
+  RECEIVED
+  COMPLETED
+  CANCELLED
+  REJECTED
+}
+
+enum ImdadTransferType {
+  INTER_WAREHOUSE
+  INTER_DEPARTMENT
+  ZONE_TO_ZONE
+  REPLENISHMENT
+  RETURN
+  EMERGENCY
+}
+
+enum ImdadVendorStatus {
+  PENDING_APPROVAL
+  APPROVED
+  CONDITIONAL
+  PROBATION
+  SUSPENDED
+  BLACKLISTED
+}
+
+enum ImdadVendorTier {
+  PREFERRED
+  APPROVED
+  CONDITIONAL
+  PROBATION
+  SUSPENDED
+}
+
+enum ImdadWarehouseZoneType {
+  GENERAL
+  COLD_CHAIN
+  CONTROLLED
+  HAZMAT
+  HIGH_VALUE
+  QUARANTINE
+  RECEIVING
+  STAGING
+  RETURNS
+}
+
+model ImdadAlertInstance {
+  id              String              @id @db.Uuid
+  tenantId        String              @db.Uuid
+  organizationId  String              @db.Uuid
+  alertRuleId     String              @db.Uuid
+  ruleCode        String
+  ruleName        String
+  severity        ImdadAlertSeverity
+  kpiCode         String
+  actualValue     Decimal
+  thresholdValue  Decimal
+  message         String
+  messageAr       String?
+  status          String              @default("ACTIVE")
+  acknowledgedBy  String?             @db.Uuid
+  acknowledgedAt  DateTime?           @db.Timestamptz
+  resolvedAt      DateTime?           @db.Timestamptz
+  resolvedBy      String?             @db.Uuid
+  firedAt         DateTime            @default(now()) @db.Timestamptz
+  metadata        Json?               @db.JsonB
+  version         Int                 @default(1)
+  isDeleted       Boolean             @default(false)
+  createdAt       DateTime            @default(now()) @db.Timestamptz
+  updatedAt       DateTime            @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_alert_instances")
+}
+
+model ImdadAlertRule {
+  id               String              @id @db.Uuid
+  tenantId         String              @db.Uuid
+  organizationId   String              @db.Uuid
+  ruleName         String
+  ruleNameAr       String?
+  ruleCode         String
+  kpiCode          String
+  conditionType    String
+  thresholdValue   Decimal
+  severity         ImdadAlertSeverity  @default(WARNING)
+  scopeType        String?
+  scopeId          String?             @db.Uuid
+  notifyRoles      String[]            @default(dbgenerated("ARRAY[]::text[]"))
+  notifyUserIds    String[]            @default(dbgenerated("ARRAY[]::text[]"))
+  notifyChannels   String[]            @default(dbgenerated("ARRAY['IN_APP'::text]"))
+  cooldownMinutes  Int                 @default(60)
+  lastTriggeredAt  DateTime?           @db.Timestamptz
+  isActive         Boolean             @default(true)
+  metadata         Json?               @db.JsonB
+  version          Int                 @default(1)
+  isDeleted        Boolean             @default(false)
+  createdAt        DateTime            @default(now()) @db.Timestamptz
+  updatedAt        DateTime            @db.Timestamptz
+  createdBy        String?             @db.Uuid
+  updatedBy        String?             @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, ruleCode])
+  @@index([tenantId])
+  @@map("imdad_alert_rules")
+}
+
+model ImdadAnnualBudgetPlan {
+  id                      String                 @id @db.Uuid
+  tenantId                String                 @db.Uuid
+  organizationId          String                 @db.Uuid
+  fiscalYear              Int
+  planCode                String
+  planName                String
+  planNameAr              String?
+  status                  ImdadAnnualPlanStatus  @default(DRAFT)
+  submittedAt             DateTime?              @db.Timestamptz
+  submittedBy             String?                @db.Uuid
+  reviewedAt              DateTime?              @db.Timestamptz
+  reviewedBy              String?                @db.Uuid
+  approvedAt              DateTime?              @db.Timestamptz
+  approvedBy              String?                @db.Uuid
+  totalCapitalBudget      Decimal                @default(0)
+  totalOperationalBudget  Decimal                @default(0)
+  totalMaintenanceBudget  Decimal                @default(0)
+  totalRequestedAmount    Decimal                @default(0)
+  totalApprovedAmount     Decimal                @default(0)
+  totalAllocatedAmount    Decimal                @default(0)
+  currency                String                 @default("SAR")
+  corporateNotes          String?
+  corporateNotesAr        String?
+  aiSummary               String?
+  aiSummaryAr             String?
+  aiRiskScore             Decimal?
+  aiOptimizationSavings   Decimal?
+  metadata                Json?                  @db.JsonB
+  version                 Int                    @default(1)
+  isDeleted               Boolean                @default(false)
+  createdAt               DateTime               @default(now()) @db.Timestamptz
+  updatedAt               DateTime               @db.Timestamptz
+  createdBy               String?                @db.Uuid
+  updatedBy               String?                @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, fiscalYear, planCode])
+  @@index([tenantId])
+  @@map("imdad_annual_budget_plans")
+}
+
+model ImdadApprovalDecision {
+  id              String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String               @db.Uuid
+  organizationId  String               @db.Uuid
+  requestId       String               @db.Uuid
+  stepNumber      Int
+  approverId      String               @db.Uuid
+  status          ImdadApprovalStatus
+  comments        String?
+  delegatedToId   String?              @db.Uuid
+  decidedAt       DateTime             @default(now()) @db.Timestamptz
+  isSoDViolation  Boolean              @default(false)
+  version         Int                  @default(1)
+  isDeleted       Boolean              @default(false)
+  createdAt       DateTime             @default(now()) @db.Timestamptz
+  updatedAt       DateTime             @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_approval_decisions")
+}
+
+model ImdadApprovalDelegation {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  organizationId   String    @db.Uuid
+  delegatorUserId  String    @db.Uuid
+  delegateUserId   String    @db.Uuid
+  validFrom        DateTime  @db.Timestamptz
+  validUntil       DateTime  @db.Timestamptz
+  documentTypes    String[]
+  isActive         Boolean   @default(true)
+  reason           String?
+  version          Int       @default(1)
+  isDeleted        Boolean   @default(false)
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+  updatedAt        DateTime  @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_approval_delegations")
+}
+
+model ImdadApprovalRequest {
+  id              String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String               @db.Uuid
+  organizationId  String?              @db.Uuid
+  entityType      String
+  entityId        String               @db.Uuid
+  prId            String?              @db.Uuid
+  poId            String?              @db.Uuid
+  contractId      String?              @db.Uuid
+  currentStep     Int                  @default(1)
+  totalSteps      Int                  @default(1)
+  status          ImdadApprovalStatus  @default(PENDING)
+  timeoutHours    Int?                 @default(48)
+  escalateToId    String?              @db.Uuid
+  submittedBy     String               @db.Uuid
+  submittedAt     DateTime             @default(now()) @db.Timestamptz
+  completedAt     DateTime?            @db.Timestamptz
+  version         Int                  @default(1)
+  isDeleted       Boolean              @default(false)
+  createdAt       DateTime             @default(now()) @db.Timestamptz
+  updatedAt       DateTime             @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_approval_requests")
+}
+
+model ImdadApprovalStep {
+  id              String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String               @db.Uuid
+  organizationId  String               @db.Uuid
+  requestId       String               @db.Uuid
+  stepNumber      Int
+  approverId      String               @db.Uuid
+  approverRole    String?
+  timeoutHours    Int?                 @default(48)
+  canDelegate     Boolean              @default(true)
+  status          ImdadApprovalStatus  @default(PENDING)
+  version         Int                  @default(1)
+  isDeleted       Boolean              @default(false)
+  createdAt       DateTime             @default(now()) @db.Timestamptz
+  updatedAt       DateTime             @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_approval_steps")
+}
+
+model ImdadApprovalWorkflowRuleStep {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String             @db.Uuid
+  ruleId             String             @db.Uuid
+  stepNumber         Int
+  approverType       ImdadApproverType
+  approverUserId     String?            @db.Uuid
+  approverRoleKey    String?
+  canDelegate        Boolean            @default(true)
+  timeoutHours       Int                @default(48)
+  escalateToUserId   String?            @db.Uuid
+  escalateToRoleKey  String?
+  version            Int                @default(1)
+  isDeleted          Boolean            @default(false)
+  createdAt          DateTime           @default(now()) @db.Timestamptz
+  updatedAt          DateTime           @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_approval_workflow_rule_steps")
+}
+
+model ImdadApprovalWorkflowRule {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  organizationId  String    @db.Uuid
+  templateId      String    @db.Uuid
+  ruleOrder       Int
+  minAmount       Decimal
+  maxAmount       Decimal?
+  currency        String    @default("SAR")
+  autoApprove     Boolean   @default(false)
+  version         Int       @default(1)
+  isDeleted       Boolean   @default(false)
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_approval_workflow_rules")
+}
+
+model ImdadApprovalWorkflowTemplate {
+  id              String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String                     @db.Uuid
+  organizationId  String                     @db.Uuid
+  name            String
+  nameAr          String?
+  documentType    ImdadApprovalDocumentType
+  isActive        Boolean                    @default(true)
+  isDefault       Boolean                    @default(false)
+  description     String?
+  descriptionAr   String?
+  version         Int                        @default(1)
+  isDeleted       Boolean                    @default(false)
+  createdAt       DateTime                   @default(now()) @db.Timestamptz
+  updatedAt       DateTime                   @db.Timestamptz
+  createdBy       String?                    @db.Uuid
+  updatedBy       String?                    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, documentType, name])
+  @@index([tenantId])
+  @@map("imdad_approval_workflow_templates")
+}
+
+model ImdadAssetDisposal {
+  id                   String               @id @db.Uuid
+  tenantId             String               @db.Uuid
+  organizationId       String               @db.Uuid
+  disposalNumber       String
+  assetId              String               @db.Uuid
+  assetTag             String
+  assetName            String
+  disposalMethod       ImdadDisposalMethod
+  disposalDate         DateTime             @db.Timestamptz
+  disposalReason       String
+  disposalReasonAr     String?
+  bookValueAtDisposal  Decimal?
+  proceedsAmount       Decimal?
+  gainLoss             Decimal?
+  recipientName        String?
+  recipientContact     String?
+  approvedBy           String?              @db.Uuid
+  approvedAt           DateTime?            @db.Timestamptz
+  hazmatDisposal       Boolean              @default(false)
+  disposalCertificate  String?
+  processedBy          String               @db.Uuid
+  notes                String?
+  metadata             Json?                @db.JsonB
+  attachmentIds        String[]             @default(dbgenerated("ARRAY[]::text[]"))
+  version              Int                  @default(1)
+  isDeleted            Boolean              @default(false)
+  createdAt            DateTime             @default(now()) @db.Timestamptz
+  updatedAt            DateTime             @db.Timestamptz
+  createdBy            String?              @db.Uuid
+  updatedBy            String?              @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, disposalNumber])
+  @@index([tenantId])
+  @@map("imdad_asset_disposals")
+}
+
+model ImdadAssetTransfer {
+  id                  String     @id @db.Uuid
+  tenantId            String     @db.Uuid
+  organizationId      String     @db.Uuid
+  transferNumber      String
+  assetId             String     @db.Uuid
+  assetTag            String
+  assetName           String
+  fromDepartmentId    String     @db.Uuid
+  fromDepartmentName  String?
+  fromLocationId      String?    @db.Uuid
+  fromCustodianId     String?    @db.Uuid
+  toDepartmentId      String     @db.Uuid
+  toDepartmentName    String?
+  toLocationId        String?    @db.Uuid
+  toCustodianId       String?    @db.Uuid
+  transferDate        DateTime   @db.Timestamptz
+  reason              String
+  reasonAr            String?
+  approvedBy          String?    @db.Uuid
+  approvedAt          DateTime?  @db.Timestamptz
+  status              String     @default("PENDING")
+  requestedBy         String     @db.Uuid
+  notes               String?
+  metadata            Json?      @db.JsonB
+  version             Int        @default(1)
+  isDeleted           Boolean    @default(false)
+  createdAt           DateTime   @default(now()) @db.Timestamptz
+  updatedAt           DateTime   @db.Timestamptz
+  createdBy           String?    @db.Uuid
+  updatedBy           String?    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, transferNumber])
+  @@index([tenantId])
+  @@map("imdad_asset_transfers")
+}
+
+model ImdadAsset {
+  id                        String                    @id @db.Uuid
+  tenantId                  String                    @db.Uuid
+  organizationId            String                    @db.Uuid
+  assetTag                  String
+  assetName                 String
+  assetNameAr               String?
+  assetCategory             String
+  assetSubCategory          String?
+  status                    ImdadAssetStatus          @default(IN_SERVICE)
+  serialNumber              String?
+  modelNumber               String?
+  manufacturer              String?
+  brand                     String?
+  barcode                   String?
+  locationId                String?                   @db.Uuid
+  departmentId              String?                   @db.Uuid
+  buildingFloor             String?
+  roomNumber                String?
+  purchaseOrderId           String?                   @db.Uuid
+  vendorId                  String?                   @db.Uuid
+  vendorName                String?
+  purchaseDate              DateTime?                 @db.Timestamptz
+  purchaseCost              Decimal?
+  warrantyStartDate         DateTime?                 @db.Timestamptz
+  warrantyEndDate           DateTime?                 @db.Timestamptz
+  warrantyProvider          String?
+  commissionDate            DateTime?                 @db.Timestamptz
+  expectedLifeYears         Int?
+  decommissionDate          DateTime?                 @db.Timestamptz
+  depreciationMethod        ImdadDepreciationMethod?
+  salvageValue              Decimal?
+  currentBookValue          Decimal?
+  accumulatedDepreciation   Decimal?
+  lastDepreciationDate      DateTime?                 @db.Timestamptz
+  maintenanceFrequencyDays  Int?
+  lastMaintenanceDate       DateTime?                 @db.Timestamptz
+  nextMaintenanceDate       DateTime?                 @db.Timestamptz
+  calibrationFrequencyDays  Int?
+  lastCalibrationDate       DateTime?                 @db.Timestamptz
+  nextCalibrationDate       DateTime?                 @db.Timestamptz
+  criticalityLevel          String?
+  riskClassification        String?
+  custodianUserId           String?                   @db.Uuid
+  custodianName             String?
+  notes                     String?
+  metadata                  Json?                     @db.JsonB
+  attachmentIds             String[]                  @default(dbgenerated("ARRAY[]::text[]"))
+  version                   Int                       @default(1)
+  isDeleted                 Boolean                   @default(false)
+  createdAt                 DateTime                  @default(now()) @db.Timestamptz
+  updatedAt                 DateTime                  @db.Timestamptz
+  createdBy                 String?                   @db.Uuid
+  updatedBy                 String?                   @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, assetTag])
+  @@index([tenantId])
+  @@map("imdad_assets")
+}
+
+model ImdadAttachment {
+  id              String                   @id @db.Uuid
+  tenantId        String                   @db.Uuid
+  organizationId  String                   @db.Uuid
+  category        ImdadAttachmentCategory
+  entityType      String
+  entityId        String                   @db.Uuid
+  fileName        String
+  fileType        String
+  fileSizeBytes   Int
+  storageKey      String
+  storageBucket   String?
+  description     String?
+  descriptionAr   String?
+  uploadedBy      String                   @db.Uuid
+  uploadedAt      DateTime                 @default(now()) @db.Timestamptz
+  expiryDate      DateTime?                @db.Timestamptz
+  isVerified      Boolean                  @default(false)
+  verifiedBy      String?                  @db.Uuid
+  verifiedAt      DateTime?                @db.Timestamptz
+  metadata        Json?                    @db.JsonB
+  version         Int                      @default(1)
+  isDeleted       Boolean                  @default(false)
+  createdAt       DateTime                 @default(now()) @db.Timestamptz
+  updatedAt       DateTime                 @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_attachments")
+}
+
+model ImdadAuditFinding {
+  id                  String     @id @db.Uuid
+  tenantId            String     @db.Uuid
+  organizationId      String     @db.Uuid
+  auditId             String     @db.Uuid
+  findingNumber       Int
+  severity            String
+  category            String?
+  description         String
+  descriptionAr       String?
+  evidence            String?
+  attachmentIds       String[]   @default(dbgenerated("ARRAY[]::text[]"))
+  correctiveAction    String?
+  correctiveActionAr  String?
+  responsibleParty    String?
+  deadline            DateTime?  @db.Timestamptz
+  status              String     @default("OPEN")
+  closedAt            DateTime?  @db.Timestamptz
+  closedBy            String?    @db.Uuid
+  verifiedAt          DateTime?  @db.Timestamptz
+  verifiedBy          String?    @db.Uuid
+  notes               String?
+  version             Int        @default(1)
+  isDeleted           Boolean    @default(false)
+  createdAt           DateTime   @default(now()) @db.Timestamptz
+  updatedAt           DateTime   @db.Timestamptz
+  createdBy           String?    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, auditId, findingNumber])
+  @@index([tenantId])
+  @@map("imdad_audit_findings")
+}
+
+model ImdadAuditLog {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String            @db.Uuid
+  organizationId  String?           @db.Uuid
+  actorUserId     String?           @db.Uuid
+  actorRole       String?
+  actorEmail      String?
+  action          ImdadAuditAction
+  resourceType    String
+  resourceId      String?           @db.Uuid
+  boundedContext  String?
+  ip              String?
+  userAgent       String?
+  method          String?
+  path            String?
+  success         Boolean           @default(true)
+  errorMessage    String?
+  previousData    Json?             @db.JsonB
+  newData         Json?             @db.JsonB
+  metadata        Json?             @db.JsonB
+  hashChain       String?
+  previousHash    String?
+  timestamp       DateTime          @default(now()) @db.Timestamptz
+  partitionKey    String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_audit_logs")
+}
+
+model ImdadBatchLot {
+  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String            @db.Uuid
+  organizationId     String            @db.Uuid
+  itemId             String            @db.Uuid
+  batchNumber        String
+  lotNumber          String?
+  serialNumber       String?
+  manufacturingDate  DateTime?         @db.Timestamptz
+  expiryDate         DateTime?         @db.Timestamptz
+  receivedDate       DateTime?         @db.Timestamptz
+  quantity           Int               @default(0)
+  unitCost           Decimal?
+  supplierId         String?           @db.Uuid
+  status             ImdadBatchStatus  @default(ACTIVE)
+  quarantineReason   String?
+  version            Int               @default(1)
+  isDeleted          Boolean           @default(false)
+  deletedAt          DateTime?         @db.Timestamptz
+  createdAt          DateTime          @default(now()) @db.Timestamptz
+  updatedAt          DateTime          @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, itemId, batchNumber])
+  @@index([tenantId])
+  @@map("imdad_batch_lots")
+}
+
+model ImdadBin {
+  id                   String                     @id @db.Uuid
+  tenantId             String                     @db.Uuid
+  organizationId       String                     @db.Uuid
+  zoneId               String                     @db.Uuid
+  binCode              String
+  binLabel             String?
+  binLabelAr           String?
+  aisle                String?
+  rack                 String?
+  shelf                String?
+  position             String?
+  barcode              String?
+  widthCm              Decimal?
+  heightCm             Decimal?
+  depthCm              Decimal?
+  maxWeightKg          Decimal?
+  status               ImdadBinStatus             @default(AVAILABLE)
+  currentItemId        String?                    @db.Uuid
+  currentQuantity      Decimal                    @default(0)
+  isMixedItem          Boolean                    @default(false)
+  cycleCountFrequency  ImdadCycleCountFrequency?
+  lastCountDate        DateTime?                  @db.Timestamptz
+  nextCountDate        DateTime?                  @db.Timestamptz
+  metadata             Json?                      @db.JsonB
+  version              Int                        @default(1)
+  isDeleted            Boolean                    @default(false)
+  createdAt            DateTime                   @default(now()) @db.Timestamptz
+  updatedAt            DateTime                   @db.Timestamptz
+  createdBy            String?                    @db.Uuid
+  updatedBy            String?                    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, zoneId, binCode])
+  @@index([tenantId])
+  @@map("imdad_bins")
+}
+
+model ImdadBudgetBenchmark {
+  id              String                @id @db.Uuid
+  tenantId        String                @db.Uuid
+  organizationId  String                @db.Uuid
+  annualPlanId    String?               @db.Uuid
+  fiscalYear      Int
+  metric          ImdadBenchmarkMetric
+  metricValue     Decimal
+  networkAverage  Decimal?
+  networkMedian   Decimal?
+  networkBest     Decimal?
+  networkWorst    Decimal?
+  percentileRank  Decimal?
+  trend           String?
+  trendAr         String?
+  departmentId    String?               @db.Uuid
+  calculatedAt    DateTime              @default(now()) @db.Timestamptz
+  version         Int                   @default(1)
+  isDeleted       Boolean               @default(false)
+  createdAt       DateTime              @default(now()) @db.Timestamptz
+  updatedAt       DateTime              @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_budget_benchmarks")
+}
+
+model ImdadBudgetConsumption {
+  id               String    @id @db.Uuid
+  tenantId         String    @db.Uuid
+  organizationId   String    @db.Uuid
+  budgetId         String    @db.Uuid
+  budgetLineId     String?   @db.Uuid
+  referenceType    String
+  referenceId      String    @db.Uuid
+  referenceNumber  String?
+  amount           Decimal
+  isCommitment     Boolean   @default(false)
+  isReversal       Boolean   @default(false)
+  description      String?
+  consumedAt       DateTime  @default(now()) @db.Timestamptz
+  version          Int       @default(1)
+  isDeleted        Boolean   @default(false)
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+  updatedAt        DateTime  @db.Timestamptz
+  createdBy        String?   @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_budget_consumptions")
+}
+
+model ImdadBudgetLine {
+  id                String    @id @db.Uuid
+  tenantId          String    @db.Uuid
+  organizationId    String    @db.Uuid
+  budgetId          String    @db.Uuid
+  lineNumber        Int
+  description       String
+  descriptionAr     String?
+  glAccountCode     String?
+  itemCategoryCode  String?
+  allocatedAmount   Decimal
+  consumedAmount    Decimal   @default(0)
+  committedAmount   Decimal   @default(0)
+  availableAmount   Decimal
+  notes             String?
+  version           Int       @default(1)
+  isDeleted         Boolean   @default(false)
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @db.Timestamptz
+  createdBy         String?   @db.Uuid
+  updatedBy         String?   @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, budgetId, lineNumber])
+  @@index([tenantId])
+  @@map("imdad_budget_lines")
+}
+
+model ImdadBudgetProposal {
+  id                   String                 @id @db.Uuid
+  tenantId             String                 @db.Uuid
+  organizationId       String                 @db.Uuid
+  annualPlanId         String                 @db.Uuid
+  departmentId         String                 @db.Uuid
+  departmentName       String
+  departmentNameAr     String?
+  proposalCode         String
+  fiscalYear           Int
+  category             ImdadProposalCategory
+  priority             ImdadProposalPriority  @default(MEDIUM)
+  title                String
+  titleAr              String?
+  description          String
+  descriptionAr        String?
+  justification        String?
+  justificationAr      String?
+  requestedAmount      Decimal
+  approvedAmount       Decimal?
+  previousYearSpend    Decimal?
+  projectedSavings     Decimal?
+  roiPercentage        Decimal?
+  clinicalImpactScore  Int?
+  riskIfNotApproved    String?
+  riskIfNotApprovedAr  String?
+  status               ImdadAnnualPlanStatus  @default(DRAFT)
+  submittedAt          DateTime?              @db.Timestamptz
+  submittedBy          String?                @db.Uuid
+  approvedAt           DateTime?              @db.Timestamptz
+  approvedBy           String?                @db.Uuid
+  reviewerNotes        String?
+  reviewerNotesAr      String?
+  aiRecommendation     String?
+  aiRecommendationAr   String?
+  aiAnomalyFlags       Json?                  @db.JsonB
+  aiAlternatives       Json?                  @db.JsonB
+  supportingData       Json?                  @db.JsonB
+  attachmentIds        String[]               @default(dbgenerated("ARRAY[]::text[]"))
+  currency             String                 @default("SAR")
+  version              Int                    @default(1)
+  isDeleted            Boolean                @default(false)
+  createdAt            DateTime               @default(now()) @db.Timestamptz
+  updatedAt            DateTime               @db.Timestamptz
+  createdBy            String?                @db.Uuid
+  updatedBy            String?                @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, proposalCode])
+  @@index([tenantId])
+  @@map("imdad_budget_proposals")
+}
+
+model ImdadBudgetTransfer {
+  id                String                     @id @db.Uuid
+  tenantId          String                     @db.Uuid
+  organizationId    String                     @db.Uuid
+  transferNumber    String
+  fromBudgetId      String                     @db.Uuid
+  fromBudgetLineId  String?                    @db.Uuid
+  toBudgetId        String                     @db.Uuid
+  toBudgetLineId    String?                    @db.Uuid
+  amount            Decimal
+  currency          String                     @default("SAR")
+  reason            String
+  reasonAr          String?
+  status            ImdadBudgetTransferStatus  @default(PENDING)
+  requestedBy       String                     @db.Uuid
+  requestedAt       DateTime                   @default(now()) @db.Timestamptz
+  approvedBy        String?                    @db.Uuid
+  approvedAt        DateTime?                  @db.Timestamptz
+  executedAt        DateTime?                  @db.Timestamptz
+  rejectionReason   String?
+  version           Int                        @default(1)
+  isDeleted         Boolean                    @default(false)
+  createdAt         DateTime                   @default(now()) @db.Timestamptz
+  updatedAt         DateTime                   @db.Timestamptz
+  createdBy         String?                    @db.Uuid
+  updatedBy         String?                    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, transferNumber])
+  @@index([tenantId])
+  @@map("imdad_budget_transfers")
+}
+
+model ImdadBudget {
+  id                 String                 @id @db.Uuid
+  tenantId           String                 @db.Uuid
+  organizationId     String                 @db.Uuid
+  budgetCode         String
+  budgetName         String
+  budgetNameAr       String?
+  fiscalYear         Int
+  periodType         ImdadBudgetPeriodType
+  periodStart        DateTime               @db.Timestamptz
+  periodEnd          DateTime               @db.Timestamptz
+  costCenterId       String                 @db.Uuid
+  departmentId       String?                @db.Uuid
+  categoryCode       String?
+  allocatedAmount    Decimal
+  adjustedAmount     Decimal
+  consumedAmount     Decimal                @default(0)
+  committedAmount    Decimal                @default(0)
+  availableAmount    Decimal
+  warningThreshold   Decimal                @default(80)
+  criticalThreshold  Decimal                @default(95)
+  status             ImdadBudgetStatus      @default(DRAFT)
+  currency           String                 @default("SAR")
+  approvedBy         String?                @db.Uuid
+  approvedAt         DateTime?              @db.Timestamptz
+  notes              String?
+  metadata           Json?                  @db.JsonB
+  version            Int                    @default(1)
+  isDeleted          Boolean                @default(false)
+  createdAt          DateTime               @default(now()) @db.Timestamptz
+  updatedAt          DateTime               @db.Timestamptz
+  createdBy          String?                @db.Uuid
+  updatedBy          String?                @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, budgetCode])
+  @@index([tenantId])
+  @@map("imdad_budgets")
+}
+
+model ImdadChargeCaptureItem {
+  id                      String    @id @db.Uuid
+  tenantId                String    @db.Uuid
+  organizationId          String    @db.Uuid
+  chargeCaptureId         String    @db.Uuid
+  lineNumber              Int
+  itemId                  String    @db.Uuid
+  itemCode                String
+  itemName                String
+  quantity                Decimal
+  unitOfMeasure           String
+  unitCost                Decimal
+  totalCost               Decimal
+  batchLotId              String?   @db.Uuid
+  serialNumber            String?
+  inventoryTransactionId  String?   @db.Uuid
+  notes                   String?
+  version                 Int       @default(1)
+  isDeleted               Boolean   @default(false)
+  createdAt               DateTime  @default(now()) @db.Timestamptz
+  updatedAt               DateTime  @db.Timestamptz
+  createdBy               String?   @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, chargeCaptureId, lineNumber])
+  @@index([tenantId])
+  @@map("imdad_charge_capture_items")
+}
+
+model ImdadChargeCapture {
+  id              String           @id @db.Uuid
+  tenantId        String           @db.Uuid
+  organizationId  String           @db.Uuid
+  chargeNumber    String
+  chargeType      ImdadChargeType
+  chargeDate      DateTime         @db.Timestamptz
+  costCenterId    String           @db.Uuid
+  departmentId    String?          @db.Uuid
+  locationId      String?          @db.Uuid
+  patientId       String?          @db.Uuid
+  encounterId     String?          @db.Uuid
+  totalAmount     Decimal          @default(0)
+  currency        String           @default("SAR")
+  budgetId        String?          @db.Uuid
+  budgetLineId    String?          @db.Uuid
+  notes           String?
+  metadata        Json?            @db.JsonB
+  isPosted        Boolean          @default(false)
+  postedAt        DateTime?        @db.Timestamptz
+  postedBy        String?          @db.Uuid
+  version         Int              @default(1)
+  isDeleted       Boolean          @default(false)
+  createdAt       DateTime         @default(now()) @db.Timestamptz
+  updatedAt       DateTime         @db.Timestamptz
+  createdBy       String?          @db.Uuid
+  updatedBy       String?          @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, chargeNumber])
+  @@index([tenantId])
+  @@map("imdad_charge_captures")
+}
+
+model ImdadComplianceCertificate {
+  id                   String                @id @db.Uuid
+  tenantId             String                @db.Uuid
+  organizationId       String                @db.Uuid
+  certificateNumber    String
+  certificateType      ImdadCertificateType
+  entityType           String
+  entityId             String                @db.Uuid
+  entityName           String?
+  issuingAuthority     String
+  issuingAuthorityAr   String?
+  certificateRef       String?
+  issuedDate           DateTime              @db.Timestamptz
+  expiryDate           DateTime              @db.Timestamptz
+  isActive             Boolean               @default(true)
+  isVerified           Boolean               @default(false)
+  verifiedBy           String?               @db.Uuid
+  verifiedAt           DateTime?             @db.Timestamptz
+  renewalReminderDays  Int                   @default(60)
+  renewalStatus        String?
+  notes                String?
+  metadata             Json?                 @db.JsonB
+  attachmentIds        String[]              @default(dbgenerated("ARRAY[]::text[]"))
+  version              Int                   @default(1)
+  isDeleted            Boolean               @default(false)
+  createdAt            DateTime              @default(now()) @db.Timestamptz
+  updatedAt            DateTime              @db.Timestamptz
+  createdBy            String?               @db.Uuid
+  updatedBy            String?               @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, certificateNumber])
+  @@index([tenantId])
+  @@map("imdad_compliance_certificates")
+}
+
+model ImdadConsumptionLog {
+  id               String    @id @db.Uuid
+  tenantId         String    @db.Uuid
+  organizationId   String    @db.Uuid
+  departmentId     String    @db.Uuid
+  locationId       String    @db.Uuid
+  itemId           String    @db.Uuid
+  itemCode         String
+  itemName         String
+  quantity         Decimal
+  unitOfMeasure    String
+  consumptionType  String
+  patientId        String?   @db.Uuid
+  encounterId      String?   @db.Uuid
+  batchLotId       String?   @db.Uuid
+  unitCost         Decimal?
+  totalCost        Decimal?
+  consumedBy       String    @db.Uuid
+  consumedAt       DateTime  @default(now()) @db.Timestamptz
+  notes            String?
+  metadata         Json?     @db.JsonB
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_consumption_logs")
+}
+
+model ImdadContractAmendment {
+  id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String     @db.Uuid
+  organizationId   String     @db.Uuid
+  contractId       String     @db.Uuid
+  amendmentNumber  Int
+  type             String
+  description      String
+  valueBefore      Decimal?
+  valueAfter       Decimal?
+  dateBefore       DateTime?  @db.Timestamptz
+  dateAfter        DateTime?  @db.Timestamptz
+  status           String     @default("PENDING")
+  approvedBy       String?    @db.Uuid
+  approvedAt       DateTime?  @db.Timestamptz
+  effectiveDate    DateTime?  @db.Timestamptz
+  version          Int        @default(1)
+  isDeleted        Boolean    @default(false)
+  createdAt        DateTime   @default(now()) @db.Timestamptz
+  updatedAt        DateTime   @db.Timestamptz
+  createdBy        String?    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_contract_amendments")
+}
+
+model ImdadContractLine {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  organizationId  String    @db.Uuid
+  contractId      String    @db.Uuid
+  lineNumber      Int
+  itemId          String    @db.Uuid
+  unitPrice       Decimal
+  currency        String    @default("SAR")
+  minQty          Int?
+  maxQty          Int?
+  discountPct     Decimal?
+  isActive        Boolean   @default(true)
+  version         Int       @default(1)
+  isDeleted       Boolean   @default(false)
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_contract_lines")
+}
+
+model ImdadContract {
+  id               String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String               @db.Uuid
+  organizationId   String?              @db.Uuid
+  contractNumber   String
+  vendorId         String               @db.Uuid
+  type             ImdadContractType    @default(SUPPLY_AGREEMENT)
+  title            String
+  description      String?
+  value            Decimal
+  currency         String               @default("SAR")
+  paymentTerms     String?
+  startDate        DateTime             @db.Timestamptz
+  endDate          DateTime             @db.Timestamptz
+  autoRenew        Boolean              @default(false)
+  renewalTermDays  Int?
+  status           ImdadContractStatus  @default(DRAFT)
+  approvedBy       String?              @db.Uuid
+  approvedAt       DateTime?            @db.Timestamptz
+  fileUrl          String?
+  notes            String?
+  version          Int                  @default(1)
+  isDeleted        Boolean              @default(false)
+  deletedAt        DateTime?            @db.Timestamptz
+  createdAt        DateTime             @default(now()) @db.Timestamptz
+  updatedAt        DateTime             @db.Timestamptz
+  createdBy        String?              @db.Uuid
+  updatedBy        String?              @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, contractNumber])
+  @@index([tenantId])
+  @@map("imdad_contracts")
+}
+
+model ImdadCostCenter {
+  id              String    @id @db.Uuid
+  tenantId        String    @db.Uuid
+  organizationId  String    @db.Uuid
+  code            String
+  name            String
+  nameAr          String?
+  parentId        String?   @db.Uuid
+  departmentId    String?   @db.Uuid
+  glAccountCode   String?
+  isActive        Boolean   @default(true)
+  managerUserId   String?   @db.Uuid
+  metadata        Json?     @db.JsonB
+  version         Int       @default(1)
+  isDeleted       Boolean   @default(false)
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @db.Timestamptz
+  createdBy       String?   @db.Uuid
+  updatedBy       String?   @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, code])
+  @@index([tenantId])
+  @@map("imdad_cost_centers")
+}
+
+model ImdadDashboardConfig {
+  id              String    @id @db.Uuid
+  tenantId        String    @db.Uuid
+  organizationId  String    @db.Uuid
+  configName      String
+  configNameAr    String?
+  configType      String
+  userId          String?   @db.Uuid
+  roleType        String?
+  layout          Json      @db.JsonB
+  widgets         Json      @db.JsonB
+  isDefault       Boolean   @default(false)
+  isActive        Boolean   @default(true)
+  metadata        Json?     @db.JsonB
+  version         Int       @default(1)
+  isDeleted       Boolean   @default(false)
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @db.Timestamptz
+  createdBy       String?   @db.Uuid
+  updatedBy       String?   @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_dashboard_configs")
+}
+
+model ImdadDecisionAction {
+  id                String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String                     @db.Uuid
+  organizationId    String                     @db.Uuid
+  decisionId        String                     @db.Uuid
+  actionCode        String
+  actionType        ImdadDecisionActionType
+  sequenceOrder     Int                        @default(1)
+  title             String
+  titleAr           String
+  description       String?
+  status            ImdadDecisionActionStatus  @default(PENDING)
+  targetEntityType  String?
+  targetEntityId    String?                    @db.Uuid
+  estimatedCost     Decimal?
+  scheduledDate     DateTime?                  @db.Timestamptz
+  completedAt       DateTime?                  @db.Timestamptz
+  resultData        Json?                      @db.JsonB
+  errorMessage      String?
+  version           Int                        @default(1)
+  isDeleted         Boolean                    @default(false)
+  createdAt         DateTime                   @default(now()) @db.Timestamptz
+  updatedAt         DateTime                   @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, decisionId, actionCode])
+  @@index([tenantId])
+  @@map("imdad_decision_actions")
+}
+
+model ImdadDecision {
+  id                     String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId               String                @db.Uuid
+  organizationId         String                @db.Uuid
+  decisionCode           String
+  decisionType           ImdadDecisionType
+  title                  String
+  titleAr                String
+  description            String?
+  descriptionAr          String?
+  confidenceScore        Decimal
+  riskScore              Decimal?
+  impactScore            Decimal?
+  costImpact             Decimal?
+  savingsEstimate        Decimal?
+  currency               String                @default("SAR")
+  status                 ImdadDecisionStatus   @default(GENERATED)
+  autoApproved           Boolean               @default(false)
+  autoApprovalThreshold  Decimal?
+  escalationLevel        ImdadEscalationLevel  @default(NONE)
+  executionDeadline      DateTime?             @db.Timestamptz
+  executedAt             DateTime?             @db.Timestamptz
+  executedBy             String?               @db.Uuid
+  overriddenAt           DateTime?             @db.Timestamptz
+  overriddenBy           String?               @db.Uuid
+  overrideReason         String?
+  sourceSignals          Json?                 @db.JsonB
+  recommendedActions     Json?                 @db.JsonB
+  alternativeOptions     Json?                 @db.JsonB
+  aiReasoning            String?
+  aiReasoningAr          String?
+  departmentId           String?               @db.Uuid
+  relatedAssetIds        String[]              @default(dbgenerated("ARRAY[]::text[]"))
+  relatedItemIds         String[]              @default(dbgenerated("ARRAY[]::text[]"))
+  metadata               Json?                 @db.JsonB
+  version                Int                   @default(1)
+  isDeleted              Boolean               @default(false)
+  createdAt              DateTime              @default(now()) @db.Timestamptz
+  updatedAt              DateTime              @db.Timestamptz
+  createdBy              String?               @db.Uuid
+  updatedBy              String?               @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, decisionCode])
+  @@index([tenantId])
+  @@map("imdad_decisions")
+}
+
+model ImdadDepartmentUser {
+  id                String     @id @db.Uuid
+  tenantId          String     @db.Uuid
+  organizationId    String     @db.Uuid
+  departmentId      String     @db.Uuid
+  userId            String     @db.Uuid
+  isPrimary         Boolean    @default(false)
+  canRequisition    Boolean    @default(true)
+  canApprove        Boolean    @default(false)
+  canReceive        Boolean    @default(false)
+  canDispense       Boolean    @default(false)
+  maxApprovalLimit  Decimal?
+  isActive          Boolean    @default(true)
+  startDate         DateTime?  @db.Timestamptz
+  endDate           DateTime?  @db.Timestamptz
+  metadata          Json?      @db.JsonB
+  version           Int        @default(1)
+  isDeleted         Boolean    @default(false)
+  createdAt         DateTime   @default(now()) @db.Timestamptz
+  updatedAt         DateTime   @db.Timestamptz
+  createdBy         String?    @db.Uuid
+  updatedBy         String?    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, departmentId, userId])
+  @@index([tenantId])
+  @@map("imdad_department_users")
+}
+
+model ImdadDepartment {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String     @db.Uuid
+  organizationId  String     @db.Uuid
+  code            String
+  name            String
+  nameAr          String?
+  type            String?
+  parentId        String?    @db.Uuid
+  costCenterId    String?    @db.Uuid
+  isActive        Boolean    @default(true)
+  version         Int        @default(1)
+  isDeleted       Boolean    @default(false)
+  deletedAt       DateTime?  @db.Timestamptz
+  createdAt       DateTime   @default(now()) @db.Timestamptz
+  updatedAt       DateTime   @db.Timestamptz
+  createdBy       String?    @db.Uuid
+  updatedBy       String?    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, code])
+  @@index([tenantId])
+  @@map("imdad_departments")
+}
+
+model ImdadDeviceReplacementPlan {
+  id                        String                         @id @db.Uuid
+  tenantId                  String                         @db.Uuid
+  organizationId            String                         @db.Uuid
+  annualPlanId              String?                        @db.Uuid
+  departmentId              String                         @db.Uuid
+  departmentName            String
+  departmentNameAr          String?
+  assetId                   String                         @db.Uuid
+  assetTag                  String
+  assetName                 String
+  assetNameAr               String?
+  manufacturer              String?
+  modelNumber               String?
+  currentAge                Int
+  expectedLifeYears         Int
+  lifecycleExceeded         Boolean                        @default(false)
+  performanceDegradation    Decimal?
+  maintenanceCostRatio      Decimal?
+  downtimeHoursYTD          Decimal?
+  failureCount              Int                            @default(0)
+  compatibilityIssues       String?
+  compatibilityIssuesAr     String?
+  technologyObsolescence    Boolean                        @default(false)
+  replacementUrgency        ImdadDeviceReplacementUrgency  @default(WITHIN_1_YEAR)
+  estimatedReplacementCost  Decimal?
+  recommendedModel          String?
+  recommendedVendor         String?
+  suggestedPhase            ImdadInvestmentPhase?
+  aiRiskScore               Decimal?
+  aiImpactAnalysis          String?
+  aiImpactAnalysisAr        String?
+  clinicalImpact            String?
+  clinicalImpactAr          String?
+  patientSafetyRisk         Boolean                        @default(false)
+  regulatoryRisk            Boolean                        @default(false)
+  metadata                  Json?                          @db.JsonB
+  version                   Int                            @default(1)
+  isDeleted                 Boolean                        @default(false)
+  createdAt                 DateTime                       @default(now()) @db.Timestamptz
+  updatedAt                 DateTime                       @db.Timestamptz
+  createdBy                 String?                        @db.Uuid
+  updatedBy                 String?                        @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_device_replacement_plans")
+}
+
+model ImdadDispenseLine {
+  id                  String     @id @db.Uuid
+  tenantId            String     @db.Uuid
+  organizationId      String     @db.Uuid
+  dispenseRequestId   String     @db.Uuid
+  lineNumber          Int
+  itemId              String     @db.Uuid
+  itemCode            String
+  itemName            String
+  orderedQty          Decimal
+  dispensedQty        Decimal    @default(0)
+  returnedQty         Decimal    @default(0)
+  unitOfMeasure       String
+  batchLotId          String?    @db.Uuid
+  batchNumber         String?
+  expiryDate          DateTime?  @db.Timestamptz
+  sourceLocationId    String?    @db.Uuid
+  sourceBinId         String?    @db.Uuid
+  dosage              String?
+  frequency           String?
+  route               String?
+  duration            String?
+  unitCost            Decimal?
+  totalCost           Decimal?
+  isSubstituted       Boolean    @default(false)
+  substitutionReason  String?
+  originalItemId      String?    @db.Uuid
+  notes               String?
+  version             Int        @default(1)
+  isDeleted           Boolean    @default(false)
+  createdAt           DateTime   @default(now()) @db.Timestamptz
+  updatedAt           DateTime   @db.Timestamptz
+  createdBy           String?    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, dispenseRequestId, lineNumber])
+  @@index([tenantId])
+  @@map("imdad_dispense_lines")
+}
+
+model ImdadDispenseRequest {
+  id                  String               @id @db.Uuid
+  tenantId            String               @db.Uuid
+  organizationId      String               @db.Uuid
+  dispenseNumber      String
+  status              ImdadDispenseStatus  @default(PENDING)
+  orderType           String
+  orderId             String?              @db.Uuid
+  orderNumber         String?
+  patientId           String?              @db.Uuid
+  patientMrn          String?
+  patientName         String?
+  departmentId        String               @db.Uuid
+  departmentName      String?
+  wardId              String?              @db.Uuid
+  bedNumber           String?
+  prescriberId        String?              @db.Uuid
+  prescriberName      String?
+  pharmacyLocationId  String?              @db.Uuid
+  pharmacyName        String?
+  dispensedBy         String?              @db.Uuid
+  dispensedAt         DateTime?            @db.Timestamptz
+  verifiedBy          String?              @db.Uuid
+  verifiedAt          DateTime?            @db.Timestamptz
+  priority            String               @default("NORMAL")
+  requiredByDate      DateTime?            @db.Timestamptz
+  notes               String?
+  clinicalNotes       String?
+  metadata            Json?                @db.JsonB
+  version             Int                  @default(1)
+  isDeleted           Boolean              @default(false)
+  createdAt           DateTime             @default(now()) @db.Timestamptz
+  updatedAt           DateTime             @db.Timestamptz
+  createdBy           String?              @db.Uuid
+  updatedBy           String?              @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, dispenseNumber])
+  @@index([tenantId])
+  @@map("imdad_dispense_requests")
+}
+
+model ImdadEventBusMessage {
+  id              String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String                @db.Uuid
+  organizationId  String?               @db.Uuid
+  channel         ImdadEventBusChannel
+  eventType       String
+  sourceBC        String
+  targetBC        String?
+  payload         Json                  @db.JsonB
+  correlationId   String?               @db.Uuid
+  status          ImdadEventBusStatus   @default(PENDING)
+  retryCount      Int                   @default(0)
+  maxRetries      Int                   @default(3)
+  lastError       String?
+  processedAt     DateTime?             @db.Timestamptz
+  deadLetteredAt  DateTime?             @db.Timestamptz
+  version         Int                   @default(1)
+  isDeleted       Boolean               @default(false)
+  createdAt       DateTime              @default(now()) @db.Timestamptz
+  updatedAt       DateTime              @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_event_bus_messages")
+}
+
+model ImdadFormularyItem {
+  id                   String                @id @db.Uuid
+  tenantId             String                @db.Uuid
+  organizationId       String                @db.Uuid
+  itemId               String                @db.Uuid
+  itemCode             String
+  itemName             String
+  formularyStatus      ImdadFormularyStatus  @default(ACTIVE)
+  formularyCategory    String?
+  therapeuticClass     String?
+  genericName          String?
+  genericNameAr        String?
+  isControlled         Boolean               @default(false)
+  controlSchedule      String?
+  requiresApproval     Boolean               @default(false)
+  approvalLevel        String?
+  maxDailyDose         String?
+  maxOrderQty          Decimal?
+  indications          String?
+  indicationsAr        String?
+  contraindications    String?
+  sideEffects          String?
+  interactions         String?
+  storageInstructions  String?
+  unitPrice            Decimal?
+  insuranceCovered     Boolean               @default(true)
+  lastReviewDate       DateTime?             @db.Timestamptz
+  nextReviewDate       DateTime?             @db.Timestamptz
+  reviewedBy           String?               @db.Uuid
+  committeeApproval    Boolean               @default(false)
+  isActive             Boolean               @default(true)
+  metadata             Json?                 @db.JsonB
+  version              Int                   @default(1)
+  isDeleted            Boolean               @default(false)
+  createdAt            DateTime              @default(now()) @db.Timestamptz
+  updatedAt            DateTime              @db.Timestamptz
+  createdBy            String?               @db.Uuid
+  updatedBy            String?               @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, itemId])
+  @@index([tenantId])
+  @@map("imdad_formulary_items")
+}
+
+model ImdadGoodsReceivingNoteLine {
+  id                 String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String     @db.Uuid
+  organizationId     String     @db.Uuid
+  grnId              String     @db.Uuid
+  poLineId           String?    @db.Uuid
+  itemId             String     @db.Uuid
+  lineNumber         Int
+  orderedQty         Int
+  receivedQty        Int
+  acceptedQty        Int        @default(0)
+  rejectedQty        Int        @default(0)
+  batchNumber        String?
+  expiryDate         DateTime?  @db.Timestamptz
+  manufacturingDate  DateTime?  @db.Timestamptz
+  unitCost           Decimal?
+  locationId         String?    @db.Uuid
+  notes              String?
+  version            Int        @default(1)
+  isDeleted          Boolean    @default(false)
+  createdAt          DateTime   @default(now()) @db.Timestamptz
+  updatedAt          DateTime   @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_goods_receiving_note_lines")
+}
+
+model ImdadGoodsReceivingNote {
+  id                  String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String          @db.Uuid
+  organizationId      String          @db.Uuid
+  grnNumber           String
+  poId                String          @db.Uuid
+  vendorId            String?         @db.Uuid
+  status              ImdadGRNStatus  @default(DRAFT)
+  receivedBy          String          @db.Uuid
+  receivedAt          DateTime        @default(now()) @db.Timestamptz
+  verifiedBy          String?         @db.Uuid
+  verifiedAt          DateTime?       @db.Timestamptz
+  qualityStatus       String          @default("PENDING")
+  qualityCheckedBy    String?         @db.Uuid
+  qualityCheckedAt    DateTime?       @db.Timestamptz
+  deliveryNoteNumber  String?
+  deliveryDate        DateTime?       @db.Timestamptz
+  notes               String?
+  version             Int             @default(1)
+  isDeleted           Boolean         @default(false)
+  deletedAt           DateTime?       @db.Timestamptz
+  createdAt           DateTime        @default(now()) @db.Timestamptz
+  updatedAt           DateTime        @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, grnNumber])
+  @@index([tenantId])
+  @@map("imdad_goods_receiving_notes")
+}
+
+model ImdadGrnDiscrepancy {
+  id               String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String                       @db.Uuid
+  organizationId   String                       @db.Uuid
+  grnId            String                       @db.Uuid
+  itemId           String                       @db.Uuid
+  type             String
+  expectedQty      Int?
+  actualQty        Int?
+  description      String
+  resolution       ImdadDiscrepancyResolution?
+  resolvedBy       String?                      @db.Uuid
+  resolvedAt       DateTime?                    @db.Timestamptz
+  resolutionNotes  String?
+  version          Int                          @default(1)
+  isDeleted        Boolean                      @default(false)
+  createdAt        DateTime                     @default(now()) @db.Timestamptz
+  updatedAt        DateTime                     @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_grn_discrepancies")
+}
+
+model ImdadInspectionChecklist {
+  id                 String    @id @db.Uuid
+  tenantId           String    @db.Uuid
+  organizationId     String    @db.Uuid
+  inspectionId       String    @db.Uuid
+  checkNumber        Int
+  checkName          String
+  checkNameAr        String?
+  checkCategory      String?
+  specification      String?
+  tolerance          String?
+  result             String?
+  actualValue        String?
+  isDefect           Boolean   @default(false)
+  defectDescription  String?
+  severity           String?
+  notes              String?
+  attachmentIds      String[]  @default(dbgenerated("ARRAY[]::text[]"))
+  version            Int       @default(1)
+  isDeleted          Boolean   @default(false)
+  createdAt          DateTime  @default(now()) @db.Timestamptz
+  updatedAt          DateTime  @db.Timestamptz
+  createdBy          String?   @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, inspectionId, checkNumber])
+  @@index([tenantId])
+  @@map("imdad_inspection_checklists")
+}
+
+model ImdadInspectionTemplate {
+  id              String               @id @db.Uuid
+  tenantId        String               @db.Uuid
+  organizationId  String               @db.Uuid
+  templateCode    String
+  templateName    String
+  templateNameAr  String?
+  inspectionType  ImdadInspectionType
+  itemCategory    String?
+  checks          Json                 @db.JsonB
+  isActive        Boolean              @default(true)
+  isDefault       Boolean              @default(false)
+  metadata        Json?                @db.JsonB
+  version         Int                  @default(1)
+  isDeleted       Boolean              @default(false)
+  createdAt       DateTime             @default(now()) @db.Timestamptz
+  updatedAt       DateTime             @db.Timestamptz
+  createdBy       String?              @db.Uuid
+  updatedBy       String?              @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, templateCode])
+  @@index([tenantId])
+  @@map("imdad_inspection_templates")
+}
+
+model ImdadInventoryAdjustment {
+  id                String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String                 @db.Uuid
+  organizationId    String                 @db.Uuid
+  adjustmentNumber  String
+  itemId            String                 @db.Uuid
+  locationId        String                 @db.Uuid
+  reason            ImdadAdjustmentReason
+  reasonDetail      String?
+  quantityChange    Int
+  previousStock     Int
+  newStock          Int
+  costImpact        Decimal?
+  status            String                 @default("PENDING")
+  requestedBy       String                 @db.Uuid
+  requestedAt       DateTime               @default(now()) @db.Timestamptz
+  approvedBy        String?                @db.Uuid
+  approvedAt        DateTime?              @db.Timestamptz
+  rejectionReason   String?
+  version           Int                    @default(1)
+  isDeleted         Boolean                @default(false)
+  deletedAt         DateTime?              @db.Timestamptz
+  createdAt         DateTime               @default(now()) @db.Timestamptz
+  updatedAt         DateTime               @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, adjustmentNumber])
+  @@index([tenantId])
+  @@map("imdad_inventory_adjustments")
+}
+
+model ImdadInventoryLocation {
+  id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String     @db.Uuid
+  organizationId   String     @db.Uuid
+  code             String
+  name             String
+  nameAr           String?
+  type             String
+  parentId         String?    @db.Uuid
+  departmentId     String?    @db.Uuid
+  temperatureZone  String?
+  capacity         Int?
+  isActive         Boolean    @default(true)
+  version          Int        @default(1)
+  isDeleted        Boolean    @default(false)
+  deletedAt        DateTime?  @db.Timestamptz
+  createdAt        DateTime   @default(now()) @db.Timestamptz
+  updatedAt        DateTime   @db.Timestamptz
+  createdBy        String?    @db.Uuid
+  updatedBy        String?    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, code])
+  @@index([tenantId])
+  @@map("imdad_inventory_locations")
+}
+
+model ImdadInventoryTransaction {
+  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String             @db.Uuid
+  organizationId  String             @db.Uuid
+  itemId          String             @db.Uuid
+  locationId      String             @db.Uuid
+  movementType    ImdadMovementType
+  quantity        Int
+  balanceBefore   Int
+  balanceAfter    Int
+  referenceType   String?
+  referenceId     String?            @db.Uuid
+  batchNumber     String?
+  expiryDate      DateTime?          @db.Timestamptz
+  unitCost        Decimal?
+  totalCost       Decimal?
+  performedBy     String             @db.Uuid
+  performedAt     DateTime           @default(now()) @db.Timestamptz
+  reason          String?
+  notes           String?
+  fromOrgId       String?            @db.Uuid
+  toOrgId         String?            @db.Uuid
+  fromLocationId  String?            @db.Uuid
+  toLocationId    String?            @db.Uuid
+  createdAt       DateTime           @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_inventory_transactions")
+}
+
+model ImdadInvoiceLine {
+  id                String    @id @db.Uuid
+  tenantId          String    @db.Uuid
+  organizationId    String    @db.Uuid
+  invoiceId         String    @db.Uuid
+  lineNumber        Int
+  itemId            String?   @db.Uuid
+  itemCode          String?
+  description       String
+  descriptionAr     String?
+  quantity          Decimal
+  unitOfMeasure     String?
+  unitPrice         Decimal
+  lineTotal         Decimal
+  taxAmount         Decimal   @default(0)
+  poLineId          String?   @db.Uuid
+  poLineNumber      Int?
+  grnLineId         String?   @db.Uuid
+  grnLineNumber     Int?
+  matchStatus       String?   @default("UNMATCHED")
+  quantityVariance  Decimal?
+  priceVariance     Decimal?
+  notes             String?
+  version           Int       @default(1)
+  isDeleted         Boolean   @default(false)
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @db.Timestamptz
+  createdBy         String?   @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, invoiceId, lineNumber])
+  @@index([tenantId])
+  @@map("imdad_invoice_lines")
+}
+
+model ImdadInvoice {
+  id                   String              @id @db.Uuid
+  tenantId             String              @db.Uuid
+  organizationId       String              @db.Uuid
+  invoiceNumber        String
+  internalNumber       String
+  vendorId             String              @db.Uuid
+  vendorName           String
+  invoiceDate          DateTime            @db.Timestamptz
+  dueDate              DateTime            @db.Timestamptz
+  receivedDate         DateTime?           @db.Timestamptz
+  purchaseOrderId      String?             @db.Uuid
+  purchaseOrderNumber  String?
+  grnId                String?             @db.Uuid
+  grnNumber            String?
+  subtotal             Decimal
+  taxAmount            Decimal             @default(0)
+  taxRate              Decimal             @default(15)
+  discountAmount       Decimal             @default(0)
+  totalAmount          Decimal
+  paidAmount           Decimal             @default(0)
+  balanceDue           Decimal
+  currency             String              @default("SAR")
+  status               ImdadInvoiceStatus  @default(DRAFT)
+  isMatched            Boolean             @default(false)
+  matchVariance        Decimal?
+  matchTolerancePct    Decimal             @default(2)
+  paymentTerms         String?
+  approvedBy           String?             @db.Uuid
+  approvedAt           DateTime?           @db.Timestamptz
+  notes                String?
+  metadata             Json?               @db.JsonB
+  attachmentIds        String[]            @default(dbgenerated("ARRAY[]::text[]"))
+  version              Int                 @default(1)
+  isDeleted            Boolean             @default(false)
+  createdAt            DateTime            @default(now()) @db.Timestamptz
+  updatedAt            DateTime            @db.Timestamptz
+  createdBy            String?             @db.Uuid
+  updatedBy            String?             @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, internalNumber])
+  @@index([tenantId])
+  @@map("imdad_invoices")
+}
+
+model ImdadItemCategory {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String     @db.Uuid
+  organizationId  String     @db.Uuid
+  code            String
+  name            String
+  nameAr          String?
+  description     String?
+  parentId        String?    @db.Uuid
+  level           Int        @default(0)
+  sortOrder       Int        @default(0)
+  isActive        Boolean    @default(true)
+  version         Int        @default(1)
+  isDeleted       Boolean    @default(false)
+  deletedAt       DateTime?  @db.Timestamptz
+  createdAt       DateTime   @default(now()) @db.Timestamptz
+  updatedAt       DateTime   @db.Timestamptz
+  createdBy       String?    @db.Uuid
+  updatedBy       String?    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("imdad_item_categories")
+}
+
+model ImdadItemLocation {
+  id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String     @db.Uuid
+  organizationId   String     @db.Uuid
+  itemId           String     @db.Uuid
+  locationId       String     @db.Uuid
+  currentStock     Int        @default(0)
+  reservedStock    Int        @default(0)
+  minStock         Int        @default(0)
+  maxStock         Int?
+  reorderQty       Int?
+  safetyStock      Int        @default(0)
+  lastCountDate    DateTime?  @db.Timestamptz
+  lastReceiptDate  DateTime?  @db.Timestamptz
+  lastIssueDate    DateTime?  @db.Timestamptz
+  version          Int        @default(1)
+  isDeleted        Boolean    @default(false)
+  deletedAt        DateTime?  @db.Timestamptz
+  createdAt        DateTime   @default(now()) @db.Timestamptz
+  updatedAt        DateTime   @db.Timestamptz
+  updatedBy        String?    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, itemId, locationId])
+  @@index([tenantId])
+  @@map("imdad_item_locations")
+}
+
+model ImdadItemMaster {
+  id                      String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId                String           @db.Uuid
+  organizationId          String?          @db.Uuid
+  code                    String
+  barcode                 String?
+  gtin                    String?
+  name                    String
+  nameAr                  String?
+  description             String?
+  descriptionAr           String?
+  itemType                ImdadItemType
+  categoryId              String?          @db.Uuid
+  subcategory             String?
+  genericName             String?
+  brandName               String?
+  baseUomId               String?          @db.Uuid
+  purchaseUomId           String?          @db.Uuid
+  dispensingUomId         String?          @db.Uuid
+  isCritical              Boolean          @default(false)
+  isControlled            Boolean          @default(false)
+  requiresColdChain       Boolean          @default(false)
+  hazardClass             String?
+  expiryTracked           Boolean          @default(true)
+  minShelfLifeDays        Int?
+  requiresSerialTracking  Boolean          @default(false)
+  requiresBatchTracking   Boolean          @default(true)
+  standardCost            Decimal?
+  lastPurchaseCost        Decimal?
+  weightedAvgCost         Decimal?
+  taxRate                 Decimal?
+  manufacturer            String?
+  countryOfOrigin         String?
+  sfdaRegistration        String?
+  formularyStatus         String?
+  abcClassification       String?
+  vedClassification       String?
+  lastReviewedAt          DateTime?        @db.Timestamptz
+  status                  ImdadItemStatus  @default(ACTIVE)
+  version                 Int              @default(1)
+  isDeleted               Boolean          @default(false)
+  deletedAt               DateTime?        @db.Timestamptz
+  createdAt               DateTime         @default(now()) @db.Timestamptz
+  updatedAt               DateTime         @db.Timestamptz
+  createdBy               String?          @db.Uuid
+  updatedBy               String?          @db.Uuid
+  // Phase 7.2 — pgvector(1536) column for semantic item search.
+  // Populated by `embedImdadItemMaster()` when FF_EMBEDDINGS_ENABLED is ON.
+  embeddingVec            Unsupported("vector(1536)")?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("imdad_item_masters")
+}
+
+model ImdadItemSubstitute {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  organizationId  String    @db.Uuid
+  itemId          String    @db.Uuid
+  substituteId    String    @db.Uuid
+  priority        Int       @default(1)
+  notes           String?
+  isActive        Boolean   @default(true)
+  version         Int       @default(1)
+  isDeleted       Boolean   @default(false)
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @db.Timestamptz
+  createdBy       String?   @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, itemId, substituteId])
+  @@index([tenantId])
+  @@map("imdad_item_substitutes")
+}
+
+model ImdadJobExecution {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String     @db.Uuid
+  organizationId  String?    @db.Uuid
+  jobName         String
+  jobType         String
+  triggerEvent    String?
+  status          String     @default("RUNNING")
+  startedAt       DateTime   @default(now()) @db.Timestamptz
+  completedAt     DateTime?  @db.Timestamptz
+  durationMs      Int?
+  itemsProcessed  Int        @default(0)
+  itemsFailed     Int        @default(0)
+  resultSummary   Json?      @db.JsonB
+  errorMessage    String?
+  errorStack      String?
+  attempt         Int        @default(1)
+  maxAttempts     Int        @default(3)
+  version         Int        @default(1)
+  isDeleted       Boolean    @default(false)
+  deletedAt       DateTime?  @db.Timestamptz
+  createdAt       DateTime   @default(now()) @db.Timestamptz
+  updatedAt       DateTime   @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_job_executions")
+}
+
+model ImdadKpiSnapshot {
+  id              String              @id @db.Uuid
+  tenantId        String              @db.Uuid
+  organizationId  String              @db.Uuid
+  kpiCode         String
+  periodType      ImdadKpiPeriodType
+  periodStart     DateTime            @db.Timestamptz
+  periodEnd       DateTime            @db.Timestamptz
+  numericValue    Decimal?
+  previousValue   Decimal?
+  targetValue     Decimal?
+  percentChange   Decimal?
+  dimensionType   String?
+  dimensionId     String?             @db.Uuid
+  dimensionName   String?
+  dataPoints      Int                 @default(0)
+  calculatedAt    DateTime            @default(now()) @db.Timestamptz
+  metadata        Json?               @db.JsonB
+  createdAt       DateTime            @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, kpiCode, periodType, periodStart, dimensionType, dimensionId])
+  @@index([tenantId])
+  @@map("imdad_kpi_snapshots")
+}
+
+model ImdadMaintenanceOrder {
+  id                  String                  @id @db.Uuid
+  tenantId            String                  @db.Uuid
+  organizationId      String                  @db.Uuid
+  orderNumber         String
+  assetId             String                  @db.Uuid
+  assetTag            String?
+  assetName           String?
+  maintenanceType     ImdadMaintenanceType
+  status              ImdadMaintenanceStatus  @default(SCHEDULED)
+  scheduledDate       DateTime                @db.Timestamptz
+  startedAt           DateTime?               @db.Timestamptz
+  completedAt         DateTime?               @db.Timestamptz
+  assignedTo          String?                 @db.Uuid
+  assignedTeam        String?
+  externalVendorId    String?                 @db.Uuid
+  externalVendorName  String?
+  description         String
+  descriptionAr       String?
+  workPerformed       String?
+  workPerformedAr     String?
+  findings            String?
+  findingsAr          String?
+  partsUsed           Json?                   @db.JsonB
+  laborHours          Decimal?
+  laborCost           Decimal?
+  partsCost           Decimal?
+  externalCost        Decimal?
+  totalCost           Decimal?
+  resultStatus        String?
+  followUpRequired    Boolean                 @default(false)
+  followUpNotes       String?
+  downtimeHours       Decimal?
+  priority            String                  @default("NORMAL")
+  notes               String?
+  metadata            Json?                   @db.JsonB
+  attachmentIds       String[]                @default(dbgenerated("ARRAY[]::text[]"))
+  version             Int                     @default(1)
+  isDeleted           Boolean                 @default(false)
+  createdAt           DateTime                @default(now()) @db.Timestamptz
+  updatedAt           DateTime                @db.Timestamptz
+  createdBy           String?                 @db.Uuid
+  updatedBy           String?                 @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, orderNumber])
+  @@index([tenantId])
+  @@map("imdad_maintenance_orders")
+}
+
+model ImdadNonConformanceReport {
+  id                  String     @id @db.Uuid
+  tenantId            String     @db.Uuid
+  organizationId      String     @db.Uuid
+  ncrNumber           String
+  status              String     @default("OPEN")
+  title               String
+  titleAr             String?
+  description         String
+  descriptionAr       String?
+  category            String
+  referenceType       String?
+  referenceId         String?    @db.Uuid
+  itemId              String?    @db.Uuid
+  vendorId            String?    @db.Uuid
+  severity            String
+  impactAssessment    String?
+  impactAssessmentAr  String?
+  rootCause           String?
+  rootCauseAr         String?
+  investigatedBy      String?    @db.Uuid
+  investigatedAt      DateTime?  @db.Timestamptz
+  correctiveAction    String?
+  correctiveActionAr  String?
+  preventiveAction    String?
+  preventiveActionAr  String?
+  actionDeadline      DateTime?  @db.Timestamptz
+  responsibleUserId   String?    @db.Uuid
+  closedAt            DateTime?  @db.Timestamptz
+  closedBy            String?    @db.Uuid
+  verifiedAt          DateTime?  @db.Timestamptz
+  verifiedBy          String?    @db.Uuid
+  reportedBy          String     @db.Uuid
+  reportedAt          DateTime   @default(now()) @db.Timestamptz
+  notes               String?
+  metadata            Json?      @db.JsonB
+  attachmentIds       String[]   @default(dbgenerated("ARRAY[]::text[]"))
+  version             Int        @default(1)
+  isDeleted           Boolean    @default(false)
+  createdAt           DateTime   @default(now()) @db.Timestamptz
+  updatedAt           DateTime   @db.Timestamptz
+  createdBy           String?    @db.Uuid
+  updatedBy           String?    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, ncrNumber])
+  @@index([tenantId])
+  @@map("imdad_non_conformance_reports")
+}
+
+model ImdadNotification {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String     @db.Uuid
+  organizationId  String?    @db.Uuid
+  userId          String     @db.Uuid
+  title           String
+  titleAr         String?
+  body            String?
+  bodyAr          String?
+  type            String
+  category        String?
+  priority        String     @default("normal")
+  actionUrl       String?
+  resourceType    String?
+  resourceId      String?    @db.Uuid
+  isRead          Boolean    @default(false)
+  readAt          DateTime?  @db.Timestamptz
+  isDismissed     Boolean    @default(false)
+  dismissedAt     DateTime?  @db.Timestamptz
+  channels        String[]   @default(dbgenerated("ARRAY['in_app'::text]"))
+  emailSent       Boolean    @default(false)
+  smsSent         Boolean    @default(false)
+  expiresAt       DateTime?  @db.Timestamptz
+  version         Int        @default(1)
+  isDeleted       Boolean    @default(false)
+  deletedAt       DateTime?  @db.Timestamptz
+  createdAt       DateTime   @default(now()) @db.Timestamptz
+  updatedAt       DateTime   @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_notifications")
+}
+
+model ImdadOperationalSignal {
+  id                String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String               @db.Uuid
+  organizationId    String               @db.Uuid
+  signalCode        String
+  signalType        ImdadSignalType
+  severity          ImdadSignalSeverity
+  title             String
+  titleAr           String
+  description       String?
+  descriptionAr     String?
+  sourceEntity      String
+  sourceEntityId    String?              @db.Uuid
+  departmentId      String?              @db.Uuid
+  metricValue       Decimal?
+  threshold         Decimal?
+  deviationPct      Decimal?
+  detectedAt        DateTime             @default(now()) @db.Timestamptz
+  resolvedAt        DateTime?            @db.Timestamptz
+  sourceDecisionId  String?              @db.Uuid
+  acknowledged      Boolean              @default(false)
+  acknowledgedBy    String?              @db.Uuid
+  acknowledgedAt    DateTime?            @db.Timestamptz
+  metadata          Json?                @db.JsonB
+  version           Int                  @default(1)
+  isDeleted         Boolean              @default(false)
+  createdAt         DateTime             @default(now()) @db.Timestamptz
+  updatedAt         DateTime             @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_operational_signals")
+}
+
+model ImdadOrganization {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String     @db.Uuid
+  code        String
+  name        String
+  nameAr      String?
+  type        String?
+  region      String?
+  city        String?
+  address     String?
+  timezone    String     @default("Asia/Riyadh")
+  currency    String     @default("SAR")
+  bedCount    Int?
+  isActive    Boolean    @default(true)
+  goLiveDate  DateTime?  @db.Timestamptz
+  version     Int        @default(1)
+  isDeleted   Boolean    @default(false)
+  deletedAt   DateTime?  @db.Timestamptz
+  createdAt   DateTime   @default(now()) @db.Timestamptz
+  updatedAt   DateTime   @db.Timestamptz
+  createdBy   String?    @db.Uuid
+  updatedBy   String?    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("imdad_organizations")
+}
+
+model ImdadPatientCharge {
+  id                 String             @id @db.Uuid
+  tenantId           String             @db.Uuid
+  organizationId     String             @db.Uuid
+  chargeNumber       String
+  status             ImdadChargeStatus  @default(PENDING)
+  patientId          String             @db.Uuid
+  patientMrn         String?
+  patientName        String?
+  encounterId        String?            @db.Uuid
+  itemId             String             @db.Uuid
+  itemCode           String
+  itemName           String
+  quantity           Decimal
+  unitOfMeasure      String
+  unitPrice          Decimal
+  totalAmount        Decimal
+  discountAmount     Decimal            @default(0)
+  netAmount          Decimal
+  insuranceCovered   Boolean            @default(false)
+  insuranceAmount    Decimal            @default(0)
+  patientAmount      Decimal            @default(0)
+  dispenseRequestId  String?            @db.Uuid
+  departmentId       String             @db.Uuid
+  costCenterId       String?            @db.Uuid
+  billedAt           DateTime?          @db.Timestamptz
+  billingReference   String?
+  reversedAt         DateTime?          @db.Timestamptz
+  reversalReason     String?
+  chargedBy          String             @db.Uuid
+  chargedAt          DateTime           @default(now()) @db.Timestamptz
+  metadata           Json?              @db.JsonB
+  version            Int                @default(1)
+  isDeleted          Boolean            @default(false)
+  createdAt          DateTime           @default(now()) @db.Timestamptz
+  updatedAt          DateTime           @db.Timestamptz
+  createdBy          String?            @db.Uuid
+  updatedBy          String?            @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, chargeNumber])
+  @@index([tenantId])
+  @@map("imdad_patient_charges")
+}
+
+model ImdadPatientReturn {
+  id                 String             @id @db.Uuid
+  tenantId           String             @db.Uuid
+  organizationId     String             @db.Uuid
+  returnNumber       String
+  reason             ImdadReturnReason
+  dispenseRequestId  String?            @db.Uuid
+  dispenseNumber     String?
+  patientId          String?            @db.Uuid
+  patientMrn         String?
+  patientName        String?
+  departmentId       String             @db.Uuid
+  departmentName     String?
+  itemId             String             @db.Uuid
+  itemCode           String
+  itemName           String
+  quantity           Decimal
+  unitOfMeasure      String
+  batchLotId         String?            @db.Uuid
+  batchNumber        String?
+  disposition        String             @default("RETURN_TO_STOCK")
+  isRestockable      Boolean            @default(true)
+  unitCost           Decimal?
+  totalCredit        Decimal?
+  returnedBy         String             @db.Uuid
+  returnedAt         DateTime           @default(now()) @db.Timestamptz
+  processedBy        String?            @db.Uuid
+  processedAt        DateTime?          @db.Timestamptz
+  notes              String?
+  metadata           Json?              @db.JsonB
+  version            Int                @default(1)
+  isDeleted          Boolean            @default(false)
+  createdAt          DateTime           @default(now()) @db.Timestamptz
+  updatedAt          DateTime           @db.Timestamptz
+  createdBy          String?            @db.Uuid
+  updatedBy          String?            @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, returnNumber])
+  @@index([tenantId])
+  @@map("imdad_patient_returns")
+}
+
+model ImdadPaymentBatch {
+  id                String              @id @db.Uuid
+  tenantId          String              @db.Uuid
+  organizationId    String              @db.Uuid
+  batchNumber       String
+  paymentDate       DateTime            @db.Timestamptz
+  vendorId          String              @db.Uuid
+  vendorName        String
+  invoiceId         String              @db.Uuid
+  invoiceNumber     String
+  paymentMethod     ImdadPaymentMethod
+  paymentReference  String?
+  amount            Decimal
+  currency          String              @default("SAR")
+  bankAccountCode   String?
+  bankName          String?
+  status            ImdadPaymentStatus  @default(PENDING)
+  approvedBy        String?             @db.Uuid
+  approvedAt        DateTime?           @db.Timestamptz
+  processedAt       DateTime?           @db.Timestamptz
+  failureReason     String?
+  notes             String?
+  metadata          Json?               @db.JsonB
+  version           Int                 @default(1)
+  isDeleted         Boolean             @default(false)
+  createdAt         DateTime            @default(now()) @db.Timestamptz
+  updatedAt         DateTime            @db.Timestamptz
+  createdBy         String?             @db.Uuid
+  updatedBy         String?             @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, batchNumber])
+  @@index([tenantId])
+  @@map("imdad_payment_batches")
+}
+
+model ImdadPhasedInvestment {
+  id                 String                 @id @db.Uuid
+  tenantId           String                 @db.Uuid
+  organizationId     String                 @db.Uuid
+  annualPlanId       String                 @db.Uuid
+  investmentCode     String
+  investmentName     String
+  investmentNameAr   String?
+  description        String?
+  descriptionAr      String?
+  totalInvestment    Decimal
+  phase              ImdadInvestmentPhase   @default(PHASE_1)
+  phaseYear          Int
+  phaseAmount        Decimal
+  cumulativeSpend    Decimal                @default(0)
+  totalPhases        Int                    @default(1)
+  itemsInPhase       Int                    @default(0)
+  totalItems         Int                    @default(0)
+  priorityScore      Decimal?
+  riskScore          Decimal?
+  departmentId       String?                @db.Uuid
+  departmentName     String?
+  assetCategory      String?
+  status             ImdadAnnualPlanStatus  @default(DRAFT)
+  approvedAt         DateTime?              @db.Timestamptz
+  approvedBy         String?                @db.Uuid
+  aiJustification    String?
+  aiJustificationAr  String?
+  costDistribution   Json?                  @db.JsonB
+  milestones         Json?                  @db.JsonB
+  currency           String                 @default("SAR")
+  version            Int                    @default(1)
+  isDeleted          Boolean                @default(false)
+  createdAt          DateTime               @default(now()) @db.Timestamptz
+  updatedAt          DateTime               @db.Timestamptz
+  createdBy          String?                @db.Uuid
+  updatedBy          String?                @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, investmentCode])
+  @@index([tenantId])
+  @@map("imdad_phased_investments")
+}
+
+model ImdadPickList {
+  id                       String           @id @db.Uuid
+  tenantId                 String           @db.Uuid
+  organizationId           String           @db.Uuid
+  pickNumber               String
+  status                   ImdadPickStatus  @default(PENDING)
+  sourceType               String
+  sourceId                 String           @db.Uuid
+  sourceNumber             String?
+  destinationLocationId    String?          @db.Uuid
+  destinationDepartmentId  String?          @db.Uuid
+  assignedTo               String?          @db.Uuid
+  assignedAt               DateTime?        @db.Timestamptz
+  startedAt                DateTime?        @db.Timestamptz
+  completedAt              DateTime?        @db.Timestamptz
+  priority                 String           @default("NORMAL")
+  requiredByDate           DateTime?        @db.Timestamptz
+  notes                    String?
+  metadata                 Json?            @db.JsonB
+  version                  Int              @default(1)
+  isDeleted                Boolean          @default(false)
+  createdAt                DateTime         @default(now()) @db.Timestamptz
+  updatedAt                DateTime         @db.Timestamptz
+  createdBy                String?          @db.Uuid
+  updatedBy                String?          @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, pickNumber])
+  @@index([tenantId])
+  @@map("imdad_pick_lists")
+}
+
+model ImdadProposalLineItem {
+  id                 String    @id @db.Uuid
+  tenantId           String    @db.Uuid
+  organizationId     String    @db.Uuid
+  proposalId         String    @db.Uuid
+  lineNumber         Int
+  itemDescription    String
+  itemDescriptionAr  String?
+  itemCode           String?
+  quantity           Int       @default(1)
+  unitCost           Decimal
+  totalCost          Decimal
+  currentAssetTag    String?
+  replacesAssetId    String?   @db.Uuid
+  isReplacement      Boolean   @default(false)
+  vendorSuggestion   String?
+  leadTimeDays       Int?
+  notes              String?
+  version            Int       @default(1)
+  isDeleted          Boolean   @default(false)
+  createdAt          DateTime  @default(now()) @db.Timestamptz
+  updatedAt          DateTime  @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, proposalId, lineNumber])
+  @@index([tenantId])
+  @@map("imdad_proposal_line_items")
+}
+
+model ImdadPurchaseOrderLine {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String     @db.Uuid
+  organizationId  String     @db.Uuid
+  poId            String     @db.Uuid
+  lineNumber      Int
+  itemId          String     @db.Uuid
+  quantity        Int
+  unitCost        Decimal
+  totalCost       Decimal
+  taxAmount       Decimal    @default(0)
+  uomId           String?    @db.Uuid
+  receivedQty     Int        @default(0)
+  batchNumber     String?
+  expiryDate      DateTime?  @db.Timestamptz
+  notes           String?
+  version         Int        @default(1)
+  isDeleted       Boolean    @default(false)
+  createdAt       DateTime   @default(now()) @db.Timestamptz
+  updatedAt       DateTime   @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_purchase_order_lines")
+}
+
+model ImdadPurchaseOrder {
+  id                    String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String         @db.Uuid
+  organizationId        String         @db.Uuid
+  poNumber              String
+  vendorId              String         @db.Uuid
+  contractId            String?        @db.Uuid
+  prId                  String?        @db.Uuid
+  status                ImdadPOStatus  @default(DRAFT)
+  title                 String?
+  subtotal              Decimal        @default(0)
+  taxAmount             Decimal        @default(0)
+  totalAmount           Decimal        @default(0)
+  currency              String         @default("SAR")
+  paymentTerms          String?
+  vendorName            String?
+  deliveryDate          DateTime?      @db.Timestamptz
+  expectedDeliveryDate  DateTime?      @db.Timestamptz
+  deliveryAddress       String?
+  shippingMethod        String?
+  isOverdue             Boolean        @default(false)
+  orderDate             DateTime?      @db.Timestamptz
+  invoiceNumber         String?
+  invoiceDate           DateTime?      @db.Timestamptz
+  invoiceAmount         Decimal?
+  zakatcaVerified       Boolean        @default(false)
+  budgetId              String?        @db.Uuid
+  costCenterId          String?        @db.Uuid
+  notes                 String?
+  sentAt                DateTime?      @db.Timestamptz
+  acknowledgedAt        DateTime?      @db.Timestamptz
+  closedAt              DateTime?      @db.Timestamptz
+  version               Int            @default(1)
+  isDeleted             Boolean        @default(false)
+  deletedAt             DateTime?      @db.Timestamptz
+  createdAt             DateTime       @default(now()) @db.Timestamptz
+  updatedAt             DateTime       @db.Timestamptz
+  createdBy             String?        @db.Uuid
+  updatedBy             String?        @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, poNumber])
+  @@index([tenantId])
+  @@map("imdad_purchase_orders")
+}
+
+model ImdadPurchaseRequisitionLine {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @db.Uuid
+  organizationId     String    @db.Uuid
+  prId               String    @db.Uuid
+  lineNumber         Int
+  itemId             String    @db.Uuid
+  quantity           Int
+  uomId              String?   @db.Uuid
+  estimatedUnitCost  Decimal?
+  estimatedTotal     Decimal?
+  preferredVendorId  String?   @db.Uuid
+  contractId         String?   @db.Uuid
+  contractLineId     String?   @db.Uuid
+  notes              String?
+  status             String    @default("PENDING")
+  version            Int       @default(1)
+  isDeleted          Boolean   @default(false)
+  createdAt          DateTime  @default(now()) @db.Timestamptz
+  updatedAt          DateTime  @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_purchase_requisition_lines")
+}
+
+model ImdadPurchaseRequisition {
+  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String         @db.Uuid
+  organizationId  String         @db.Uuid
+  prNumber        String
+  title           String?
+  status          ImdadPRStatus  @default(DRAFT)
+  priority        String         @default("NORMAL")
+  departmentId    String?        @db.Uuid
+  costCenterId    String?        @db.Uuid
+  requestedBy     String         @db.Uuid
+  requestedAt     DateTime       @default(now()) @db.Timestamptz
+  justification   String?
+  estimatedTotal  Decimal?
+  currency        String         @default("SAR")
+  requiredDate    DateTime?      @db.Timestamptz
+  budgetId        String?        @db.Uuid
+  budgetLineId    String?        @db.Uuid
+  notes           String?
+  version         Int            @default(1)
+  isDeleted       Boolean        @default(false)
+  deletedAt       DateTime?      @db.Timestamptz
+  createdAt       DateTime       @default(now()) @db.Timestamptz
+  updatedAt       DateTime       @db.Timestamptz
+  createdBy       String?        @db.Uuid
+  updatedBy       String?        @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, prNumber])
+  @@index([tenantId])
+  @@map("imdad_purchase_requisitions")
+}
+
+model ImdadPutAwayTask {
+  id              String              @id @db.Uuid
+  tenantId        String              @db.Uuid
+  organizationId  String              @db.Uuid
+  taskNumber      String
+  grnId           String              @db.Uuid
+  grnNumber       String?
+  status          ImdadPutAwayStatus  @default(PENDING)
+  assignedTo      String?             @db.Uuid
+  assignedAt      DateTime?           @db.Timestamptz
+  startedAt       DateTime?           @db.Timestamptz
+  completedAt     DateTime?           @db.Timestamptz
+  notes           String?
+  metadata        Json?               @db.JsonB
+  version         Int                 @default(1)
+  isDeleted       Boolean             @default(false)
+  createdAt       DateTime            @default(now()) @db.Timestamptz
+  updatedAt       DateTime            @db.Timestamptz
+  createdBy       String?             @db.Uuid
+  updatedBy       String?             @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, taskNumber])
+  @@index([tenantId])
+  @@map("imdad_put_away_tasks")
+}
+
+model ImdadQualityInspection {
+  id                        String                 @id @db.Uuid
+  tenantId                  String                 @db.Uuid
+  organizationId            String                 @db.Uuid
+  inspectionNumber          String
+  inspectionType            ImdadInspectionType
+  status                    ImdadInspectionStatus  @default(SCHEDULED)
+  referenceType             String
+  referenceId               String                 @db.Uuid
+  referenceNumber           String?
+  itemId                    String?                @db.Uuid
+  itemCode                  String?
+  itemName                  String?
+  batchLotId                String?                @db.Uuid
+  batchNumber               String?
+  sampleSize                Int?
+  totalQuantity             Decimal?
+  scheduledDate             DateTime?              @db.Timestamptz
+  startedAt                 DateTime?              @db.Timestamptz
+  completedAt               DateTime?              @db.Timestamptz
+  inspectorId               String?                @db.Uuid
+  inspectorName             String?
+  reviewerId                String?                @db.Uuid
+  overallResult             String?
+  defectsFound              Int                    @default(0)
+  defectRate                Decimal?
+  dispositionAction         String?
+  correctiveActionRequired  Boolean                @default(false)
+  findings                  String?
+  findingsAr                String?
+  notes                     String?
+  metadata                  Json?                  @db.JsonB
+  attachmentIds             String[]               @default(dbgenerated("ARRAY[]::text[]"))
+  version                   Int                    @default(1)
+  isDeleted                 Boolean                @default(false)
+  createdAt                 DateTime               @default(now()) @db.Timestamptz
+  updatedAt                 DateTime               @db.Timestamptz
+  createdBy                 String?                @db.Uuid
+  updatedBy                 String?                @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, inspectionNumber])
+  @@index([tenantId])
+  @@map("imdad_quality_inspections")
+}
+
+model ImdadRecallAction {
+  id                String     @id @db.Uuid
+  tenantId          String     @db.Uuid
+  organizationId    String     @db.Uuid
+  recallId          String     @db.Uuid
+  actionNumber      Int
+  locationId        String?    @db.Uuid
+  locationName      String?
+  actionType        String
+  description       String
+  descriptionAr     String?
+  quantityFound     Decimal?
+  quantityActioned  Decimal?
+  status            String     @default("PENDING")
+  assignedTo        String?    @db.Uuid
+  completedAt       DateTime?  @db.Timestamptz
+  completedBy       String?    @db.Uuid
+  notes             String?
+  version           Int        @default(1)
+  isDeleted         Boolean    @default(false)
+  createdAt         DateTime   @default(now()) @db.Timestamptz
+  updatedAt         DateTime   @db.Timestamptz
+  createdBy         String?    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, recallId, actionNumber])
+  @@index([tenantId])
+  @@map("imdad_recall_actions")
+}
+
+model ImdadRecall {
+  id                     String               @id @db.Uuid
+  tenantId               String               @db.Uuid
+  organizationId         String               @db.Uuid
+  recallNumber           String
+  status                 ImdadRecallStatus    @default(DRAFT)
+  severity               ImdadRecallSeverity
+  itemId                 String               @db.Uuid
+  itemCode               String
+  itemName               String
+  batchNumbers           String[]             @default(dbgenerated("ARRAY[]::text[]"))
+  vendorId               String?              @db.Uuid
+  vendorName             String?
+  recallReason           String
+  recallReasonAr         String?
+  sfdaReferenceNumber    String?
+  manufacturerRecallRef  String?
+  quantityAffected       Decimal?
+  quantityRecovered      Decimal              @default(0)
+  quantityDestroyed      Decimal              @default(0)
+  locationsAffected      Int                  @default(0)
+  initiatedAt            DateTime             @db.Timestamptz
+  initiatedBy            String               @db.Uuid
+  completedAt            DateTime?            @db.Timestamptz
+  completedBy            String?              @db.Uuid
+  sfdaNotified           Boolean              @default(false)
+  sfdaNotifiedAt         DateTime?            @db.Timestamptz
+  publicNotice           Boolean              @default(false)
+  notes                  String?
+  metadata               Json?                @db.JsonB
+  attachmentIds          String[]             @default(dbgenerated("ARRAY[]::text[]"))
+  version                Int                  @default(1)
+  isDeleted              Boolean              @default(false)
+  createdAt              DateTime             @default(now()) @db.Timestamptz
+  updatedAt              DateTime             @db.Timestamptz
+  createdBy              String?              @db.Uuid
+  updatedBy              String?              @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, recallNumber])
+  @@index([tenantId])
+  @@map("imdad_recalls")
+}
+
+model ImdadReorderRule {
+  id                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String              @db.Uuid
+  organizationId     String              @db.Uuid
+  itemId             String              @db.Uuid
+  locationId         String              @db.Uuid
+  method             ImdadReorderMethod  @default(MIN_MAX)
+  minLevel           Int                 @default(0)
+  maxLevel           Int?
+  reorderPoint       Int                 @default(0)
+  reorderQuantity    Int?
+  safetyStock        Int                 @default(0)
+  leadTimeDays       Int                 @default(7)
+  isAutoReorder      Boolean             @default(false)
+  preferredVendorId  String?             @db.Uuid
+  isActive           Boolean             @default(true)
+  version            Int                 @default(1)
+  isDeleted          Boolean             @default(false)
+  deletedAt          DateTime?           @db.Timestamptz
+  createdAt          DateTime            @default(now()) @db.Timestamptz
+  updatedAt          DateTime            @db.Timestamptz
+  createdBy          String?             @db.Uuid
+  updatedBy          String?             @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, itemId, locationId])
+  @@index([tenantId])
+  @@map("imdad_reorder_rules")
+}
+
+model ImdadReplenishmentRule {
+  id                String     @id @db.Uuid
+  tenantId          String     @db.Uuid
+  organizationId    String     @db.Uuid
+  itemId            String     @db.Uuid
+  sourceLocationId  String     @db.Uuid
+  destLocationId    String     @db.Uuid
+  minLevel          Decimal
+  maxLevel          Decimal
+  replenishQty      Decimal
+  isActive          Boolean    @default(true)
+  lastTriggeredAt   DateTime?  @db.Timestamptz
+  version           Int        @default(1)
+  isDeleted         Boolean    @default(false)
+  createdAt         DateTime   @default(now()) @db.Timestamptz
+  updatedAt         DateTime   @db.Timestamptz
+  createdBy         String?    @db.Uuid
+  updatedBy         String?    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, itemId, sourceLocationId, destLocationId])
+  @@index([tenantId])
+  @@map("imdad_replenishment_rules")
+}
+
+model ImdadReportDefinition {
+  id                  String    @id @db.Uuid
+  tenantId            String    @db.Uuid
+  organizationId      String    @db.Uuid
+  reportCode          String
+  reportName          String
+  reportNameAr        String?
+  reportCategory      String
+  description         String?
+  descriptionAr       String?
+  queryConfig         Json      @db.JsonB
+  filterDefaults      Json?     @db.JsonB
+  columnConfig        Json?     @db.JsonB
+  supportedFormats    String[]  @default(dbgenerated("ARRAY['PDF'::text, 'EXCEL'::text, 'CSV'::text]"))
+  defaultFormat       String    @default("PDF")
+  paperSize           String    @default("A4")
+  orientation         String    @default("LANDSCAPE")
+  isScheduled         Boolean   @default(false)
+  scheduleExpression  String?
+  scheduleRecipients  String[]  @default(dbgenerated("ARRAY[]::text[]"))
+  isSystem            Boolean   @default(false)
+  isActive            Boolean   @default(true)
+  metadata            Json?     @db.JsonB
+  version             Int       @default(1)
+  isDeleted           Boolean   @default(false)
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+  updatedAt           DateTime  @db.Timestamptz
+  createdBy           String?   @db.Uuid
+  updatedBy           String?   @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, reportCode])
+  @@index([tenantId])
+  @@map("imdad_report_definitions")
+}
+
+model ImdadReportExecution {
+  id                  String     @id @db.Uuid
+  tenantId            String     @db.Uuid
+  organizationId      String     @db.Uuid
+  reportDefinitionId  String     @db.Uuid
+  reportCode          String
+  reportName          String
+  executedAt          DateTime   @default(now()) @db.Timestamptz
+  executedBy          String     @db.Uuid
+  executionTimeMs     Int?
+  filterParams        Json?      @db.JsonB
+  periodStart         DateTime?  @db.Timestamptz
+  periodEnd           DateTime?  @db.Timestamptz
+  outputFormat        String
+  outputStorageKey    String?
+  outputSizeBytes     Int?
+  rowCount            Int?
+  status              String     @default("COMPLETED")
+  errorMessage        String?
+  metadata            Json?      @db.JsonB
+  createdAt           DateTime   @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_report_executions")
+}
+
+model ImdadRoleDefinition {
+  id                  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String         @db.Uuid
+  organizationId      String?        @db.Uuid
+  name                String
+  nameAr              String?
+  roleKey             String
+  roleType            ImdadRoleType
+  description         String?
+  descriptionAr       String?
+  permissions         String[]       @default(dbgenerated("ARRAY[]::text[]"))
+  incompatibleRoles   String[]       @default(dbgenerated("ARRAY[]::text[]"))
+  maxConcurrentUsers  Int?
+  isSystem            Boolean        @default(false)
+  isActive            Boolean        @default(true)
+  version             Int            @default(1)
+  isDeleted           Boolean        @default(false)
+  deletedAt           DateTime?      @db.Timestamptz
+  createdAt           DateTime       @default(now()) @db.Timestamptz
+  updatedAt           DateTime       @db.Timestamptz
+  createdBy           String?        @db.Uuid
+  updatedBy           String?        @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, roleKey])
+  @@index([tenantId])
+  @@map("imdad_role_definitions")
+}
+
+model ImdadSequenceCounter {
+  id              String    @id @db.Uuid
+  tenantId        String    @db.Uuid
+  organizationId  String    @db.Uuid
+  sequenceType    String
+  prefix          String
+  currentValue    Int       @default(0)
+  fiscalYear      Int?
+  padLength       Int       @default(6)
+  version         Int       @default(1)
+  isDeleted       Boolean   @default(false)
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, sequenceType, fiscalYear])
+  @@index([tenantId])
+  @@map("imdad_sequence_counters")
+}
+
+model ImdadSfdaIntegrationLog {
+  id               String     @id @db.Uuid
+  tenantId         String     @db.Uuid
+  organizationId   String     @db.Uuid
+  requestType      String
+  requestPayload   Json?      @db.JsonB
+  responsePayload  Json?      @db.JsonB
+  httpStatusCode   Int?
+  referenceType    String?
+  referenceId      String?    @db.Uuid
+  isSuccess        Boolean    @default(false)
+  errorMessage     String?
+  requestedAt      DateTime   @default(now()) @db.Timestamptz
+  respondedAt      DateTime?  @db.Timestamptz
+  requestedBy      String?    @db.Uuid
+  createdAt        DateTime   @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_sfda_integration_logs")
+}
+
+model ImdadStockCountItem {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String     @db.Uuid
+  organizationId  String     @db.Uuid
+  countId         String     @db.Uuid
+  itemId          String     @db.Uuid
+  systemQty       Int
+  countedQty      Int?
+  variance        Int?
+  varianceValue   Decimal?
+  batchNumber     String?
+  expiryDate      DateTime?  @db.Timestamptz
+  notes           String?
+  version         Int        @default(1)
+  isDeleted       Boolean    @default(false)
+  createdAt       DateTime   @default(now()) @db.Timestamptz
+  updatedAt       DateTime   @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_stock_count_items")
+}
+
+model ImdadStockCount {
+  id                  String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String                 @db.Uuid
+  organizationId      String                 @db.Uuid
+  countNumber         String
+  locationId          String                 @db.Uuid
+  countType           String
+  status              ImdadStockCountStatus  @default(DRAFT)
+  scheduledDate       DateTime?              @db.Timestamptz
+  startedAt           DateTime?              @db.Timestamptz
+  completedAt         DateTime?              @db.Timestamptz
+  totalItems          Int                    @default(0)
+  matchedItems        Int                    @default(0)
+  varianceItems       Int                    @default(0)
+  totalVarianceValue  Decimal?
+  assignedTo          String?                @db.Uuid
+  countedBy           String?                @db.Uuid
+  approvedBy          String?                @db.Uuid
+  approvedAt          DateTime?              @db.Timestamptz
+  notes               String?
+  version             Int                    @default(1)
+  isDeleted           Boolean                @default(false)
+  deletedAt           DateTime?              @db.Timestamptz
+  createdAt           DateTime               @default(now()) @db.Timestamptz
+  updatedAt           DateTime               @db.Timestamptz
+  createdBy           String?                @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, countNumber])
+  @@index([tenantId])
+  @@map("imdad_stock_counts")
+}
+
+model ImdadSupplyRequestApproval {
+  id            String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String               @db.Uuid
+  requestId     String               @db.Uuid
+  stepNumber    Int
+  role          String
+  roleName      String
+  roleNameAr    String?
+  status        ImdadApprovalStatus  @default(PENDING)
+  slaHours      Int                  @default(24)
+  pendingSince  DateTime?            @db.Timestamptz
+  decidedAt     DateTime?            @db.Timestamptz
+  decidedBy     String?
+  comments      String?
+  escalatedTo   String?
+  version       Int                  @default(1)
+  isDeleted     Boolean              @default(false)
+  createdAt     DateTime             @default(now()) @db.Timestamptz
+  updatedAt     DateTime             @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, requestId, stepNumber])
+  @@index([tenantId])
+  @@map("imdad_supply_request_approvals")
+}
+
+model ImdadSupplyRequestAudit {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  requestId        String    @db.Uuid
+  requestCode      String
+  action           String
+  performedBy      String
+  performedByRole  String
+  previousState    String
+  newState         String
+  stepRole         String?
+  comments         String?
+  metadata         Json?     @db.JsonB
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_supply_request_audit")
+}
+
+model ImdadSupplyRequestItem {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  requestId      String    @db.Uuid
+  itemId         String?
+  name           String
+  nameAr         String?
+  sku            String
+  quantity       Int
+  unit           String    @default("unit")
+  estimatedCost  Decimal
+  version        Int       @default(1)
+  isDeleted      Boolean   @default(false)
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+  updatedAt      DateTime  @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_supply_request_items")
+}
+
+model ImdadSupplyRequest {
+  id                   String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String                      @db.Uuid
+  organizationId       String?                     @db.Uuid
+  code                 String
+  idempotencyKey       String?
+  requestType          ImdadSupplyRequestType      @default(SUPPLY_REQUEST)
+  hospitalId           String
+  hospitalName         String
+  hospitalNameAr       String?
+  department           String
+  departmentAr         String?
+  requestedBy          String
+  requestedByAr        String?
+  requestedByUserId    String?                     @db.Uuid
+  requestedByRole      String
+  domain               String
+  priority             ImdadSupplyRequestPriority  @default(ROUTINE)
+  justification        String?
+  justificationAr      String?
+  totalEstimatedCost   Decimal                     @default(0)
+  status               ImdadSupplyRequestStatus    @default(SUBMITTED)
+  currentApprovalStep  Int                         @default(0)
+  poCode               String?
+  workOrderCode        String?
+  expectedDelivery     DateTime?                   @db.Timestamptz
+  slaDeadlineAt        DateTime                    @db.Timestamptz
+  slaBreached          Boolean                     @default(false)
+  deviceId             String?
+  deviceName           String?
+  maintenanceType      String?
+  sourceHospitalId     String?
+  targetHospitalId     String?
+  budgetCategory       String?
+  budgetPeriod         String?
+  budgetAmount         Decimal?
+  version              Int                         @default(1)
+  isDeleted            Boolean                     @default(false)
+  createdAt            DateTime                    @default(now()) @db.Timestamptz
+  updatedAt            DateTime                    @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, code])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId])
+  @@map("imdad_supply_requests")
+}
+
+model ImdadSystemConfig {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String            @db.Uuid
+  organizationId  String?           @db.Uuid
+  configKey       String
+  configValue     Json              @db.JsonB
+  scope           ImdadConfigScope  @default(ORGANIZATION)
+  scopeId         String?
+  description     String?
+  descriptionAr   String?
+  version         Int               @default(1)
+  isDeleted       Boolean           @default(false)
+  deletedAt       DateTime?         @db.Timestamptz
+  createdAt       DateTime          @default(now()) @db.Timestamptz
+  updatedAt       DateTime          @db.Timestamptz
+  createdBy       String?           @db.Uuid
+  updatedBy       String?           @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, configKey, scope, scopeId])
+  @@index([tenantId])
+  @@map("imdad_system_configs")
+}
+
+model ImdadSystemPulse {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String    @db.Uuid
+  organizationId       String    @db.Uuid
+  pulseTimestamp       DateTime  @default(now()) @db.Timestamptz
+  activeDecisions      Int       @default(0)
+  pendingActions       Int       @default(0)
+  criticalSignals      Int       @default(0)
+  highSignals          Int       @default(0)
+  totalAssets          Int       @default(0)
+  assetsAtRisk         Int       @default(0)
+  inventoryHealth      Decimal?
+  budgetHealth         Decimal?
+  complianceHealth     Decimal?
+  overallHealthScore   Decimal?
+  operationalPressure  Decimal?
+  supplyChainVelocity  Decimal?
+  riskIndex            Decimal?
+  aiInsights           Json?     @db.JsonB
+  trendDirection       String?
+  metadata             Json?     @db.JsonB
+  version              Int       @default(1)
+  isDeleted            Boolean   @default(false)
+  createdAt            DateTime  @default(now()) @db.Timestamptz
+  updatedAt            DateTime  @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_system_pulses")
+}
+
+model ImdadTemperatureLog {
+  id              String     @id @db.Uuid
+  tenantId        String     @db.Uuid
+  organizationId  String     @db.Uuid
+  zoneId          String     @db.Uuid
+  sensorId        String?
+  temperature     Decimal
+  humidity        Decimal?
+  recordedAt      DateTime   @db.Timestamptz
+  isOutOfRange    Boolean    @default(false)
+  alertSent       Boolean    @default(false)
+  alertSentAt     DateTime?  @db.Timestamptz
+  metadata        Json?      @db.JsonB
+  createdAt       DateTime   @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_temperature_logs")
+}
+
+model ImdadTransferLine {
+  id              String    @id @db.Uuid
+  tenantId        String    @db.Uuid
+  organizationId  String    @db.Uuid
+  transferId      String    @db.Uuid
+  lineNumber      Int
+  itemId          String    @db.Uuid
+  itemCode        String
+  itemName        String
+  requestedQty    Decimal
+  shippedQty      Decimal   @default(0)
+  receivedQty     Decimal   @default(0)
+  unitOfMeasure   String
+  batchLotId      String?   @db.Uuid
+  serialNumber    String?
+  sourceBinId     String?   @db.Uuid
+  destBinId       String?   @db.Uuid
+  unitCost        Decimal?
+  totalCost       Decimal?
+  notes           String?
+  version         Int       @default(1)
+  isDeleted       Boolean   @default(false)
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @db.Timestamptz
+  createdBy       String?   @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, transferId, lineNumber])
+  @@index([tenantId])
+  @@map("imdad_transfer_lines")
+}
+
+model ImdadTransferRequest {
+  id                  String               @id @db.Uuid
+  tenantId            String               @db.Uuid
+  organizationId      String               @db.Uuid
+  transferNumber      String
+  transferType        ImdadTransferType
+  status              ImdadTransferStatus  @default(DRAFT)
+  sourceLocationId    String               @db.Uuid
+  sourceLocationName  String?
+  sourceDepartmentId  String?              @db.Uuid
+  destLocationId      String               @db.Uuid
+  destLocationName    String?
+  destDepartmentId    String?              @db.Uuid
+  priority            String               @default("NORMAL")
+  requiredByDate      DateTime?            @db.Timestamptz
+  requestedBy         String               @db.Uuid
+  requestedAt         DateTime             @default(now()) @db.Timestamptz
+  approvedBy          String?              @db.Uuid
+  approvedAt          DateTime?            @db.Timestamptz
+  shippedAt           DateTime?            @db.Timestamptz
+  receivedAt          DateTime?            @db.Timestamptz
+  completedAt         DateTime?            @db.Timestamptz
+  rejectionReason     String?
+  notes               String?
+  metadata            Json?                @db.JsonB
+  version             Int                  @default(1)
+  isDeleted           Boolean              @default(false)
+  createdAt           DateTime             @default(now()) @db.Timestamptz
+  updatedAt           DateTime             @db.Timestamptz
+  createdBy           String?              @db.Uuid
+  updatedBy           String?              @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, transferNumber])
+  @@index([tenantId])
+  @@map("imdad_transfer_requests")
+}
+
+model ImdadUserRole {
+  id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String     @db.Uuid
+  organizationId   String?    @db.Uuid
+  userId           String     @db.Uuid
+  roleId           String     @db.Uuid
+  departmentScope  String?
+  validFrom        DateTime?  @db.Timestamptz
+  validUntil       DateTime?  @db.Timestamptz
+  isActive         Boolean    @default(true)
+  grantedBy        String?    @db.Uuid
+  grantedAt        DateTime   @default(now()) @db.Timestamptz
+  version          Int        @default(1)
+  isDeleted        Boolean    @default(false)
+  deletedAt        DateTime?  @db.Timestamptz
+  createdAt        DateTime   @default(now()) @db.Timestamptz
+  updatedAt        DateTime   @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, userId, roleId])
+  @@index([tenantId])
+  @@map("imdad_user_roles")
+}
+
+model ImdadVendorAudit {
+  id                 String              @id @db.Uuid
+  tenantId           String              @db.Uuid
+  organizationId     String              @db.Uuid
+  auditNumber        String
+  vendorId           String              @db.Uuid
+  vendorName         String
+  auditType          String
+  auditScope         String?
+  auditScopeAr       String?
+  plannedDate        DateTime            @db.Timestamptz
+  actualDate         DateTime?           @db.Timestamptz
+  completedAt        DateTime?           @db.Timestamptz
+  leadAuditorId      String              @db.Uuid
+  leadAuditorName    String?
+  auditTeam          String[]            @default(dbgenerated("ARRAY[]::text[]"))
+  outcome            ImdadAuditOutcome?
+  findingsCount      Int                 @default(0)
+  criticalFindings   Int                 @default(0)
+  majorFindings      Int                 @default(0)
+  minorFindings      Int                 @default(0)
+  summary            String?
+  summaryAr          String?
+  recommendations    String?
+  recommendationsAr  String?
+  nextAuditDue       DateTime?           @db.Timestamptz
+  capaRequired       Boolean             @default(false)
+  capaDeadline       DateTime?           @db.Timestamptz
+  notes              String?
+  metadata           Json?               @db.JsonB
+  attachmentIds      String[]            @default(dbgenerated("ARRAY[]::text[]"))
+  version            Int                 @default(1)
+  isDeleted          Boolean             @default(false)
+  createdAt          DateTime            @default(now()) @db.Timestamptz
+  updatedAt          DateTime            @db.Timestamptz
+  createdBy          String?             @db.Uuid
+  updatedBy          String?             @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, auditNumber])
+  @@index([tenantId])
+  @@map("imdad_vendor_audits")
+}
+
+model ImdadVendor {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String             @db.Uuid
+  organizationId     String?            @db.Uuid
+  code               String
+  name               String
+  nameAr             String?
+  type               String
+  country            String?
+  city               String?
+  address            String?
+  crNumber           String?
+  vatNumber          String?
+  taxId              String?
+  contactName        String?
+  contactEmail       String?
+  contactPhone       String?
+  website            String?
+  paymentTerms       String?
+  currency           String             @default("SAR")
+  bankName           String?
+  bankAccount        String?
+  iban               String?
+  rating             Decimal?
+  tier               ImdadVendorTier?
+  status             ImdadVendorStatus  @default(PENDING_APPROVAL)
+  approvedBy         String?            @db.Uuid
+  approvedAt         DateTime?          @db.Timestamptz
+  sfdaLicense        String?
+  sfdaLicenseExpiry  DateTime?          @db.Timestamptz
+  version            Int                @default(1)
+  isDeleted          Boolean            @default(false)
+  deletedAt          DateTime?          @db.Timestamptz
+  createdAt          DateTime           @default(now()) @db.Timestamptz
+  updatedAt          DateTime           @db.Timestamptz
+  createdBy          String?            @db.Uuid
+  updatedBy          String?            @db.Uuid
+  // Phase 7.2 — pgvector(1536) column for semantic vendor search.
+  // Populated by `embedImdadVendor()` when FF_EMBEDDINGS_ENABLED is ON.
+  embeddingVec       Unsupported("vector(1536)")?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@map("imdad_vendors")
+}
+
+model ImdadWardParLevel {
+  id                String     @id @db.Uuid
+  tenantId          String     @db.Uuid
+  organizationId    String     @db.Uuid
+  departmentId      String     @db.Uuid
+  departmentName    String?
+  locationId        String     @db.Uuid
+  itemId            String     @db.Uuid
+  itemCode          String
+  itemName          String
+  parLevel          Decimal
+  maxLevel          Decimal
+  reorderQty        Decimal
+  unitOfMeasure     String
+  avgDailyUsage     Decimal?
+  lastCalculatedAt  DateTime?  @db.Timestamptz
+  isActive          Boolean    @default(true)
+  metadata          Json?      @db.JsonB
+  version           Int        @default(1)
+  isDeleted         Boolean    @default(false)
+  createdAt         DateTime   @default(now()) @db.Timestamptz
+  updatedAt         DateTime   @db.Timestamptz
+  createdBy         String?    @db.Uuid
+  updatedBy         String?    @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, departmentId, itemId])
+  @@index([tenantId])
+  @@map("imdad_ward_par_levels")
+}
+
+model ImdadWarehouseZone {
+  id                      String                  @id @db.Uuid
+  tenantId                String                  @db.Uuid
+  organizationId          String                  @db.Uuid
+  warehouseId             String                  @db.Uuid
+  zoneCode                String
+  zoneName                String
+  zoneNameAr              String?
+  zoneType                ImdadWarehouseZoneType
+  temperatureZone         ImdadTemperatureZone?
+  minTemperature          Decimal?
+  maxTemperature          Decimal?
+  humidityMin             Decimal?
+  humidityMax             Decimal?
+  totalBins               Int                     @default(0)
+  usedBins                Int                     @default(0)
+  maxWeight               Decimal?
+  requiresBadgeAccess     Boolean                 @default(false)
+  requiredClearanceLevel  String?
+  isActive                Boolean                 @default(true)
+  metadata                Json?                   @db.JsonB
+  version                 Int                     @default(1)
+  isDeleted               Boolean                 @default(false)
+  createdAt               DateTime                @default(now()) @db.Timestamptz
+  updatedAt               DateTime                @db.Timestamptz
+  createdBy               String?                 @db.Uuid
+  updatedBy               String?                 @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, warehouseId, zoneCode])
+  @@index([tenantId])
+  @@map("imdad_warehouse_zones")
+}
+
+model ImdadWarehouse {
+  id                        String    @id @db.Uuid
+  tenantId                  String    @db.Uuid
+  organizationId            String    @db.Uuid
+  warehouseCode             String
+  warehouseName             String
+  warehouseNameAr           String?
+  facilityType              String
+  address                   String?
+  city                      String?
+  region                    String?
+  country                   String    @default("SA")
+  totalAreaSqm              Decimal?
+  totalBins                 Int       @default(0)
+  usedBins                  Int       @default(0)
+  operatingHoursStart       String?
+  operatingHoursEnd         String?
+  operatingDays             String[]  @default(dbgenerated("ARRAY['SUN'::text, 'MON'::text, 'TUE'::text, 'WED'::text, 'THU'::text]"))
+  hasTemperatureMonitoring  Boolean   @default(false)
+  temperatureZones          String[]
+  managerUserId             String?   @db.Uuid
+  contactPhone              String?
+  contactEmail              String?
+  isActive                  Boolean   @default(true)
+  metadata                  Json?     @db.JsonB
+  version                   Int       @default(1)
+  isDeleted                 Boolean   @default(false)
+  createdAt                 DateTime  @default(now()) @db.Timestamptz
+  updatedAt                 DateTime  @db.Timestamptz
+  createdBy                 String?   @db.Uuid
+  updatedBy                 String?   @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, organizationId, warehouseCode])
+  @@index([tenantId])
+  @@map("imdad_warehouses")
+}
+
+model ImdadWebhookDelivery {
+  id              String    @id @db.Uuid
+  tenantId        String    @db.Uuid
+  webhookId       String    @db.Uuid
+  eventType       String
+  payload         Json      @db.JsonB
+  httpStatusCode  Int?
+  responseBody    String?
+  responseTimeMs  Int?
+  attempt         Int       @default(1)
+  isSuccess       Boolean   @default(false)
+  errorMessage    String?
+  deliveredAt     DateTime  @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_webhook_deliveries")
+}
+
+model ImdadWebhook {
+  id               String     @id @db.Uuid
+  tenantId         String     @db.Uuid
+  organizationId   String?    @db.Uuid
+  name             String
+  url              String
+  secret           String
+  eventTypes       String[]
+  isActive         Boolean    @default(true)
+  headers          Json?      @db.JsonB
+  retryPolicy      Json?      @db.JsonB
+  lastTriggeredAt  DateTime?
+  failureCount     Int        @default(0)
+  version          Int        @default(1)
+  isDeleted        Boolean    @default(false)
+  createdBy        String     @db.Uuid
+  updatedBy        String     @db.Uuid
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  @@index([tenantId])
+  @@map("imdad_webhooks")
+}
+

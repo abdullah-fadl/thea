@@ -1,0 +1,631 @@
+// =============================================================================
+// SAM/Policy Domain — Policy Documents, Chunks, Practices, Risk Runs, Integrity
+// =============================================================================
+
+model PolicyDocument {
+  id                            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId                      String    @db.Uuid
+  theaEngineId                  String?
+  policyEngineId                String?
+  title                         String
+  originalFileName              String?
+  filename                      String?
+  fileType                      String?
+  category                      String?
+  entityType                    String?
+  source                        String?
+  scope                         String?
+  departmentIds                 String[]  @default([])
+  operationIds                  String[]  @default([])
+  isActive                      Boolean   @default(true)
+  deletedAt                     DateTime? @db.Timestamptz
+  archivedAt                    DateTime? @db.Timestamptz
+  status                        String    @default("draft")
+  statusUpdatedAt               DateTime? @db.Timestamptz
+  effectiveDate                 DateTime? @db.Date
+  expiryDate                    DateTime? @db.Date
+  version                       Int       @default(1)
+  owners                        Json?
+  reviewCycleMonths             Int?
+  nextReviewDate                DateTime? @db.Date
+  classification                Json?
+  operationalMappingNeedsReview Boolean   @default(false)
+  tagsStatus                    String?
+  indexedAt                     DateTime? @db.Timestamptz
+  progress                      Json?
+  uploadedBy                    String?
+  createdAt                     DateTime  @default(now()) @db.Timestamptz
+  updatedAt                     DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("policy_documents")
+}
+
+model PolicyChunk {
+  id           String                          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String                          @db.Uuid
+  documentId   String                          @db.Uuid
+  chunkIndex   Int
+  content      String
+  // Populated by `embedPolicyChunk()` when FF_EMBEDDINGS_ENABLED is ON.
+  embeddingVec Unsupported("vector(1536)")?
+  metadata     Json?
+  createdAt    DateTime                        @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, documentId])
+  @@map("policy_chunks")
+}
+
+model PolicyAlert {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  type      String?
+  severity  String?
+  message   String?
+  details   Json?
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("policy_alerts")
+}
+
+model Practice {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @db.Uuid
+  departmentId String?
+  setting      String? // IPD, OPD, Corporate, Shared
+  title        String
+  description  String?
+  frequency    String? // Rare, Occasional, Frequent, Daily
+  ownerRole    String?
+  status       String   @default("active")
+  createdAt    DateTime @default(now()) @db.Timestamptz
+  updatedAt    DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("practices")
+}
+
+model RiskRun {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String   @db.Uuid
+  departmentId     String?
+  setting          String?
+  createdBy        String?
+  inputPracticeIds String[] @default([])
+  resultsJson      Json?
+  createdAt        DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("risk_runs")
+}
+
+model Policy {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  title     String
+  content   String?
+  category  String?
+  status    String   @default("draft")
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("policies")
+}
+
+model IntegrityFinding {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  ruleId         String?
+  rulesetId      String?
+  runId          String?
+  title          String?
+  summary        String?
+  type           String?
+  category       String?
+  severity       String?
+  status         String    @default("OPEN")
+  documentIds    String[]  @default([])
+  metadata       Json?
+  archivedAt     DateTime? @db.Timestamptz
+  resolvedAt     DateTime? @db.Timestamptz
+  resolvedBy     String?
+  acknowledgedAt DateTime? @db.Timestamptz
+  acknowledgedBy String?
+  snoozedUntil   DateTime? @db.Timestamptz
+  snoozedAt      DateTime? @db.Timestamptz
+  snoozedBy      String?
+  updatedAt      DateTime? @db.Timestamptz
+  updatedBy      String?
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("integrity_findings")
+}
+
+model IntegrityRun {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @db.Uuid
+  type        String?
+  status      String    @default("QUEUED")
+  documentIds String[]  @default([])
+  rulesetId   String?
+  scope       Json?
+  progress    Json?
+  result      Json?
+  startedAt   DateTime? @db.Timestamptz
+  completedAt DateTime? @db.Timestamptz
+  cancelledAt DateTime? @db.Timestamptz
+  cancelledBy String?
+  createdBy   String?
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime? @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("integrity_runs")
+}
+
+model IntegrityRuleset {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  name        String
+  description String?
+  rules       Json?
+  isActive    Boolean  @default(true)
+  isBuiltIn   Boolean  @default(false)
+  createdBy   String?
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("integrity_rulesets")
+}
+
+model DocumentTask {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  documentId          String
+  documentTitle       String?
+  title               String?
+  taskType            String
+  status              String    @default("Open")
+  dueDate             DateTime? @db.Timestamptz
+  assignedTo          String?
+  assigneeUserId      String?
+  assigneeEmail       String?
+  assigneeDisplayName String?
+  createdBy           String?
+  updatedBy           String?
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+  updatedAt           DateTime? @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, documentId])
+  @@map("document_tasks")
+}
+
+model DraftDocument {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String    @db.Uuid
+  status                String    @default("draft")
+  documentType          String?
+  title                 String?
+  departmentId          String?
+  operationId           String?
+  requiredType          String?
+  latestContent         String?
+  latestVersion         Int       @default(1)
+  versions              Json?
+  orgProfileSnapshot    Json?
+  contextRulesSnapshot  Json?
+  publishedTheaEngineId String?
+  publishedAt           DateTime? @db.Timestamptz
+  publishedBy           String?
+  createdBy             String?
+  updatedBy             String?
+  createdAt             DateTime  @default(now()) @db.Timestamptz
+  updatedAt             DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("draft_documents")
+}
+
+model PolicyLifecycleEvent {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String   @db.Uuid
+  policyId   String
+  fromStatus String?
+  toStatus   String?
+  message    String?
+  createdAt  DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, policyId])
+  @@map("policy_lifecycle_events")
+}
+
+model IntegrityActivity {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  type      String
+  message   String?
+  metadata  Json?
+  userId    String?
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("integrity_activity")
+}
+
+// ==========================================
+// SAM — Compliance Monitoring
+// ==========================================
+
+model ComplianceRequirement {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  title           String
+  titleAr         String?
+  description     String?
+  descriptionAr   String?
+  standardId      String?   @db.Uuid
+  standardCode    String?
+  category        String?
+  priority        String    @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  status          String    @default("NOT_MET") // NOT_MET, PARTIALLY_MET, MET, NOT_APPLICABLE
+  dueDate         DateTime? @db.Date
+  evidenceRequired Boolean  @default(false)
+  assignedTo      String?
+  departmentId    String?
+  metadata        Json?
+  createdBy       String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, standardId])
+  @@map("sam_compliance_requirements")
+}
+
+model ComplianceViolation {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  requirementId     String?   @db.Uuid
+  title             String
+  titleAr           String?
+  description       String?
+  severity          String    @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  status            String    @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  detectedAt        DateTime  @default(now()) @db.Timestamptz
+  resolvedAt        DateTime? @db.Timestamptz
+  resolvedBy        String?
+  departmentId      String?
+  assignedTo        String?
+  correctiveActionId String?  @db.Uuid
+  slaDeadline       DateTime? @db.Timestamptz
+  metadata          Json?
+  createdBy         String?
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("sam_compliance_violations")
+}
+
+model CorrectiveAction {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String    @db.Uuid
+  violationId   String?   @db.Uuid
+  findingId     String?   @db.Uuid
+  title         String
+  titleAr       String?
+  description   String?
+  actionType    String    @default("CORRECTIVE") // CORRECTIVE, PREVENTIVE, IMPROVEMENT
+  status        String    @default("PLANNED") // PLANNED, IN_PROGRESS, COMPLETED, VERIFIED, CLOSED
+  priority      String    @default("MEDIUM")
+  assignedTo    String?
+  departmentId  String?
+  dueDate       DateTime? @db.Date
+  completedAt   DateTime? @db.Timestamptz
+  completedBy   String?
+  verifiedAt    DateTime? @db.Timestamptz
+  verifiedBy    String?
+  rootCause     String?
+  actionTaken   String?
+  effectiveness String?
+  metadata      Json?
+  createdBy     String?
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("sam_corrective_actions")
+}
+
+// ==========================================
+// SAM — Risk Assessment
+// ==========================================
+
+model RiskAssessment {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  title          String
+  titleAr        String?
+  description    String?
+  riskCategory   String?
+  likelihood     Int       @default(1) // 1-5
+  impact         Int       @default(1) // 1-5
+  riskScore      Int       @default(1) // likelihood * impact
+  riskLevel      String    @default("LOW") // LOW, MEDIUM, HIGH, CRITICAL
+  status         String    @default("IDENTIFIED") // IDENTIFIED, ANALYZED, MITIGATING, MITIGATED, ACCEPTED, CLOSED
+  departmentId   String?
+  assignedTo     String?
+  mitigationPlan String?
+  residualRisk   Int?
+  dueDate        DateTime? @db.Date
+  reviewDate     DateTime? @db.Date
+  metadata       Json?
+  createdBy      String?
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, riskLevel])
+  @@map("sam_risk_assessments")
+}
+
+model RiskMitigation {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  riskId          String    @db.Uuid
+  title           String
+  titleAr         String?
+  description     String?
+  strategy        String    @default("MITIGATE") // AVOID, MITIGATE, TRANSFER, ACCEPT
+  status          String    @default("PLANNED") // PLANNED, IN_PROGRESS, COMPLETED, VERIFIED
+  assignedTo      String?
+  dueDate         DateTime? @db.Date
+  completedAt     DateTime? @db.Timestamptz
+  completedBy     String?
+  effectivenessScore Int?
+  metadata        Json?
+  createdBy       String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, riskId])
+  @@map("sam_risk_mitigations")
+}
+
+model RiskFollowUp {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @db.Uuid
+  riskId      String    @db.Uuid
+  note        String?
+  status      String    @default("PENDING") // PENDING, COMPLETED
+  scheduledAt DateTime  @db.Timestamptz
+  completedAt DateTime? @db.Timestamptz
+  completedBy String?
+  metadata    Json?
+  createdBy   String?
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, riskId])
+  @@map("sam_risk_follow_ups")
+}
+
+// ==========================================
+// SAM — Standards Management (CBAHI/JCI)
+// ==========================================
+
+model SamStandard {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String   @db.Uuid
+  code          String
+  title         String
+  titleAr       String?
+  description   String?
+  descriptionAr String?
+  framework     String   @default("CBAHI") // CBAHI, JCI, CUSTOM
+  chapter       String?
+  section       String?
+  version       String?
+  isActive      Boolean  @default(true)
+  metadata      Json?
+  createdBy     String?
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, framework, code])
+  @@index([tenantId])
+  @@index([tenantId, framework])
+  @@map("sam_standards")
+}
+
+model StandardAssessment {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String    @db.Uuid
+  standardId    String    @db.Uuid
+  status        String    @default("NOT_ASSESSED") // NOT_ASSESSED, NON_COMPLIANT, PARTIALLY_COMPLIANT, COMPLIANT
+  score         Int?
+  assessedBy    String?
+  assessedAt    DateTime? @db.Timestamptz
+  notes         String?
+  departmentId  String?
+  gapAnalysis   String?
+  actionPlan    String?
+  nextReviewDate DateTime? @db.Date
+  metadata      Json?
+  createdBy     String?
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, standardId])
+  @@map("sam_standard_assessments")
+}
+
+model StandardEvidence {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String    @db.Uuid
+  standardId   String    @db.Uuid
+  assessmentId String?   @db.Uuid
+  title        String
+  description  String?
+  fileUrl      String?
+  fileName     String?
+  fileType     String?
+  fileSize     Int?
+  status       String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  uploadedBy   String?
+  reviewedBy   String?
+  reviewedAt   DateTime? @db.Timestamptz
+  metadata     Json?
+  createdAt    DateTime  @default(now()) @db.Timestamptz
+  updatedAt    DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, standardId])
+  @@map("sam_standard_evidence")
+}
+
+// ==========================================
+// SAM — Policy Acknowledgment
+// ==========================================
+
+model PolicyAcknowledgment {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  policyId        String
+  userId          String
+  userName        String?
+  userEmail       String?
+  acknowledgedAt  DateTime  @default(now()) @db.Timestamptz
+  version         Int?
+  ipAddress       String?
+  metadata        Json?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, policyId, userId])
+  @@index([tenantId])
+  @@index([tenantId, policyId])
+  @@map("sam_policy_acknowledgments")
+}
+
+// ==========================================
+// SAM — Automated Reminders
+// ==========================================
+
+model SamReminder {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  type           String    // POLICY_REVIEW, AUDIT_OVERDUE, COMPLIANCE_DEADLINE, RISK_REVIEW
+  referenceId    String?
+  referenceType  String?
+  title          String
+  message        String?
+  recipientId    String?
+  recipientEmail String?
+  status         String    @default("PENDING") // PENDING, SENT, ACKNOWLEDGED, DISMISSED
+  dueDate        DateTime? @db.Timestamptz
+  sentAt         DateTime? @db.Timestamptz
+  acknowledgedAt DateTime? @db.Timestamptz
+  metadata       Json?
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, type])
+  @@map("sam_reminders")
+}
+
+// ==========================================
+// SAM — Evidence Attachments
+// ==========================================
+
+model SamEvidence {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  referenceId    String
+  referenceType  String    // FINDING, COMPLIANCE, RISK, AUDIT, CORRECTIVE_ACTION
+  title          String
+  description    String?
+  fileName       String?
+  fileType       String?
+  fileSize       Int?
+  fileUrl        String?
+  storageKey     String?
+  status         String    @default("ACTIVE") // ACTIVE, ARCHIVED
+  uploadedBy     String?
+  metadata       Json?
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, referenceId, referenceType])
+  @@map("sam_evidence")
+}
+
+// FailedCancellation model defined in misc.prisma

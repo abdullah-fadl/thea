@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: thea
+    env: node
+    plan: free
+    nodeVersion: 20
+    buildCommand: yarn install --frozen-lockfile && yarn build
+    startCommand: yarn start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+        optional: true
+      - key: CRON_SECRET
+        generateValue: true
+      - key: NEXT_PUBLIC_BASE_URL
+        sync: false

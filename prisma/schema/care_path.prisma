@@ -1,0 +1,220 @@
+// =============================================================================
+// Daily Care Path — Auto-generated nursing care pathways
+// =============================================================================
+
+model DailyCarePath {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  patientMasterId String  @db.Uuid
+  encounterCoreId String? @db.Uuid
+
+  // Episode link (IPD/ICU/NICU)
+  episodeId     String? @db.Uuid
+  // ER encounter link
+  erEncounterId String? @db.Uuid
+
+  date           DateTime @db.Date
+  departmentType String // OPD, IPD, ER, ICU, NICU, NURSERY, LDR
+  templateType   String // adult, baby, nicu, critical, ldr
+
+  // Patient snapshot (denormalized for display)
+  patientSnapshot Json? // {fullName, fullNameAr, mrn, dob, gender, room, bed, allergies, diagnosis}
+
+  // Diet / nutrition order
+  dietOrder Json? // {type, typeAr, instructions, instructionsAr, mealTimes[]}
+
+  // Patient instructions
+  instructions Json? // [{text, textAr, status, source}]
+
+  // Doctor rounds schedule
+  roundsSchedule Json? // [{doctorName, doctorNameAr, scheduledTime, type, status}]
+
+  // Status
+  status        String @default("ACTIVE") // ACTIVE, COMPLETED, ARCHIVED
+  completionPct Int    @default(0)
+
+  // Generation metadata
+  generatedAt      DateTime @default(now()) @db.Timestamptz
+  generationSource String   @default("AUTO") // AUTO, MANUAL, COPY_FORWARD
+
+  // Access control for bedside/portal views
+  bedsidePin   String? // 4-6 digit PIN for bedside screen access
+  bedsideToken String? @unique // Unique token for QR code / URL access
+
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?
+
+  // Relations
+  tenant  Tenant          @relation(fields: [tenantId], references: [id])
+  patient PatientMaster   @relation(fields: [patientMasterId], references: [id])
+  shifts  CarePathShift[]
+  tasks   CarePathTask[]
+  alerts  CarePathAlert[]
+
+  @@unique([tenantId, patientMasterId, date, departmentType])
+  @@index([tenantId])
+  @@index([tenantId, date])
+  @@index([tenantId, date, departmentType])
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, status])
+  @@index([bedsideToken])
+  @@map("daily_care_paths")
+}
+
+model CarePathShift {
+  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String @db.Uuid
+  carePathId String @db.Uuid
+
+  shiftType   String // DAY, NIGHT (Day: 07:00-19:00, Night: 19:00-07:00)
+  nurseUserId String? @db.Uuid
+  nurseName   String?
+  nurseNameAr String?
+
+  startTime DateTime @db.Timestamptz
+  endTime   DateTime @db.Timestamptz
+
+  // Completion tracking
+  status         String @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, SIGNED
+  totalTasks     Int    @default(0)
+  completedTasks Int    @default(0)
+  missedTasks    Int    @default(0)
+  heldTasks      Int    @default(0)
+
+  // Sign-off
+  signedAt       DateTime? @db.Timestamptz
+  signedByUserId String?   @db.Uuid
+  signatureData  String? // Base64 signature if needed
+
+  // Summary (auto-generated at end of shift)
+  summary Json? // {completionPct, highlights, pendingCarryForward[], notes}
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  carePath DailyCarePath  @relation(fields: [carePathId], references: [id], onDelete: Cascade)
+  tasks    CarePathTask[]
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, carePathId])
+  @@index([tenantId, nurseUserId])
+  @@map("care_path_shifts")
+}
+
+model CarePathTask {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String  @db.Uuid
+  carePathId String  @db.Uuid
+  shiftId    String? @db.Uuid
+
+  // Task categorization
+  category    String // VITALS, MEDICATION, LAB, RADIOLOGY, PROCEDURE, DIET, DOCTOR_VISIT, NURSING_CARE, INSTRUCTION, IO, WOUND_CARE, ASSESSMENT, CUSTOM
+  subcategory String? // e.g., for MEDICATION: "IV", "PO"; for VITALS: "ROUTINE", "PRN"
+
+  // Scheduling
+  scheduledTime    DateTime  @db.Timestamptz
+  scheduledEndTime DateTime? @db.Timestamptz // For range-based tasks (e.g., infusion)
+  isRecurring      Boolean   @default(false)
+  recurrenceRule   String? // Q4H, Q6H, BID, etc.
+
+  // Display
+  title         String // e.g., "Paracetamol 500mg PO"
+  titleAr       String? // e.g., "باراسيتامول ٥٠٠ ملغ عن طريق الفم"
+  description   String? // Additional details
+  descriptionAr String?
+  priority      String  @default("ROUTINE") // STAT, URGENT, ROUTINE
+
+  // Source linkage (where this task came from)
+  sourceType           String  @default("AUTO") // AUTO, MANUAL, ORDER_UPDATE, CARRY_FORWARD
+  sourceOrderId        String? @db.Uuid // Link to OrdersHub
+  sourcePrescriptionId String? @db.Uuid // Link to PharmacyPrescription
+  sourceCarePlanId     String? @db.Uuid // Link to nursing care plan
+
+  // Task-specific data (varies by category)
+  taskData Json? // Input template: {route, dose, frequency, ...} for meds; {parameters[]} for vitals
+
+  // Execution
+  status     String @default("PENDING") // PENDING, IN_PROGRESS, DONE, MISSED, HELD, REFUSED, CANCELLED
+  resultData Json? // Actual values: {systolic, diastolic, hr, ...} for vitals; {givenAt, witnessedBy} for meds
+
+  // Completion
+  startedAt         DateTime? @db.Timestamptz
+  completedAt       DateTime? @db.Timestamptz
+  completedByUserId String?   @db.Uuid
+  completedByName   String?
+  completedByNameAr String?
+
+  // Missed/Held/Refused tracking
+  missedReason       String? // patient_unavailable, held_by_md, patient_refused, equipment_issue, other
+  missedReasonText   String? // Free text explanation
+  missedReasonTextAr String?
+
+  // Verification (for high-risk tasks like blood products, controlled substances)
+  requiresWitness Boolean @default(false)
+  witnessUserId   String? @db.Uuid
+  witnessName     String?
+
+  // Ordering within timeline
+  sortOrder Int @default(0)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  carePath DailyCarePath  @relation(fields: [carePathId], references: [id], onDelete: Cascade)
+  shift    CarePathShift? @relation(fields: [shiftId], references: [id])
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, carePathId])
+  @@index([tenantId, carePathId, status])
+  @@index([tenantId, carePathId, category])
+  @@index([tenantId, carePathId, scheduledTime])
+  @@index([tenantId, shiftId])
+  @@index([sourceOrderId])
+  @@map("care_path_tasks")
+}
+
+model CarePathAlert {
+  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String @db.Uuid
+  carePathId String @db.Uuid
+
+  // Alert details
+  alertType String // NEW_ORDER, MODIFIED_ORDER, CANCELLED_ORDER, STAT_ORDER, CRITICAL_RESULT, DIET_CHANGE
+  severity  String @default("INFO") // INFO, WARNING, URGENT, CRITICAL
+
+  // Display
+  title     String
+  titleAr   String?
+  message   String?
+  messageAr String?
+
+  // Source
+  sourceOrderId String? @db.Uuid
+  orderDetails  Json? // Snapshot of the order change
+
+  // Acknowledgment
+  acknowledged         Boolean   @default(false)
+  acknowledgedAt       DateTime? @db.Timestamptz
+  acknowledgedByUserId String?   @db.Uuid
+  acknowledgedByName   String?
+  acknowledgedAction   String? // ADDED_TO_PATH, NOTED, DEFERRED
+
+  // Auto-generated task (if applicable)
+  generatedTaskId String? @db.Uuid
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  // Relations
+  carePath DailyCarePath @relation(fields: [carePathId], references: [id], onDelete: Cascade)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, carePathId])
+  @@index([tenantId, carePathId, acknowledged])
+  @@map("care_path_alerts")
+}

@@ -1,0 +1,91 @@
+/**
+ * EXAMPLE: Platform Event Subscriber Stub
+ * Copy to: lib/my-platform/events/subscribe.ts
+ *
+ * STATUS: STUB — the event schema registry and emitter land in Phase 4.2.
+ *
+ * PURPOSE: Document what events this platform wants to consume before the
+ * bus exists, so Phase 4.2 can validate the registry against declared
+ * subscribers.
+ *
+ * PATTERN:
+ *   - Platforms are CONSUMERS of core events (e.g., patient.created).
+ *   - Platforms are EMITTERS of their own domain events (e.g., my_platform.order.created).
+ *   - Core NEVER imports platform event handlers — only the platform subscribes to core.
+ *   - Event payload shapes are versioned (schemaVersion field) and must not
+ *     make breaking changes to existing versions.
+ *
+ * This file is NOT imported by the application.  It is a scaffold reference.
+ */
+
+// TODO(phase-4.2): replace these stubs with real imports once the event bus is available.
+// import { subscribe } from '@/lib/events/bus';
+// import { EventPayload } from '@/lib/events/types';
+
+// ---------------------------------------------------------------------------
+// Events this platform CONSUMES (reacts to events from core or other platforms)
+// ---------------------------------------------------------------------------
+
+/**
+ * React when a core Patient is created.
+ * Use case: seed a platform-specific patient profile extension row.
+ */
+// subscribe('core.patient.created', async (event: EventPayload<'core.patient.created'>) => {
+//   const { tenantId, payload } = event;
+//   await prisma.myPlatform_PatientExtension.upsert({
+//     where: { coreId: payload.patientId },
+//     create: { coreId: payload.patientId, tenantId, /* defaults */ },
+//     update: {}, // idempotent — no-op if already exists
+//   });
+// });
+
+/**
+ * React when a core Encounter closes.
+ * Use case: trigger a platform-specific post-encounter workflow.
+ */
+// subscribe('core.encounter.closed', async (event) => {
+//   const { tenantId, payload } = event;
+//   // … platform-specific logic here
+// });
+
+// ---------------------------------------------------------------------------
+// Events this platform EMITS (for other modules to consume)
+//
+// These declarations serve as the authoritative source for Phase 4.2's
+// event schema registry.  Each event must declare:
+//   - type: namespaced string (my_platform.<entity>.<verb>)
+//   - schemaVersion: integer, starts at 1
+//   - payload shape (TypeScript interface below)
+// ---------------------------------------------------------------------------
+
+export interface MyPlatformOrderCreatedPayload {
+  id: string;        // UUID of the new MyPlatform_OrderExtension row
+  coreId: string;    // UUID of the core entity being extended
+  tenantId: string;
+  platformRefCode?: string;
+}
+
+export interface MyPlatformOrderApprovedPayload {
+  id: string;
+  coreId: string;
+  tenantId: string;
+  approvedBy: string;  // User UUID
+  approvedAt: string;  // ISO 8601
+}
+
+// When emitting (replace stub with real emitter once Phase 4.2 lands):
+// await emitEvent({
+//   type: 'my_platform.order_extension.created',
+//   tenantId,
+//   actorId: userId,
+//   schemaVersion: 1,
+//   payload: { id: created.id, coreId: created.coreId, tenantId } satisfies MyPlatformOrderCreatedPayload,
+// });
+
+// ---------------------------------------------------------------------------
+// PHASE 4.2 TODO:
+//   - Register event types in the central event schema registry
+//   - Replace comment-stubs above with real subscribe() calls
+//   - Add dead-letter handling for failed subscribers
+//   - Confirm payload types against the registered JSON Schema
+// ---------------------------------------------------------------------------

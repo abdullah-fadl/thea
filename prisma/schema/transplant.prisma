@@ -1,0 +1,119 @@
+model TransplantCase {
+  id                String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String                @db.Uuid
+  patientMasterId   String                @db.Uuid
+  organType         String
+  transplantType    String                @default("DECEASED_DONOR")
+  status            String                @default("EVALUATION")
+  evaluationDate    DateTime?             @db.Timestamptz
+  listingDate       DateTime?             @db.Timestamptz
+  transplantDate    DateTime?             @db.Timestamptz
+  donorId           String?               @db.Uuid
+  surgeonId         String?
+  nephrologyId      String?
+  crossmatchResult  String?
+  pra               Float?
+  hlaMatch          Json?
+  coldIschemiaTime  Int?
+  notes             String?
+  followUps         TransplantFollowUp[]
+  rejectionEpisodes TransplantRejection[]
+  createdAt         DateTime              @default(now()) @db.Timestamptz
+  updatedAt         DateTime              @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@map("transplant_cases")
+}
+
+model TransplantFollowUp {
+  id                 String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String         @db.Uuid
+  caseId             String         @db.Uuid
+  case               TransplantCase @relation(fields: [caseId], references: [id])
+  visitDate          DateTime       @db.Timestamptz
+  daysPostTransplant Int?
+  clinicianId        String
+  graftFunction      String?
+  labs               Json?
+  medications        Json?
+  complications      String?
+  biopsyDone         Boolean        @default(false)
+  biopsyResult       String?
+  plan               String?
+  nextVisit          DateTime?      @db.Timestamptz
+  createdAt          DateTime       @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, caseId])
+  @@map("transplant_followups")
+}
+
+model TransplantRejection {
+  id         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String         @db.Uuid
+  caseId     String         @db.Uuid
+  case       TransplantCase @relation(fields: [caseId], references: [id])
+  onsetDate  DateTime       @db.Timestamptz
+  type       String
+  banffGrade String?
+  treatment  String
+  response   String?
+  graftLoss  Boolean        @default(false)
+  createdAt  DateTime       @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, caseId])
+  @@map("transplant_rejections")
+}
+
+// ── 3.24 Transplant Waitlist Management ──────────────────────────────────
+model TransplantWaitlistEntry {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  patientMasterId     String    @db.Uuid
+  caseId              String?   @db.Uuid // link to TransplantCase
+  organType           String // KIDNEY | LIVER | HEART | LUNG | PANCREAS | BONE_MARROW | CORNEA
+  bloodType           String // A+ | A- | B+ | B- | AB+ | AB- | O+ | O-
+  urgencyStatus       String    @default("ROUTINE") // EMERGENT | URGENT | ROUTINE
+  medicalStatus       String    @default("ACTIVE") // ACTIVE | TEMPORARILY_INACTIVE | PERMANENTLY_INACTIVE | TRANSPLANTED | DECEASED | REMOVED
+  listingDate         DateTime  @db.Timestamptz
+  evaluationComplete  Boolean   @default(false)
+  // Clinical Data
+  primaryDiagnosis    String
+  icdCode             String?
+  meldScore           Int? // for liver (Model for End-stage Liver Disease)
+  childPughScore      String? // A | B | C
+  pra                 Float? // Panel Reactive Antibody %
+  hlaTyping           Json? // {classI:{a1,a2,b1,b2,c1,c2}, classII:{dr1,dr2,dq1,dq2}}
+  crossmatchHistory   Json? // [{date, donorId, result}]
+  dialysisStartDate   DateTime? @db.Timestamptz // for kidney
+  dialysisType        String? // HD | PD | NONE
+  previousTransplants Int       @default(0)
+  // Waiting details
+  waitingDays         Int       @default(0) // calculated
+  priorityScore       Float? // composite score for ranking
+  region              String? // SCOT region
+  transplantCenter    String?
+  // Status tracking
+  statusHistory       Json? // [{date, from, to, reason, by}]
+  notes               String?
+  lastReviewDate      DateTime? @db.Timestamptz
+  nextReviewDate      DateTime? @db.Timestamptz
+  removedReason       String?
+  removedDate         DateTime? @db.Timestamptz
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+  updatedAt           DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, organType])
+  @@index([tenantId, medicalStatus])
+  @@index([tenantId, urgencyStatus])
+  @@map("transplant_waitlist_entries")
+}

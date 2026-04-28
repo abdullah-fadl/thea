@@ -1,0 +1,229 @@
+/**
+ * Example API Route with Full Security Integration
+ * 
+ * This is a template showing how to integrate all security features
+ * into an API route. Copy this pattern for all new routes.
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { requireAuth, requireRole, getRequestIP, getRequestUserAgent } from '@/lib/security/auth';
+import { rateLimitAPI } from '@/lib/security/rateLimit';
+import { requireCSRF } from '@/lib/security/csrf';
+import { addSecurityHeaders, handleCORSPreflight } from '@/lib/security/headers';
+import { validateRequestBody, handleError } from '@/lib/security/validation';
+import { logAuditEvent, createAuditContext } from '@/lib/security/audit';
+
+// Define Zod schema for request validation
+const createResourceSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().max(500).optional(),
+  groupId: z.string().uuid().optional(),
+  hospitalId: z.string().uuid().optional(),
+});
+
+export async function OPTIONS(request: NextRequest) {
+  const corsResponse = handleCORSPreflight(request);
+  if (corsResponse) {
+    return corsResponse;
+  }
+  return new NextResponse(null, { status: 204 });
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    // 1. CORS preflight (if needed)
+    // Handled in OPTIONS handler above
+
+    // 2. Rate limiting
+    const ip = getRequestIP(request);
+    const rateLimit = rateLimitAPI({ ip });
+    if (!rateLimit.allowed) {
+      return addSecurityHeaders(
+        NextResponse.json(
+          { 
+            error: 'Too Many Requests', 
+            message: 'Rate limit exceeded',
+            retryAfter: Math.ceil((rateLimit.resetAt - Date.now()) / 1000),
+          },
+          { status: 429 }
+        )
+      );
+    }
+
+    // 3. CSRF protection (for state-changing requests)
+    const csrfCheck = await requireCSRF(request);
+    if (csrfCheck) {
+      return addSecurityHeaders(csrfCheck);
+    }
+
+    // 4. Authentication
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) {
+      return addSecurityHeaders(auth); // Already an error response
+    }
+
+    // 5. Authorization (role-based)
+    const authorized = await requireRole(request, ['admin', 'group-admin', 'hospital-admin']);
+    if (authorized instanceof NextResponse) {
+      // Log access denied
+      await logAuditEvent(
+        createAuditContext(auth, {
+          ip,
+          userAgent: getRequestUserAgent(request),
+          method: 'POST',
+          path: request.nextUrl.pathname,
+        }),
+        'access_denied',
+        'system',
+        {
+          success: false,
+          errorMessage: 'Insufficient role permissions',
+        }
+      );
+      return addSecurityHeaders(authorized);
+    }
+
+    // 6. Input validation
+    const validation = await validateRequestBody(request, createResourceSchema);
+    if (!validation.success) {
+      return addSecurityHeaders(validation.response);
+    }
+    const { name, description, groupId, hospitalId } = validation.data;
+
+    // 7. Scope validation (if accessing scoped resources)
+    // If the resource is scoped to group/hospital, validate access
+    if (groupId || hospitalId) {
+      const scopeAuth = await requireScope(request, { groupId, hospitalId });
+      if (scopeAuth instanceof NextResponse) {
+        // Log scope violation
+        await logAuditEvent(
+          createAuditContext(authorized, {
+            ip,
+            userAgent: getRequestUserAgent(request),
+            method: 'POST',
+            path: request.nextUrl.pathname,
+          }),
+          'scope_violation',
+          'system',
+          {
+            success: false,
+            errorMessage: `Attempted to access groupId=${groupId}, hospitalId=${hospitalId}`,
+            metadata: { requestedGroupId: groupId, requestedHospitalId: hospitalId },
+          }
+        );
+        return addSecurityHeaders(scopeAuth);
+      }
+    }
+
+    // 8. Business logic (your actual route logic here)
+    // Example: Create resource in database
+    // const resource = await createResource({
+    //   name,
+    //   description,
+    //   groupId: authorized.groupId || groupId,
+    //   hospitalId: authorized.hospitalId || hospitalId,
+    //   tenantId: authorized.tenantId, // ALWAYS from session
+    //   createdBy: authorized.userId,
+    // });
+
+    // 9. Audit logging (success)
+    await logAuditEvent(
+      createAuditContext(authorized, {
+        ip,
+        userAgent: getRequestUserAgent(request),
+        method: 'POST',
+        path: request.nextUrl.pathname,
+      }),
+      'resource_create', // Your action type
+      'resource', // Your resource type
+      {
+        success: true,
+        resourceId: 'resource-id', // resource.id,
+        metadata: { name, groupId, hospitalId },
+      }
+    );
+
+    // 10. Return response with security headers
+    return addSecurityHeaders(
+      NextResponse.json(
+        { 
+          success: true, 
+          // resource,
+        },
+        { status: 201 }
+      )
+    );
+
+  } catch (error) {
+    // 11. Error handling (never leaks stack traces in production)
+    const { message, details } = handleError(error);
+    
+    return addSecurityHeaders(
+      NextResponse.json(
+        { error: 'Internal server error', message, ...details },
+        { status: 500 }
+      )
+    );
+  }
+}
+
+/**
+ * GET endpoint example (simpler, no CSRF needed)
+ */
+export async function GET(request: NextRequest) {
+  try {
+    // Rate limiting
+    const ip = getRequestIP(request);
+    const rateLimit = rateLimitAPI({ ip });
+    if (!rateLimit.allowed) {
+      return addSecurityHeaders(
+        NextResponse.json(
+          { error: 'Too Many Requests', message: 'Rate limit exceeded' },
+          { status: 429 }
+        )
+      );
+    }
+
+    // Authentication
+    const auth = await requireAuth(request);
+    if (auth instanceof NextResponse) {
+      return addSecurityHeaders(auth);
+    }
+
+    // Authorization (optional, depending on endpoint)
+    // const authorized = await requireRole(request, ['admin', 'group-admin']);
+    // if (authorized instanceof NextResponse) {
+    //   return addSecurityHeaders(authorized);
+    // }
+
+    // Query parameter validation (if needed)
+    // const url = new URL(request.url);
+    // const page = parseInt(url.searchParams.get('page') || '1', 10);
+    // const limit = parseInt(url.searchParams.get('limit') || '10', 10);
+
+    // Business logic
+    // const resources = await getResources({
+    //   tenantId: auth.tenantId, // ALWAYS from session
+    //   groupId: auth.groupId,
+    //   hospitalId: auth.hospitalId,
+    // });
+
+    return addSecurityHeaders(
+      NextResponse.json({ 
+        success: true, 
+        // resources,
+      })
+    );
+
+  } catch (error) {
+    const { message, details } = handleError(error);
+    return addSecurityHeaders(
+      NextResponse.json(
+        { error: 'Internal server error', message, ...details },
+        { status: 500 }
+      )
+    );
+  }
+}
+

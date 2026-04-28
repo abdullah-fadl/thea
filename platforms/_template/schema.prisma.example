@@ -1,0 +1,111 @@
+// =============================================================================
+// EXAMPLE: Platform Extension-Table Schema Fragment
+// Copy to: prisma/schema/my-platform.prisma
+//
+// CONTRACT (enforced by Phase 4.1 template; automated in 4.2+):
+//
+//   1. Every model name MUST be prefixed with the platform name.
+//      ✅  MyPlatform_OrderExtension
+//      ❌  OrderExtension, OrderExt, PlatformOrder
+//
+//   2. Every extension table MUST carry a `coreId` FK pointing to the exact
+//      core entity it extends.  One extension row per core row (@@unique on coreId).
+//      ✅  coreId  String @db.Uuid  // FK → CoreOrder.id
+//      ❌  orderId String           // untyped string join
+//
+//   3. No column in an extension table MAY duplicate a column that already
+//      exists in the core entity (e.g., do not re-declare `patientId` if the
+//      core entity already carries it — read it from the joined core row).
+//
+//   4. Every model MUST include `tenantId String @db.Uuid` for row-level
+//      tenant isolation.  The application layer always filters by tenantId.
+//
+//   5. Models MUST use `@db.Uuid` on all UUID columns and
+//      `@default(gen_random_uuid())` for generated PKs (consistent with core).
+//
+//   6. All enum names MUST be prefixed with the platform name.
+//      ✅  MyPlatformOrderStatus
+//      ❌  OrderStatus  (collides with other platforms)
+//
+//   7. Table names in @@map MUST be lowercase snake_case prefixed with the
+//      platform name.
+//      ✅  @@map("my_platform_order_extensions")
+//      ❌  @@map("order_extensions")
+// =============================================================================
+
+// --- Enums -------------------------------------------------------------------
+
+// RULE: Prefix every enum with the platform name.
+enum MyPlatformOrderStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+// --- Extension Tables --------------------------------------------------------
+
+// This model EXTENDS a hypothetical core "CoreOrder" entity.
+// It holds only fields that are specific to MyPlatform.
+// Fields that live on CoreOrder (e.g., patientId, tenantId, createdAt) are NOT repeated here.
+model MyPlatform_OrderExtension {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // FK to the core entity this row extends.
+  // MUST be a typed UUID, not a bare string.
+  // MUST reference the exact core model field (here: CoreOrder.id).
+  coreId   String @unique @db.Uuid
+
+  // Tenant isolation — REQUIRED on every platform table.
+  tenantId String @db.Uuid
+
+  // -------------------------------------------------------------------------
+  // Platform-specific fields go here.
+  // Do NOT copy columns that already exist on CoreOrder.
+  // -------------------------------------------------------------------------
+  status          MyPlatformOrderStatus @default(DRAFT)
+  platformRefCode String?
+  reviewedBy      String?               @db.Uuid  // FK to User (optional)
+  reviewedAt      DateTime?             @db.Timestamptz
+  metadata        Json?
+
+  // Relation to core entity.
+  // Replace "CoreOrder" with the actual Prisma model name from core.prisma.
+  core CoreOrder @relation(fields: [coreId], references: [id], onDelete: Cascade)
+
+  // One extension row per core row — enforced at the DB level.
+  @@unique([coreId])
+
+  // Tenant + status index — common query pattern.
+  @@index([tenantId, status])
+
+  // Table name MUST be prefixed with the platform name.
+  @@map("my_platform_order_extensions")
+}
+
+// --- Stand-alone Platform Table (no core entity to extend) -------------------
+
+// Some platform entities have no core equivalent.
+// These are still prefixed and still carry tenantId.
+model MyPlatform_ReviewQueue {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  assigneeId  String?  @db.Uuid
+  priority    Int      @default(0)
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+
+  @@index([tenantId, priority])
+  @@map("my_platform_review_queues")
+}
+
+// =============================================================================
+// MIGRATION NOTE (see migration-template/README.md)
+//
+// When you add this schema file:
+//   1. Run: npx prisma migrate dev --name add_my_platform_tables
+//   2. The generated SQL must be additive-only (no DROP, no ALTER COLUMN TYPE).
+//   3. Commit the generated migration file alongside this schema change.
+//   4. Write a backfill script if existing rows need default values.
+// =============================================================================

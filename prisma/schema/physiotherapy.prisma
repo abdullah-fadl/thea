@@ -1,0 +1,76 @@
+// =============================================================================
+// Physiotherapy Domain — Referrals, Assessments, Sessions
+// =============================================================================
+
+model PtReferral {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  patientMasterId String   @db.Uuid
+  encounterId     String?  @db.Uuid
+  episodeId       String?  @db.Uuid
+  referredBy      String   @db.Uuid // userId
+  specialty       String   @default("PHYSIOTHERAPY") // PHYSIOTHERAPY, OCCUPATIONAL, SPEECH
+  reason          String
+  urgency         String   @default("ROUTINE") // STAT, URGENT, ROUTINE
+  status          String   @default("PENDING") // PENDING, ACCEPTED, IN_PROGRESS, COMPLETED, CANCELLED
+  notes           String?
+  createdByUserId String?
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+
+  assessments PtAssessment[]
+  sessions    PtSession[]
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, status])
+  @@map("pt_referrals")
+}
+
+model PtAssessment {
+  id                      String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId                String     @db.Uuid
+  referralId              String     @db.Uuid
+  referral                PtReferral @relation(fields: [referralId], references: [id])
+  assessedBy              String     @db.Uuid // userId
+  chiefComplaint          String
+  historyOfPresentIllness String?
+  pastHistory             String?
+  functionalStatus        Json? // {adls, mobility, strength, rom, balance, pain, gait}
+  goalShortTerm           String?
+  goalLongTerm            String?
+  treatmentPlan           String?
+  frequency               String? // e.g. "5x/week for 3 weeks"
+  precautions             String?
+  createdAt               DateTime   @default(now()) @db.Timestamptz
+  updatedAt               DateTime   @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, referralId])
+  @@map("pt_assessments")
+}
+
+model PtSession {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String     @db.Uuid
+  referralId      String     @db.Uuid
+  referral        PtReferral @relation(fields: [referralId], references: [id])
+  therapistId     String     @db.Uuid // userId
+  sessionDate     DateTime   @db.Timestamptz
+  duration        Int? // minutes
+  interventions   Json       @default("[]") // [{type, description, sets, reps, duration}]
+  patientResponse String?
+  progressNote    String?
+  painBefore      Int? // 0-10
+  painAfter       Int?
+  nextSession     DateTime?  @db.Timestamptz
+  createdAt       DateTime   @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, referralId])
+  @@map("pt_sessions")
+}

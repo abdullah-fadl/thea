@@ -1,0 +1,175 @@
+{
+  "_note": "PLACEHOLDER CONCEPTS ONLY — for test use. Do NOT use in production without proper licensed datasets. See scripts/import-ontology.ts for production import.",
+  "codeSystems": [
+    {
+      "code": "SNOMED_CT",
+      "name": "SNOMED Clinical Terms",
+      "version": "2026-03",
+      "url": "http://snomed.info/sct",
+      "description": "International clinical terminology maintained by SNOMED International"
+    },
+    {
+      "code": "LOINC",
+      "name": "Logical Observation Identifiers Names and Codes",
+      "version": "2.78",
+      "url": "http://loinc.org",
+      "description": "Universal code system for laboratory and clinical observations (Regenstrief Institute)"
+    },
+    {
+      "code": "ICD_10_AM",
+      "name": "ICD-10-AM (Australian Modification)",
+      "version": "12th Edition",
+      "url": "https://www.ihacpa.gov.au/health-care/classifications/icd-10-am-achi-acs",
+      "description": "Australian Modification of ICD-10 for morbidity classification and billing"
+    },
+    {
+      "code": "RXNORM",
+      "name": "RxNorm",
+      "version": "2026-04",
+      "url": "https://www.nlm.nih.gov/research/umls/rxnorm",
+      "description": "US NLM normalized names for clinical drugs (requires UMLS licence)"
+    }
+  ],
+  "concepts": [
+    {
+      "codeSystem": "SNOMED_CT",
+      "code": "195967001",
+      "display": "Asthma",
+      "displayAr": "الربو",
+      "semanticType": "disorder"
+    },
+    {
+      "codeSystem": "SNOMED_CT",
+      "code": "73211009",
+      "display": "Diabetes mellitus",
+      "displayAr": "داء السكري",
+      "semanticType": "disorder"
+    },
+    {
+      "codeSystem": "SNOMED_CT",
+      "code": "38341003",
+      "display": "Hypertension",
+      "displayAr": "ارتفاع ضغط الدم",
+      "semanticType": "disorder"
+    },
+    {
+      "codeSystem": "SNOMED_CT",
+      "code": "22298006",
+      "display": "Myocardial infarction",
+      "displayAr": "احتشاء عضلة القلب",
+      "semanticType": "disorder"
+    },
+    {
+      "codeSystem": "SNOMED_CT",
+      "code": "80146002",
+      "display": "Appendectomy",
+      "displayAr": "استئصال الزائدة الدودية",
+      "semanticType": "procedure"
+    },
+    {
+      "codeSystem": "LOINC",
+      "code": "2339-0",
+      "display": "Glucose [Mass/volume] in Blood",
+      "displayAr": "الجلوكوز في الدم",
+      "semanticType": "laboratory"
+    },
+    {
+      "codeSystem": "LOINC",
+      "code": "718-7",
+      "display": "Hemoglobin [Mass/volume] in Blood",
+      "displayAr": "الهيموجلوبين في الدم",
+      "semanticType": "laboratory"
+    },
+    {
+      "codeSystem": "LOINC",
+      "code": "2823-3",
+      "display": "Potassium [Moles/volume] in Serum or Plasma",
+      "displayAr": "البوتاسيوم في المصل",
+      "semanticType": "laboratory"
+    },
+    {
+      "codeSystem": "LOINC",
+      "code": "6690-2",
+      "display": "Leukocytes [#/volume] in Blood by Automated count",
+      "displayAr": "كريات الدم البيضاء",
+      "semanticType": "laboratory"
+    },
+    {
+      "codeSystem": "LOINC",
+      "code": "4548-4",
+      "display": "Hemoglobin A1c/Hemoglobin.total in Blood",
+      "displayAr": "الهيموجلوبين A1c",
+      "semanticType": "laboratory"
+    },
+    {
+      "codeSystem": "ICD_10_AM",
+      "code": "J45",
+      "display": "Asthma",
+      "displayAr": "الربو",
+      "semanticType": "disorder"
+    },
+    {
+      "codeSystem": "ICD_10_AM",
+      "code": "E11",
+      "display": "Type 2 diabetes mellitus",
+      "displayAr": "داء السكري من النوع 2",
+      "semanticType": "disorder"
+    },
+    {
+      "codeSystem": "ICD_10_AM",
+      "code": "I10",
+      "display": "Essential (primary) hypertension",
+      "displayAr": "ارتفاع ضغط الدم الأساسي",
+      "semanticType": "disorder"
+    },
+    {
+      "codeSystem": "ICD_10_AM",
+      "code": "I21",
+      "display": "Acute myocardial infarction",
+      "displayAr": "احتشاء عضلة القلب الحاد",
+      "semanticType": "disorder"
+    },
+    {
+      "codeSystem": "ICD_10_AM",
+      "code": "J18",
+      "display": "Pneumonia, unspecified organism",
+      "displayAr": "الالتهاب الرئوي",
+      "semanticType": "disorder"
+    },
+    {
+      "codeSystem": "RXNORM",
+      "code": "6809",
+      "display": "Metformin",
+      "displayAr": "ميتفورمين",
+      "semanticType": "substance"
+    },
+    {
+      "codeSystem": "RXNORM",
+      "code": "29046",
+      "display": "Lisinopril",
+      "displayAr": "ليسينوبريل",
+      "semanticType": "substance"
+    },
+    {
+      "codeSystem": "RXNORM",
+      "code": "41493",
+      "display": "Amoxicillin",
+      "displayAr": "أموكسيسيلين",
+      "semanticType": "substance"
+    },
+    {
+      "codeSystem": "RXNORM",
+      "code": "1049502",
+      "display": "Atorvastatin 40 MG Oral Tablet",
+      "displayAr": "أتورفاستاتين 40 مجم",
+      "semanticType": "substance"
+    },
+    {
+      "codeSystem": "RXNORM",
+      "code": "310798",
+      "display": "Salbutamol 0.1 MG/ACTUAT Inhalant Solution",
+      "displayAr": "سالبوتامول بخاخ",
+      "semanticType": "substance"
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+// =============================================================================
+// Phase 5.3 — Clinical Ontology Mapping Layer
+//
+// Three models:
+//   OntologyCodeSystem   — catalog of supported external terminologies
+//   OntologyConcept      — individual codes within a system, tenant-scoped
+//                          (use ONTOLOGY_GLOBAL_TENANT_ID for shared/global concepts)
+//   OntologyMapping      — bridge: internal Thea entity ↔ external concept
+//
+// All tables are additive. Flag FF_ONTOLOGY_ENABLED guards all reads/writes.
+// See migration 20260424000009_clinical_ontology for the DDL.
+// =============================================================================
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum OntologyConceptStatus {
+  active
+  deprecated
+  retired
+}
+
+enum OntologyMappingType {
+  primary
+  additional
+  billing
+  deprecated
+}
+
+enum OntologyMappingSource {
+  manual
+  ai
+  imported
+  /// Phase 7.3: mapping was created from a stable internal entity code (e.g.
+  /// FormularyDrug.rxNorm, DiagnosisCatalog.icd10) where the corresponding
+  /// OntologyConcept was lazily upserted as a stub (display = code) because
+  /// the licensed dataset has not been imported yet. The mapping is durable
+  /// across (codeSystem, code, tenantId); when the licensed dataset later
+  /// arrives via scripts/import-ontology.ts, the stub concept is enriched
+  /// (display, displayAr, semanticType) and the mapping survives intact.
+  inferred
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+/// Catalog of supported external code systems (SNOMED CT, LOINC, ICD-10-AM, RxNorm).
+/// Seeded once at deploy time; rarely updated.
+model OntologyCodeSystem {
+  id          String   @id @default(uuid()) @db.Uuid
+  /// Short stable key used in API calls and env references (e.g. "SNOMED_CT").
+  code        String   @unique
+  name        String
+  /// Release version string (e.g. "2026-03", "2.78").
+  version     String
+  /// Canonical URL of the code system (HL7 / NLM URL).
+  url         String
+  description String?
+  addedAt     DateTime @default(now())
+
+  concepts OntologyConcept[]
+
+  @@map("ontology_code_systems")
+}
+
+/// A single clinical concept from an external terminology, scoped to a tenant.
+/// Use ONTOLOGY_GLOBAL_TENANT_ID (see lib/ontology/constants.ts) for concepts
+/// shared across all tenants (e.g. from the officially licensed dataset import).
+model OntologyConcept {
+  id           String                @id @default(uuid()) @db.Uuid
+  /// Row-level tenant isolation. Use ONTOLOGY_GLOBAL_TENANT_ID for global concepts.
+  tenantId     String                @db.Uuid
+  codeSystemId String                @db.Uuid
+  /// The external system's canonical code (e.g. "195967001" for SNOMED, "2339-0" for LOINC).
+  code         String
+  /// Human-readable label in English.
+  display      String
+  /// Human-readable label in Arabic (optional; may be populated by translation jobs).
+  displayAr    String?
+  /// Broad semantic category (e.g. "disorder", "procedure", "substance", "finding").
+  semanticType String?
+  status       OntologyConceptStatus @default(active)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  codeSystem OntologyCodeSystem @relation(fields: [codeSystemId], references: [id])
+  mappings   OntologyMapping[]
+
+  /// One code per system per tenant.
+  @@unique([codeSystemId, code, tenantId])
+  @@index([tenantId, codeSystemId])
+  @@map("ontology_concepts")
+}
+
+/// Bridges an internal Thea entity (any entityType/entityId pair) to an external concept.
+/// Supports multiple mapping types per entity (primary billing code + additional codes).
+model OntologyMapping {
+  id          String                @id @default(uuid()) @db.Uuid
+  tenantId    String                @db.Uuid
+  /// The type of Thea entity being mapped (e.g. "core_department", "encounter", "lab_order").
+  entityType  String
+  /// The Thea entity's primary key (UUID or other string).
+  entityId    String
+  conceptId   String                @db.Uuid
+  mappingType OntologyMappingType   @default(primary)
+  /// 1.0 = confirmed, < 1.0 = AI-suggested confidence score.
+  confidence  Float                 @default(1.0)
+  source      OntologyMappingSource @default(manual)
+  /// The userId or system identifier that created this mapping.
+  createdBy   String?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  concept OntologyConcept @relation(fields: [conceptId], references: [id])
+
+  @@index([tenantId, entityType, entityId])
+  @@index([conceptId])
+  @@map("ontology_mappings")
+}

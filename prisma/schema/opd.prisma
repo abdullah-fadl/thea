@@ -1,0 +1,464 @@
+// =============================================================================
+// OPD Domain — Encounters, Nursing/Doctor Entries, Bookings, Orders, Census
+// =============================================================================
+
+model OpdEncounter {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String            @db.Uuid
+  encounterCoreId String            @unique @db.Uuid
+  patientId       String            @db.Uuid
+  status          OpdStatus         @default(OPEN)
+  arrivalState    OpdArrivalState   @default(NOT_ARRIVED)
+  arrivalSource   OpdArrivalSource?
+  visitType       OpdVisitType?
+  opdFlowState    OpdFlowState?
+  priority        OpdPriority?
+
+  // Timestamps (flattened from OPDTimestamps)
+  arrivedAt        DateTime? @db.Timestamptz
+  nursingStartAt   DateTime? @db.Timestamptz
+  nursingEndAt     DateTime? @db.Timestamptz
+  doctorStartAt    DateTime? @db.Timestamptz
+  doctorEndAt      DateTime? @db.Timestamptz
+  procedureStartAt DateTime? @db.Timestamptz
+  procedureEndAt   DateTime? @db.Timestamptz
+
+  // Payment snapshot
+  paymentStatus      OpdPaymentStatus?
+  paymentServiceType OpdPaymentServiceType?
+  paymentPaidAt      DateTime?              @db.Timestamptz
+  paymentAmount      Decimal?               @db.Decimal(12, 2)
+  paymentMethod      OpdPaymentMethod?
+  paymentInvoiceId   String?
+  paymentReference   String?
+
+  // Disposition
+  dispositionType OpdDispositionType?
+  dispositionNote String?
+
+  // Billing metadata
+  billingMeta Json? // { visitType, serviceCode, specialtyCode, price, ... }
+
+  // Clinic extensions (opaque JSON per clinic)
+  clinicExtensions Json?
+
+  // Optimistic locking
+  version Int @default(0)
+
+  // Critical vitals flag
+  criticalVitalsFlag Json? // { active, alerts[], detectedAt, detectedByUserId, nursingEntryId }
+
+  // Return-to-nursing log
+  returnToNursingLog Json? // [{ from, to, reason, at, byUserId }]
+
+  // Audit
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?
+
+  // Relations
+  tenant         Tenant              @relation(fields: [tenantId], references: [id])
+  encounterCore  EncounterCore       @relation(fields: [encounterCoreId], references: [id])
+  patient        PatientMaster       @relation(fields: [patientId], references: [id])
+  nursingEntries OpdNursingEntry[]
+  doctorEntries  OpdDoctorEntry[]
+  doctorAddenda  OpdDoctorAddendum[]
+  resultsViewed  OpdResultViewed[]
+
+  @@index([tenantId])
+  @@index([patientId])
+  @@index([status])
+  @@index([tenantId, status])
+  @@index([tenantId, opdFlowState])
+  @@map("opd_encounters")
+}
+
+// Extracted from OPDEncounter.opdNursingEntries[]
+model OpdNursingEntry {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  opdEncounterId  String  @db.Uuid
+  createdByUserId String?
+
+  nursingNote         String?
+  chiefComplaintShort String?
+  painScore           Int?
+  painLocation        String?
+  fallRiskScore       Int?
+  fallRiskLabel       OpdFallRiskLabel?
+  fallRiskData        Json? // { scale, totalScore, riskLevel, factors, morseInput?, humptyInput? }
+
+  // NEWS2 Early Warning Score
+  consciousness    String? // AVPU: ALERT, CONFUSION, VOICE, PAIN, UNRESPONSIVE
+  onSupplementalO2 Boolean @default(false)
+  mewsScore        Int? // NEWS2 total score (0-20)
+  mewsRiskLevel    String? // LOW, LOW_MEDIUM, MEDIUM, HIGH
+  mewsData         Json? // { parameters, hasSingleHighParameter, parametersCompleted }
+
+  // Glasgow Coma Scale
+  gcsScore    Int? // GCS total score (3-15)
+  gcsCategory String? // MILD, MODERATE, SEVERE
+  gcsData     Json? // { eye, verbal, motor, intubated, isPediatric, parameters }
+
+  // SBAR Communication
+  sbarData Json? // { situation, background, assessment, recommendation, meta }
+
+  // Pain Assessment
+  painData Json? // { score, scale, severity, regions, character, interventions, ... }
+
+  // Family Communication
+  familyCommData Json? // { contacts, entries[] }
+
+  // Bedside Procedures
+  proceduresData Json? // { procedures[] }
+
+  // Intake & Output
+  ioData Json? // { entries[] }
+
+  // Braden Scale (Pressure Injury Risk)
+  bradenScore Int? // 6-23
+  bradenRisk  String? // SEVERE, HIGH, MODERATE, MILD, NO_RISK
+  bradenData  Json? // { input, totalScore, risk, recommendations }
+
+  // Nursing Care Plan
+  carePlanData Json? // { plans[] }
+
+  // Shift Handover
+  handoverData Json? // { shiftType, entries[], generalNotes }
+
+  // Nursing Tasks
+  nursingTasksData Json? // { tasks[] }
+
+  // Medication Administration Record
+  marData Json? // { medications[], adminEntries[] }
+
+  // Semi-structured data kept as JSON
+  vitals           Json? // { bp, hr, temp, rr, spo2, weight, height, bmi }
+  pfe              Json? // { allergies, medications, medicalHistory }
+  timeOutChecklist Json? // { patientIdentified, procedureConfirmed, ... }
+
+  // Correction
+  isCorrected       Boolean   @default(false)
+  correctedAt       DateTime? @db.Timestamptz
+  correctedByUserId String?
+  correctionReason  String?
+  correctedEntryId  String?   @db.Uuid
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  // Relations
+  opdEncounter OpdEncounter @relation(fields: [opdEncounterId], references: [id], onDelete: Cascade)
+
+  @@index([opdEncounterId])
+  @@map("opd_nursing_entries")
+}
+
+// Extracted from OPDEncounter.opdDoctorEntries[]
+model OpdDoctorEntry {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  opdEncounterId  String            @db.Uuid
+  noteType        OpdDoctorNoteType
+  subjective      String?
+  objective       String?
+  assessment      String?
+  plan            String?
+  freeText        String?
+  createdByUserId String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  // Relations
+  opdEncounter OpdEncounter @relation(fields: [opdEncounterId], references: [id], onDelete: Cascade)
+
+  @@index([opdEncounterId])
+  @@map("opd_doctor_entries")
+}
+
+// Extracted from OPDEncounter.opdDoctorAddenda[]
+model OpdDoctorAddendum {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  opdEncounterId  String            @db.Uuid
+  noteType        OpdDoctorNoteType
+  subjective      String?
+  objective       String?
+  assessment      String?
+  plan            String?
+  freeText        String?
+  reason          String
+  createdByUserId String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  // Relations
+  opdEncounter OpdEncounter @relation(fields: [opdEncounterId], references: [id], onDelete: Cascade)
+
+  @@index([opdEncounterId])
+  @@map("opd_doctor_addenda")
+}
+
+// Extracted from OPDEncounter.opdResultsViewed[]
+model OpdResultViewed {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  opdEncounterId String   @db.Uuid
+  resultId       String
+  viewedAt       DateTime @db.Timestamptz
+  viewedBy       String
+
+  // Relations
+  opdEncounter OpdEncounter @relation(fields: [opdEncounterId], references: [id], onDelete: Cascade)
+
+  @@index([opdEncounterId])
+  @@map("opd_results_viewed")
+}
+
+// =============================================================================
+// OPD Bookings
+// =============================================================================
+
+model OpdBooking {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String        @db.Uuid
+  patientMasterId   String?       @db.Uuid
+  patientId         String?       @db.Uuid
+  encounterCoreId   String?       @db.Uuid
+  resourceId        String?       @db.Uuid
+  clinicId          String?
+  doctorId          String?
+  departmentId      String?
+  slotId            String?       @db.Uuid
+  slotIds           String[]      @default([]) // Multiple slot IDs for multi-slot bookings
+  bookingType       String        @default("PATIENT") // PATIENT, BLOCK
+  status            String        @default("ACTIVE") // ACTIVE, PENDING_PAYMENT, CHECKED_IN, ARRIVED, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW
+  visitType         OpdVisitType?
+  date              String? // YYYY-MM-DD string for lookup
+  bookingDate       DateTime?     @db.Date
+  startAt           DateTime?     @db.Timestamptz
+  endAt             DateTime?     @db.Timestamptz
+  startTime         DateTime?     @db.Timestamptz
+  endTime           DateTime?     @db.Timestamptz
+  checkedInAt       DateTime?     @db.Timestamptz
+  completedAt       DateTime?     @db.Timestamptz
+  notes             String?
+  reason            String? // Block reason or booking reason
+  cancelReason      String?
+  cancelledAt       DateTime?     @db.Timestamptz
+  cancelledByUserId String?
+  noShowAt          DateTime?     @db.Timestamptz
+  noShowReason      String?
+  pendingPaymentAt  DateTime?     @db.Timestamptz
+
+  // Walk-in specific
+  isWalkIn               Boolean  @default(false)
+  chiefComplaint         String?
+  specialtyCode          String?
+  priority               String? // NORMAL, URGENT, STAT
+  isPrimaryClinicBooking Boolean?
+
+  // Payment snapshot
+  payment     Json? // { status, serviceType, paidAt, amount, method, invoiceId, reference }
+  billingMeta Json? // { visitType, serviceCode, specialtyCode, price }
+
+  // First-visit flag
+  isFirstVisit Boolean?
+
+  // SMS reminder tracking
+  reminderSentAt DateTime? @db.Timestamptz
+
+  // Idempotency
+  clientRequestId String?
+
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?
+  updatedByUserId String?
+  createdBy       String?
+  updatedBy       String?
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([patientMasterId])
+  @@index([patientId])
+  @@index([encounterCoreId])
+  @@index([doctorId])
+  @@index([bookingDate])
+  @@index([tenantId, date])
+  @@index([tenantId, bookingDate])
+  @@index([tenantId, status])
+  @@map("opd_bookings")
+}
+
+// =============================================================================
+// OPD Orders
+// =============================================================================
+
+model OpdOrder {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  encounterCoreId String? @db.Uuid
+  patientId       String? @db.Uuid
+  kind            String? // LAB, RAD
+  orderType       String? // lab, radiology, medication, procedure (legacy)
+  title           String?
+  status          String  @default("ORDERED") // ORDERED, IN_PROGRESS, COMPLETED, CANCELLED
+  priority        String? // stat, routine, urgent
+  orderDetails    Json? // Type-specific order details
+  results         Json? // Order results
+  notes           String?
+
+  orderedBy    String?
+  orderedAt    DateTime  @default(now()) @db.Timestamptz
+  completedAt  DateTime? @db.Timestamptz
+  cancelledAt  DateTime? @db.Timestamptz
+  cancelReason String?
+
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([encounterCoreId])
+  @@index([patientId])
+  @@index([status])
+  @@map("opd_orders")
+}
+
+// =============================================================================
+// OPD Daily Data, Census, Meeting Reports, Recommendations
+// =============================================================================
+
+model OpdDailyData {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String   @db.Uuid
+  date               DateTime @db.Date
+  departmentId       String?
+  doctorId           String?
+  employmentType     String?
+  subspecialty       String?
+  isPrimarySpecialty Boolean?
+  rooms              Int?
+  slotsPerHour       Int?
+  clinicStartTime    String?
+  clinicEndTime      String?
+  totalPatients      Int      @default(0)
+  booked             Int      @default(0)
+  walkIn             Int      @default(0)
+  noShow             Int      @default(0)
+  timeDistribution   Json? // Time distribution breakdown
+  fv                 Int      @default(0)
+  fcv                Int      @default(0)
+  fuv                Int      @default(0)
+  rv                 Int      @default(0)
+  procedures         Int      @default(0)
+  orSurgeries        Int      @default(0)
+  admissions         Int      @default(0)
+  cath               Int      @default(0)
+  deliveriesNormal   Int      @default(0)
+  deliveriesSC       Int      @default(0)
+  ivf                Int      @default(0)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([date])
+  @@index([tenantId, date])
+  @@map("opd_daily_data")
+}
+
+model OpdCensus {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String   @db.Uuid
+  date             DateTime @db.Date
+  clinicId         String?
+  departmentId     String?
+  doctorId         String?
+  patientCount     Int      @default(0)
+  newPatients      Int      @default(0)
+  followUpPatients Int      @default(0)
+  booked           Int      @default(0)
+  waiting          Int      @default(0)
+  procedures       Int      @default(0)
+  scheduledTime    Int? // minutes
+  actualTime       Int? // minutes
+  utilizationRate  Int      @default(0)
+  notes            String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([date])
+  @@map("opd_census")
+}
+
+model OpdRecommendation {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  encounterId    String?   @db.Uuid
+  patientId      String?   @db.Uuid
+  type           String? // clinical, operational, scheduling, staffing, waitTime, noShow, utilization
+  severity       String? // critical, high, medium, low
+  title          String?
+  titleAr        String?
+  titleEn        String?
+  description    String?
+  descriptionAr  String?
+  descriptionEn  String?
+  actionAr       String?
+  actionEn       String?
+  priority       String? // high, medium, low
+  status         String    @default("pending") // pending, accepted, rejected, implemented
+  departmentId   String?
+  departmentName String?
+  doctorId       String?
+  doctorName     String?
+  metric         String?
+  metricValue    Decimal?  @db.Decimal(12, 2)
+  threshold      Decimal?  @db.Decimal(12, 2)
+  confidence     Decimal?  @db.Decimal(5, 2)
+  expiresAt      DateTime? @db.Timestamptz
+
+  // Acknowledgement
+  acknowledged   Boolean   @default(false)
+  acknowledgedAt DateTime? @db.Timestamptz
+  acknowledgedBy String?
+
+  // Dismissal
+  dismissed     Boolean   @default(false)
+  dismissedAt   DateTime? @db.Timestamptz
+  dismissedBy   String?
+  dismissReason String?
+
+  // Validation
+  validated        Boolean   @default(false)
+  validatedAt      DateTime? @db.Timestamptz
+  validationResult Json?
+
+  persistedAt DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, dismissed])
+  @@map("opd_recommendations")
+}

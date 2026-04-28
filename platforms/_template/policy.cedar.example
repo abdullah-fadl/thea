@@ -1,0 +1,84 @@
+// =============================================================================
+// EXAMPLE: Platform Cedar Policy Stub
+// Copy to: platforms/my-platform/policies/my-platform.cedar
+//
+// STATUS: STUB — full Cedar policy engine integration arrives in Phase 4.3.
+//
+// PURPOSE: Declaring the intended access rules here (even before the engine
+// is wired) makes them reviewable, diffable, and auditable from day one.
+// When Phase 4.3 lands, the engine will evaluate these rules at runtime.
+//
+// CEDAR BASICS:
+//   - Principal: the actor (User, ServiceAccount)
+//   - Action: the operation (Action::"read", Action::"write", Action::"admin")
+//   - Resource: the entity being accessed (MyPlatform::"order_extensions")
+//   - Context: runtime attributes (tenantId, entitlements, hospitalId, …)
+//
+// Thea-specific conventions (to be formalized in Phase 4.3):
+//   - All platform resources are namespaced: <PlatformName>::"<resource>"
+//   - context.entitlements.<platformKey> must be true for any platform action
+//   - context.tenantId must match principal.tenantId (row-level isolation)
+// =============================================================================
+
+// ---------------------------------------------------------------------------
+// PERMIT RULES
+// ---------------------------------------------------------------------------
+
+// Rule 1: Platform members may read their platform's resources.
+permit (
+  principal in Role::"my_platform_member",
+  action    == Action::"read",
+  resource  in MyPlatform::"order_extensions"
+)
+when {
+  // Entitlement gate: tenant must be subscribed to this platform.
+  context.entitlements.myPlatform == true &&
+  // Tenant isolation: principal and resource must belong to the same tenant.
+  principal.tenantId == context.tenantId
+};
+
+// Rule 2: Platform admins may read and write.
+permit (
+  principal in Role::"my_platform_admin",
+  action    in [Action::"read", Action::"write"],
+  resource  in MyPlatform::"order_extensions"
+)
+when {
+  context.entitlements.myPlatform == true &&
+  principal.tenantId == context.tenantId
+};
+
+// Rule 3: Thea system owner bypasses platform entitlement checks.
+// (mirrors the isOwnerRole short-circuit in withAuthTenant)
+permit (
+  principal in Role::"thea_owner",
+  action,
+  resource  in MyPlatform::""
+);
+
+// ---------------------------------------------------------------------------
+// FORBID RULES
+// ---------------------------------------------------------------------------
+
+// Rule 4: No platform principal may write directly to core entities.
+// Core entities (Patient, Encounter, CoreDepartment, …) are managed only
+// by the core platform.
+forbid (
+  principal in Role::"my_platform_admin",
+  action    == Action::"write",
+  resource  in Core::"patients"
+);
+
+forbid (
+  principal in Role::"my_platform_admin",
+  action    == Action::"write",
+  resource  in Core::"encounters"
+);
+
+// ---------------------------------------------------------------------------
+// PHASE 4.3 TODO:
+//   - Replace stubbed Role::"my_platform_member" with real entity shapes
+//   - Wire cedar-agent sidecar evaluation
+//   - Add hospital-scoped rules once HospitalEntitlement is in use
+//   - Integrate with OPA/Cedar SDK when Phase 4.3 lands
+// ---------------------------------------------------------------------------

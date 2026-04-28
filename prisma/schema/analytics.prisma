@@ -1,0 +1,326 @@
+// =============================================================================
+// Analytics Domain — KPIs, Infection Events, Antibiotic Usage, Surveillance
+// =============================================================================
+
+model AnalyticsKpiDefinition {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @db.Uuid
+  name              String
+  nameAr            String?
+  category          String?
+  description       String?
+  unit              String?
+  target            Decimal? @db.Decimal(12, 4)
+  warningThreshold  Decimal? @db.Decimal(12, 4)
+  criticalThreshold Decimal? @db.Decimal(12, 4)
+  direction         String? // lower_is_better, higher_is_better
+  formula           String?
+  createdAt         DateTime @default(now()) @db.Timestamptz
+  updatedAt         DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("analytics_kpi_definitions")
+}
+
+model AnalyticsKpiValue {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  kpiId       String   @db.Uuid
+  value       Decimal? @db.Decimal(12, 4)
+  periodStart DateTime @db.Timestamptz
+  periodEnd   DateTime @db.Timestamptz
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, kpiId, periodStart])
+  @@map("analytics_kpi_values")
+}
+
+model InfectionEvent {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  patientId         String?   @db.Uuid
+  encounterId       String?   @db.Uuid
+  type              String? // SSI, CLABSI, CAUTI, VAP, CDI, MRSA, VRE, OTHER
+  organism          String?
+  site              String?
+  onsetDate         DateTime? @db.Date
+  isHAI             Boolean   @default(false)
+  department        String?
+  status            String    @default("suspected") // suspected, confirmed, ruled_out, resolved
+  resistancePattern String[]  @default([])
+  isolationRequired Boolean   @default(false)
+  isolationType     String?
+  reportedBy        String?
+  notes             String?
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("infection_events")
+}
+
+model SurveillanceAlert {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  type            String? // outbreak, threshold_exceeded, cluster, new_resistance
+  severity        String?
+  message         String?
+  messageAr       String?
+  details         Json?
+  status          String?  @default("OPEN") // OPEN, INVESTIGATING, CONTAINED, CLOSED
+  assignedTo      String?  @db.Uuid // userId assigned to investigate
+  responseActions Json? // [{action, date, userId, notes}]
+  createdAt       DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("surveillance_alerts")
+}
+
+model DeviceDayRecord {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String   @db.Uuid
+  recordDate          DateTime @db.Date
+  department          String
+  patientDays         Int      @default(0)
+  ventilatorDays      Int      @default(0)
+  centralLineDays     Int      @default(0)
+  urinaryCatheterDays Int      @default(0)
+  recordedBy          String?  @db.Uuid
+  createdAt           DateTime @default(now()) @db.Timestamptz
+  updatedAt           DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, department, recordDate])
+  @@index([tenantId])
+  @@index([tenantId, recordDate])
+  @@map("device_day_records")
+}
+
+model HandHygieneAudit {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @db.Uuid
+  auditDate      DateTime @db.Date
+  department     String
+  observerUserId String   @db.Uuid
+  staffCategory  String // PHYSICIAN, NURSE, ALLIED_HEALTH, SUPPORT, STUDENT
+  moment         String // BEFORE_PATIENT, BEFORE_ASEPTIC, AFTER_BODY_FLUID, AFTER_PATIENT, AFTER_SURROUNDINGS
+  compliant      Boolean  @default(false)
+  method         String? // HANDWASH, HAND_RUB, GLOVES, NONE
+  notes          String?
+  createdAt      DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, department])
+  @@index([tenantId, auditDate])
+  @@map("hand_hygiene_audits")
+}
+
+model AntibioticUsage {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  patientId      String?   @db.Uuid
+  encounterId    String?   @db.Uuid
+  drugCode       String?
+  drugName       String?
+  drugNameAr     String?
+  category       String?
+  route          String?
+  dose           Decimal?  @db.Decimal(12, 4)
+  doseUnit       String?
+  frequency      String?
+  startDate      DateTime? @db.Date
+  endDate        DateTime? @db.Date
+  durationDays   Int?
+  indication     String?
+  cultureGuided  Boolean   @default(false)
+  deEscalated    Boolean   @default(false)
+  restrictedDrug Boolean   @default(false)
+  prescriberId   String?
+  department     String?
+  ddd            Decimal?  @db.Decimal(12, 4)
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("antibiotic_usage")
+}
+
+model StewardshipAlert {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  type        String?
+  severity    String?
+  message     String?
+  messageAr   String?
+  patientId   String?  @db.Uuid
+  encounterId String?  @db.Uuid
+  drugName    String?
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("stewardship_alerts")
+}
+
+model MedicationError {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  patientId           String?   @db.Uuid
+  encounterId         String?   @db.Uuid
+  orderId             String?   @db.Uuid
+  errorType           String? // prescribing, transcribing, dispensing, administering, monitoring
+  errorCategory       String? // wrong_drug, wrong_dose, wrong_route, wrong_patient, wrong_time, omission, duplicate, interaction, allergy
+  drugCode            String?
+  drugName            String?
+  drugNameAr          String?
+  intendedDrug        String?
+  intendedDose        String?
+  actualDrug          String?
+  actualDose          String?
+  severity            String? // near_miss, no_harm, minor, moderate, severe, fatal
+  stage               String? // detected_before_admin, detected_after_admin, detected_by_patient
+  outcome             String? // no_harm, temporary_harm, permanent_harm, intervention_required, death
+  contributingFactors String[]  @default([])
+  description         String?
+  descriptionAr       String?
+  reportedBy          String?
+  reportedByRole      String?
+  department          String?
+  isNearMiss          Boolean   @default(false)
+  preventable         Boolean   @default(true)
+  rootCause           String?
+  correctiveAction    String?
+  status              String    @default("reported") // reported, under_review, resolved, closed
+  resolvedAt          DateTime? @db.Timestamptz
+  resolvedBy          String?
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+  updatedAt           DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, errorType])
+  @@index([tenantId, severity])
+  @@map("medication_errors")
+}
+
+// =============================================================================
+// Isolation Precautions — Patient isolation tracking
+// =============================================================================
+
+model IsolationPrecaution {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @db.Uuid
+  patientMasterId    String    @db.Uuid
+  episodeId          String?   @db.Uuid
+  encounterId        String?   @db.Uuid
+  // Isolation details
+  isolationType      String // CONTACT, DROPLET, AIRBORNE, PROTECTIVE, ENTERIC, COMBINED
+  reason             String? // MRSA, VRE, C_DIFF, TB, COVID, CHICKENPOX, MEASLES, NEUTROPENIA, OTHER
+  organism           String?
+  startedAt          DateTime  @db.Timestamptz
+  endedAt            DateTime? @db.Timestamptz
+  startedByUserId    String    @db.Uuid
+  startedByName      String?
+  endedByUserId      String?   @db.Uuid
+  endedByName        String?
+  // Room assignment
+  roomNumber         String?
+  bedLabel           String?
+  isNegativePressure Boolean   @default(false)
+  isAnteroom         Boolean   @default(false)
+  // PPE requirements
+  ppeGown            Boolean   @default(false)
+  ppeGloves          Boolean   @default(false)
+  ppeMaskSurgical    Boolean   @default(false)
+  ppeMaskN95         Boolean   @default(false)
+  ppePapr            Boolean   @default(false)
+  ppeEyeProtection   Boolean   @default(false)
+  ppeShoeCovers      Boolean   @default(false)
+  // Signage
+  signagePosted      Boolean   @default(false)
+  // Compliance audits
+  complianceAudits   Json? // [{date, auditor, compliant, notes}]
+  // Status
+  status             String    @default("ACTIVE") // ACTIVE, DISCONTINUED, CLEARED
+  discontinuedReason String?
+  clearanceCriteria  String?
+  clearanceMet       Boolean   @default(false)
+  notes              String?
+  createdAt          DateTime  @default(now()) @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, status])
+  @@index([tenantId, isolationType])
+  @@map("isolation_precautions")
+}
+
+// =============================================================================
+// Outbreak Management — Tracking and response
+// =============================================================================
+
+model OutbreakEvent {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String    @db.Uuid
+  name                 String
+  organism             String?
+  infectionType        String? // SSI, CLABSI, CAUTI, VAP, GI, RESPIRATORY, SKIN, OTHER
+  department           String?
+  startDate            DateTime  @db.Date
+  endDate              DateTime? @db.Date
+  declaredByUserId     String    @db.Uuid
+  declaredByName       String?
+  // Case tracking
+  cases                Json? // [{patientId, patientName, mrn, onsetDate, status, cultureResult}]
+  totalCases           Int       @default(0)
+  activeCases          Int       @default(0)
+  recoveredCases       Int       @default(0)
+  // Investigation
+  sourceIdentified     Boolean   @default(false)
+  sourceDescription    String?
+  transmissionRoute    String? // CONTACT, DROPLET, AIRBORNE, COMMON_SOURCE, VECTOR, UNKNOWN
+  // Control measures
+  controlMeasures      Json? // [{measure, implementedAt, responsiblePerson, status}]
+  // Communication
+  notifiedAuthorities  Boolean   @default(false)
+  notifiedDate         DateTime? @db.Date
+  notifiedTo           String? // MOH, CDC, LOCAL_HEALTH_DEPT
+  staffCommunication   Json? // [{date, method, audience, message}]
+  // Environmental
+  environmentalActions Json? // [{action, date, area, result}]
+  // Status
+  status               String    @default("ACTIVE") // ACTIVE, CONTAINED, RESOLVED, MONITORING
+  resolutionDate       DateTime? @db.Date
+  resolutionNotes      String?
+  lessonsLearned       String?
+  // After-action report
+  afterActionReport    String?
+  notes                String?
+  createdAt            DateTime  @default(now()) @db.Timestamptz
+  updatedAt            DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("outbreak_events")
+}

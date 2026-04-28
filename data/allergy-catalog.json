@@ -1,0 +1,169 @@
+{
+  "_description": "كتالوج الحساسيات الشامل – يمكن إضافة عناصر جديدة في أي وقت",
+  "_lastUpdated": "2026-02-09",
+  "categories": [
+    {
+      "id": "DRUG_ANTIBIOTICS",
+      "nameAr": "المضادات الحيوية",
+      "nameEn": "Antibiotics",
+      "items": [
+        { "id": "PENICILLIN", "nameAr": "بنسلين", "nameEn": "Penicillin" },
+        { "id": "AMOXICILLIN", "nameAr": "أموكسيسيلين", "nameEn": "Amoxicillin" },
+        { "id": "AMPICILLIN", "nameAr": "أمبيسيلين", "nameEn": "Ampicillin" },
+        { "id": "CEPHALOSPORIN", "nameAr": "سيفالوسبورين", "nameEn": "Cephalosporin" },
+        { "id": "CEFTRIAXONE", "nameAr": "سيفترياكسون", "nameEn": "Ceftriaxone" },
+        { "id": "AZITHROMYCIN", "nameAr": "أزيثرومايسين", "nameEn": "Azithromycin" },
+        { "id": "ERYTHROMYCIN", "nameAr": "إريثرومايسين", "nameEn": "Erythromycin" },
+        { "id": "CLARITHROMYCIN", "nameAr": "كلاريثرومايسين", "nameEn": "Clarithromycin" },
+        { "id": "CIPROFLOXACIN", "nameAr": "سيبروفلوكساسين", "nameEn": "Ciprofloxacin" },
+        { "id": "LEVOFLOXACIN", "nameAr": "ليفوفلوكساسين", "nameEn": "Levofloxacin" },
+        { "id": "SULFONAMIDE", "nameAr": "سلفوناميد", "nameEn": "Sulfonamide" },
+        { "id": "TRIMETHOPRIM_SMX", "nameAr": "تريميثوبريم/سلفاميثوكسازول", "nameEn": "Trimethoprim/Sulfamethoxazole (Bactrim)" },
+        { "id": "METRONIDAZOLE", "nameAr": "ميترونيدازول", "nameEn": "Metronidazole" },
+        { "id": "TETRACYCLINE", "nameAr": "تتراسيكلين", "nameEn": "Tetracycline" },
+        { "id": "DOXYCYCLINE", "nameAr": "دوكسيسايكلين", "nameEn": "Doxycycline" },
+        { "id": "VANCOMYCIN", "nameAr": "فانكومايسين", "nameEn": "Vancomycin" },
+        { "id": "CLINDAMYCIN", "nameAr": "كلينداميسين", "nameEn": "Clindamycin" },
+        { "id": "NITROFURANTOIN", "nameAr": "نيتروفورانتوين", "nameEn": "Nitrofurantoin" }
+      ]
+    },
+    {
+      "id": "DRUG_PAIN",
+      "nameAr": "المسكنات ومضادات الالتهاب",
+      "nameEn": "Pain & Anti-inflammatory",
+      "items": [
+        { "id": "ASPIRIN", "nameAr": "أسبرين", "nameEn": "Aspirin" },
+        { "id": "IBUPROFEN", "nameAr": "إيبوبروفين", "nameEn": "Ibuprofen" },
+        { "id": "NAPROXEN", "nameAr": "نابروكسين", "nameEn": "Naproxen" },
+        { "id": "DICLOFENAC", "nameAr": "ديكلوفيناك", "nameEn": "Diclofenac" },
+        { "id": "KETOROLAC", "nameAr": "كيتورولاك", "nameEn": "Ketorolac" },
+        { "id": "CELECOXIB", "nameAr": "سيليكوكسيب", "nameEn": "Celecoxib" },
+        { "id": "ACETAMINOPHEN", "nameAr": "باراسيتامول / أسيتامينوفين", "nameEn": "Acetaminophen (Paracetamol)" },
+        { "id": "MORPHINE", "nameAr": "مورفين", "nameEn": "Morphine" },
+        { "id": "CODEINE", "nameAr": "كودايين", "nameEn": "Codeine" },
+        { "id": "TRAMADOL", "nameAr": "ترامادول", "nameEn": "Tramadol" },
+        { "id": "FENTANYL", "nameAr": "فنتانيل", "nameEn": "Fentanyl" },
+        { "id": "MEPERIDINE", "nameAr": "ميبيريدين (ديميرول)", "nameEn": "Meperidine (Demerol)" }
+      ]
+    },
+    {
+      "id": "DRUG_CARDIAC",
+      "nameAr": "أدوية القلب والضغط",
+      "nameEn": "Cardiac & Blood Pressure",
+      "items": [
+        { "id": "ACE_INHIBITOR", "nameAr": "مثبطات ACE (إنالابريل، ليسينوبريل)", "nameEn": "ACE Inhibitors" },
+        { "id": "ARB", "nameAr": "حاصرات مستقبلات الأنجيوتنسين", "nameEn": "ARBs (Losartan, Valsartan)" },
+        { "id": "BETA_BLOCKER", "nameAr": "حاصرات بيتا", "nameEn": "Beta Blockers" },
+        { "id": "CALCIUM_CHANNEL_BLOCKER", "nameAr": "حاصرات قنوات الكالسيوم", "nameEn": "Calcium Channel Blockers" },
+        { "id": "STATIN", "nameAr": "ستاتين (خافضات الكوليسترول)", "nameEn": "Statins" },
+        { "id": "HEPARIN", "nameAr": "هيبارين", "nameEn": "Heparin" },
+        { "id": "WARFARIN", "nameAr": "وارفارين", "nameEn": "Warfarin" },
+        { "id": "DIGOXIN", "nameAr": "ديجوكسين", "nameEn": "Digoxin" }
+      ]
+    },
+    {
+      "id": "DRUG_ANESTHESIA",
+      "nameAr": "أدوية التخدير",
+      "nameEn": "Anesthesia",
+      "items": [
+        { "id": "LIDOCAINE", "nameAr": "ليدوكايين", "nameEn": "Lidocaine" },
+        { "id": "BUPIVACAINE", "nameAr": "بوبيفاكايين", "nameEn": "Bupivacaine" },
+        { "id": "PROPOFOL", "nameAr": "بروبوفول", "nameEn": "Propofol" },
+        { "id": "KETAMINE", "nameAr": "كيتامين", "nameEn": "Ketamine" },
+        { "id": "SUCCINYLCHOLINE", "nameAr": "سكسينيل كولين", "nameEn": "Succinylcholine" },
+        { "id": "SEVOFLURANE", "nameAr": "سيفوفلوران", "nameEn": "Sevoflurane" }
+      ]
+    },
+    {
+      "id": "DRUG_OTHER",
+      "nameAr": "أدوية أخرى",
+      "nameEn": "Other Medications",
+      "items": [
+        { "id": "INSULIN", "nameAr": "إنسولين", "nameEn": "Insulin" },
+        { "id": "METFORMIN", "nameAr": "ميتفورمين", "nameEn": "Metformin" },
+        { "id": "CONTRAST_DYE", "nameAr": "صبغة الأشعة (اليود)", "nameEn": "Iodinated Contrast Dye" },
+        { "id": "GADOLINIUM", "nameAr": "جادولينيوم (صبغة MRI)", "nameEn": "Gadolinium (MRI Contrast)" },
+        { "id": "PHENYTOIN", "nameAr": "فينيتوين", "nameEn": "Phenytoin" },
+        { "id": "CARBAMAZEPINE", "nameAr": "كاربامازيبين", "nameEn": "Carbamazepine" },
+        { "id": "ALLOPURINOL", "nameAr": "ألوبيورينول", "nameEn": "Allopurinol" },
+        { "id": "METHOTREXATE", "nameAr": "ميثوتريكسات", "nameEn": "Methotrexate" },
+        { "id": "HYDROXYCHLOROQUINE", "nameAr": "هيدروكسي كلوروكين", "nameEn": "Hydroxychloroquine" },
+        { "id": "FLUCONAZOLE", "nameAr": "فلوكونازول", "nameEn": "Fluconazole" },
+        { "id": "ANTITUBERCULOSIS", "nameAr": "أدوية السل (ريفامبيسين/أيزونيازيد)", "nameEn": "Anti-TB drugs (Rifampicin/Isoniazid)" }
+      ]
+    },
+    {
+      "id": "FOOD",
+      "nameAr": "حساسية الطعام",
+      "nameEn": "Food Allergies",
+      "items": [
+        { "id": "PEANUTS", "nameAr": "الفول السوداني", "nameEn": "Peanuts" },
+        { "id": "TREE_NUTS", "nameAr": "المكسرات (لوز، جوز، كاجو)", "nameEn": "Tree Nuts (Almond, Walnut, Cashew)" },
+        { "id": "EGGS", "nameAr": "البيض", "nameEn": "Eggs" },
+        { "id": "MILK", "nameAr": "الحليب ومشتقاته", "nameEn": "Milk & Dairy" },
+        { "id": "WHEAT", "nameAr": "القمح (الغلوتين)", "nameEn": "Wheat (Gluten)" },
+        { "id": "SOY", "nameAr": "الصويا", "nameEn": "Soy" },
+        { "id": "FISH", "nameAr": "الأسماك", "nameEn": "Fish" },
+        { "id": "SHELLFISH", "nameAr": "المحار والروبيان", "nameEn": "Shellfish & Shrimp" },
+        { "id": "SESAME", "nameAr": "السمسم", "nameEn": "Sesame" },
+        { "id": "CORN", "nameAr": "الذرة", "nameEn": "Corn" },
+        { "id": "STRAWBERRY", "nameAr": "الفراولة", "nameEn": "Strawberry" },
+        { "id": "BANANA", "nameAr": "الموز", "nameEn": "Banana" },
+        { "id": "KIWI", "nameAr": "الكيوي", "nameEn": "Kiwi" },
+        { "id": "MANGO", "nameAr": "المانجو", "nameEn": "Mango" },
+        { "id": "CHOCOLATE", "nameAr": "الشوكولاتة", "nameEn": "Chocolate" },
+        { "id": "HONEY", "nameAr": "العسل", "nameEn": "Honey" },
+        { "id": "FOOD_COLORING", "nameAr": "ملونات الطعام", "nameEn": "Food Coloring / Additives" }
+      ]
+    },
+    {
+      "id": "ENVIRONMENTAL",
+      "nameAr": "حساسية بيئية",
+      "nameEn": "Environmental Allergies",
+      "items": [
+        { "id": "DUST_MITES", "nameAr": "عث الغبار", "nameEn": "Dust Mites" },
+        { "id": "POLLEN", "nameAr": "حبوب اللقاح", "nameEn": "Pollen" },
+        { "id": "MOLD", "nameAr": "العفن", "nameEn": "Mold" },
+        { "id": "PET_DANDER", "nameAr": "وبر الحيوانات (قطط/كلاب)", "nameEn": "Pet Dander (Cats/Dogs)" },
+        { "id": "COCKROACH", "nameAr": "الصراصير", "nameEn": "Cockroach" },
+        { "id": "GRASS", "nameAr": "أعشاب / حشائش", "nameEn": "Grass" },
+        { "id": "PERFUME", "nameAr": "العطور والروائح", "nameEn": "Perfumes & Fragrances" },
+        { "id": "SMOKE", "nameAr": "الدخان", "nameEn": "Smoke" },
+        { "id": "COLD_AIR", "nameAr": "الهواء البارد", "nameEn": "Cold Air" },
+        { "id": "SUNLIGHT", "nameAr": "أشعة الشمس", "nameEn": "Sunlight (Photosensitivity)" }
+      ]
+    },
+    {
+      "id": "MATERIAL",
+      "nameAr": "مواد ومنتجات",
+      "nameEn": "Materials & Products",
+      "items": [
+        { "id": "LATEX", "nameAr": "اللاتكس (المطاط)", "nameEn": "Latex (Rubber)" },
+        { "id": "ADHESIVE_TAPE", "nameAr": "الشريط اللاصق الطبي", "nameEn": "Adhesive / Medical Tape" },
+        { "id": "NICKEL", "nameAr": "النيكل (المعادن)", "nameEn": "Nickel (Metals)" },
+        { "id": "IODINE_TOPICAL", "nameAr": "اليود الموضعي (بيتادين)", "nameEn": "Topical Iodine (Betadine)" },
+        { "id": "CHLORHEXIDINE", "nameAr": "كلورهيكسيدين", "nameEn": "Chlorhexidine" },
+        { "id": "ALCOHOL_TOPICAL", "nameAr": "الكحول الموضعي", "nameEn": "Rubbing Alcohol" },
+        { "id": "HAIR_DYE", "nameAr": "صبغة الشعر", "nameEn": "Hair Dye" },
+        { "id": "DETERGENT", "nameAr": "المنظفات", "nameEn": "Detergents / Soaps" }
+      ]
+    },
+    {
+      "id": "INSECT",
+      "nameAr": "لدغات وحشرات",
+      "nameEn": "Insect Stings & Bites",
+      "items": [
+        { "id": "BEE_STING", "nameAr": "لدغة النحل", "nameEn": "Bee Sting" },
+        { "id": "WASP_STING", "nameAr": "لدغة الدبور", "nameEn": "Wasp Sting" },
+        { "id": "ANT_BITE", "nameAr": "لدغة النمل", "nameEn": "Ant Bite" },
+        { "id": "MOSQUITO", "nameAr": "لدغة البعوض", "nameEn": "Mosquito Bite" },
+        { "id": "SCORPION", "nameAr": "لدغة العقرب", "nameEn": "Scorpion Sting" }
+      ]
+    }
+  ],
+  "specialOptions": [
+    { "id": "NKDA", "nameAr": "لا توجد حساسية معروفة", "nameEn": "No Known Drug Allergies (NKDA)", "exclusive": true },
+    { "id": "NKA", "nameAr": "لا توجد حساسية من أي نوع", "nameEn": "No Known Allergies (NKA)", "exclusive": true },
+    { "id": "UNABLE_TO_ASSESS", "nameAr": "غير قادر على التقييم", "nameEn": "Unable to Assess", "exclusive": true }
+  ]
+}

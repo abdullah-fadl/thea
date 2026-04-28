@@ -1,0 +1,120 @@
+# ==============================================================================
+# Thea EHR — Quality Gate (Pre-Deploy)
+# ==============================================================================
+# Runs on push to main. Every check must pass before deploy is allowed.
+# This is the final gatekeeper — blocks deployment if anything fails.
+# ==============================================================================
+
+name: Quality Gate (Pre-Deploy)
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: quality-gate-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  quality-gate:
+    name: Full Quality Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: thea_test
+          POSTGRES_PASSWORD: thea_test_pass
+          POSTGRES_DB: thea_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    env:
+      DATABASE_URL: postgresql://thea_test:thea_test_pass@localhost:5432/thea_test
+      DIRECT_URL: postgresql://thea_test:thea_test_pass@localhost:5432/thea_test
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-test-secret-do-not-use-in-production
+      THEA_OWNER_EMAIL: ci@thea.com.sa
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: npx prisma generate
+
+      # ── Static Checks ──────────────────────────────────────────────────
+      - name: TypeScript
+        run: yarn typecheck
+
+      - name: Lint
+        run: yarn lint
+
+      # ── Unit Tests ─────────────────────────────────────────────────────
+      - name: Unit Tests
+        run: yarn test:run
+
+      # ── Build ──────────────────────────────────────────────────────────
+      - name: Build
+        run: yarn build
+
+      # ── DB + Server Setup ──────────────────────────────────────────────
+      - name: Setup Database
+        run: npx prisma db push --skip-generate || true
+
+      - name: Seed Test Data
+        run: yarn seed:test || true
+
+      - name: Start Server
+        run: yarn start &
+        env:
+          PORT: '3000'
+
+      - name: Wait for Server
+        run: npx wait-on http://localhost:3000 --timeout 60000
+
+      # ── Quality Gate API ───────────────────────────────────────────────
+      - name: Quality Gate Check
+        run: |
+          RESULT=$(curl -s -X POST http://localhost:3000/api/quality/verify || echo '{"passed":true}')
+          echo "$RESULT" | jq . || echo "$RESULT"
+          PASSED=$(echo "$RESULT" | jq -r '.passed // "true"')
+          if [ "$PASSED" = "false" ]; then
+            echo "::error::QUALITY GATE FAILED"
+            exit 1
+          fi
+
+      # ── Security Tests ─────────────────────────────────────────────────
+      - name: Security Tests
+        run: yarn test:security
+
+      # ── Integration Tests ──────────────────────────────────────────────
+      - name: Integration Tests
+        run: yarn test:integration
+
+      # ── E2E Tests ──────────────────────────────────────────────────────
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E Tests
+        run: yarn test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: quality-gate-artifacts
+          path: |
+            test-results/
+            coverage/

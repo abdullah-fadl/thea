@@ -1,0 +1,221 @@
+model OncologyPatient {
+  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String             @db.Uuid
+  patientMasterId String             @db.Uuid
+  diagnosis       String
+  icdCode         String?
+  stage           String?
+  histology       String?
+  primarySite     String?
+  diagnosisDate   DateTime?          @db.Timestamptz
+  ecogStatus      Int?
+  oncologistId    String?
+  status          String             @default("ACTIVE")
+  notes           String?
+  cycles          ChemoCycle[]
+  createdAt       DateTime           @default(now()) @db.Timestamptz
+  updatedAt       DateTime           @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@map("oncology_patients")
+}
+
+model ChemoCycle {
+  id               String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String          @db.Uuid
+  patientId        String          @db.Uuid
+  patient          OncologyPatient @relation(fields: [patientId], references: [id])
+  cycleNumber      Int
+  protocolName     String
+  scheduledDate    DateTime        @db.Timestamptz
+  administeredDate DateTime?       @db.Timestamptz
+  administeredBy   String?
+  premedications   Json?
+  drugs            Json
+  vitals           Json?
+  toxicity         Json?
+  labsPreCycle     Json?
+  bsa              Float?
+  weight           Float?
+  status           String          @default("SCHEDULED")
+  delayReason      String?
+  notes            String?
+  createdAt        DateTime        @default(now()) @db.Timestamptz
+  updatedAt        DateTime        @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@map("chemo_cycles")
+}
+
+model TumorBoardCase {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  patientMasterId   String    @db.Uuid
+  caseDate          DateTime  @db.Timestamptz
+  presentedBy       String
+  attendees         Json?
+  clinicalSummary   String
+  imagingFindings   String?
+  pathologyFindings String?
+  currentTreatment  String?
+  discussion        String?
+  recommendation    String
+  followUpDate      DateTime? @db.Timestamptz
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("tumor_board_cases")
+}
+
+// ── 3.6 Chemo Protocol Template Library ──────────────────────────────────
+model ChemoProtocolTemplate {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String   @db.Uuid
+  name               String // e.g. "FOLFOX", "CHOP", "AC-T"
+  cancerType         String // e.g. "COLORECTAL", "LYMPHOMA", "BREAST"
+  intent             String   @default("CURATIVE") // CURATIVE | NEOADJUVANT | ADJUVANT | PALLIATIVE
+  emetogenicRisk     String? // HIGH | MODERATE | LOW | MINIMAL
+  totalCyclesDefault Int?
+  cycleLengthDays    Int? // e.g. 14, 21, 28
+  drugs              Json // [{name,dose,unit,route,day,infusionTime}]
+  premedications     Json? // [{name,dose,route,timing}]
+  hydration          Json? // [{fluid,volume,rate,timing}]
+  doseModifications  Json? // [{condition,adjustment,notes}]
+  supportiveCare     Json? // [{medication,indication}]
+  references         Json? // [{title,url,year}]
+  isGlobal           Boolean  @default(false) // shared across tenants or tenant-specific
+  status             String   @default("ACTIVE") // ACTIVE | ARCHIVED
+  createdBy          String?
+  notes              String?
+  createdAt          DateTime @default(now()) @db.Timestamptz
+  updatedAt          DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, cancerType])
+  @@map("chemo_protocol_templates")
+}
+
+// ── 3.8 CTCAE Toxicity Grading ───────────────────────────────────────────
+model CtcaeToxicityRecord {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String    @db.Uuid
+  patientMasterId       String    @db.Uuid
+  cycleId               String?   @db.Uuid // optional link to ChemoCycle
+  assessmentDate        DateTime  @db.Timestamptz
+  assessedBy            String // userId
+  ctcaeVersion          String    @default("5.0")
+  toxicities            Json // [{category,term,grade,attribution,onset,resolved,action,notes}]
+  overallWorstGrade     Int? // max grade across all toxicities
+  doseModRequired       Boolean   @default(false)
+  treatmentHeld         Boolean   @default(false)
+  treatmentDiscontinued Boolean   @default(false)
+  nextAssessmentDate    DateTime? @db.Timestamptz
+  notes                 String?
+  createdAt             DateTime  @default(now()) @db.Timestamptz
+  updatedAt             DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@map("ctcae_toxicity_records")
+}
+
+// ── 3.10 TNM Staging ─────────────────────────────────────────────────────
+model TnmStaging {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  patientMasterId String   @db.Uuid
+  cancerType      String // e.g. "BREAST", "LUNG_NSCLC", "COLORECTAL"
+  stagingSystem   String   @default("AJCC_8TH") // AJCC_8TH | AJCC_7TH
+  stagingType     String   @default("CLINICAL") // CLINICAL (c) | PATHOLOGICAL (p) | POST_THERAPY (yp)
+  tCategory       String // T0, Tis, T1, T1a, T1b, T2, T3, T4
+  nCategory       String // N0, N1, N1a, N1b, N2, N3
+  mCategory       String // M0, M1, M1a, M1b, M1c
+  stageGroup      String? // auto-calculated: IA, IB, IIA, IIB, IIIA, IIIB, IV
+  gradeGroup      String? // histologic grade G1-G4
+  biomarkers      Json? // cancer-specific: {er,pr,her2,ki67,psa,cea,braf...}
+  stagingDate     DateTime @db.Timestamptz
+  stagedBy        String // userId
+  method          String? // IMAGING | BIOPSY | SURGICAL | COMBINED
+  notes           String?
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@map("tnm_stagings")
+}
+
+// ── 3.11 Radiation Therapy Log ───────────────────────────────────────────
+model RadiationTherapyPlan {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String             @db.Uuid
+  patientMasterId    String             @db.Uuid
+  planName           String
+  technique          String // IMRT | VMAT | 3DCRT | SRS | SBRT | PROTON | ELECTRON | BRACHY
+  intent             String             @default("CURATIVE") // CURATIVE | PALLIATIVE | ADJUVANT | NEOADJUVANT
+  targetSite         String // anatomical site
+  targetVolumes      Json? // [{name,type:"GTV|CTV|PTV",prescribedDose,fractions}]
+  totalDoseGy        Float // total dose in Gray
+  dosePerFraction    Float // dose per fraction in Gray
+  totalFractions     Int // planned fractions
+  completedFractions Int                @default(0)
+  frequency          String             @default("DAILY_5") // DAILY_5 | BID | WEEKLY | HYPO
+  machine            String? // e.g. "TrueBeam", "CyberKnife"
+  energy             String? // e.g. "6MV", "15MV", "6MeV"
+  startDate          DateTime?          @db.Timestamptz
+  endDate            DateTime?          @db.Timestamptz
+  concurrentChemo    String? // concurrent chemo regimen name
+  oarConstraints     Json? // [{organ,constraint,limit}] organs-at-risk
+  status             String             @default("PLANNED") // PLANNED | IN_PROGRESS | COMPLETED | SUSPENDED | CANCELLED
+  suspendReason      String?
+  physicist          String?
+  oncologistId       String?
+  notes              String?
+  sessions           RadiationSession[]
+  createdAt          DateTime           @default(now()) @db.Timestamptz
+  updatedAt          DateTime           @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@map("radiation_therapy_plans")
+}
+
+model RadiationSession {
+  id                String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String               @db.Uuid
+  planId            String               @db.Uuid
+  plan              RadiationTherapyPlan @relation(fields: [planId], references: [id])
+  fractionNumber    Int
+  sessionDate       DateTime             @db.Timestamptz
+  deliveredDoseGy   Float?
+  machine           String?
+  technician        String?
+  setupVerification String? // CBCT | KV | PORTAL
+  skinReaction      String? // NONE | GRADE1 | GRADE2 | GRADE3 | GRADE4
+  patientTolerance  String? // GOOD | FAIR | POOR
+  isocenterShift    Json? // {x,y,z} in mm
+  treatmentTime     Int? // minutes
+  notes             String?
+  status            String               @default("COMPLETED") // COMPLETED | MISSED | CANCELLED
+  createdAt         DateTime             @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, planId])
+  @@map("radiation_sessions")
+}

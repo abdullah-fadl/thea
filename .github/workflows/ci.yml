@@ -1,0 +1,221 @@
+# ==============================================================================
+# Thea EHR — CI Pipeline
+# ==============================================================================
+# Runs on every PR to main/develop and pushes to main.
+# Jobs: typecheck → lint → unit-tests → integration-tests → e2e + security
+# ==============================================================================
+
+name: Thea EHR CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ────────────────────────────────────────────────────────────────────────────
+  # Stage 1: Static checks (parallel)
+  # ────────────────────────────────────────────────────────────────────────────
+
+  typecheck:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: npx prisma generate
+      - run: yarn typecheck
+
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: npx prisma generate
+      - run: yarn lint
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Stage 1: Unit tests (parallel with static checks)
+  # ────────────────────────────────────────────────────────────────────────────
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: npx prisma generate
+      - run: yarn test:run --reporter=verbose
+      - run: yarn test:coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Stage 2: Integration tests (needs typecheck + unit)
+  # ────────────────────────────────────────────────────────────────────────────
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [typecheck, unit-tests]
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: thea_test
+          POSTGRES_PASSWORD: thea_test_pass
+          POSTGRES_DB: thea_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    env:
+      DATABASE_URL: postgresql://thea_test:thea_test_pass@localhost:5432/thea_test
+      DIRECT_URL: postgresql://thea_test:thea_test_pass@localhost:5432/thea_test
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-test-secret-do-not-use-in-production
+      THEA_OWNER_EMAIL: ci@thea.com.sa
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: npx prisma generate
+      - run: npx prisma db push --skip-generate || true
+      - run: yarn seed:test || true
+      - run: yarn dev &
+      - run: npx wait-on http://localhost:3000 --timeout 60000
+      - run: yarn test:integration
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Stage 3: E2E tests (needs integration)
+  # ────────────────────────────────────────────────────────────────────────────
+
+  e2e-tests:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: [integration-tests]
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: thea_test
+          POSTGRES_PASSWORD: thea_test_pass
+          POSTGRES_DB: thea_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    env:
+      DATABASE_URL: postgresql://thea_test:thea_test_pass@localhost:5432/thea_test
+      DIRECT_URL: postgresql://thea_test:thea_test_pass@localhost:5432/thea_test
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-test-secret-do-not-use-in-production
+      THEA_OWNER_EMAIL: ci@thea.com.sa
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: npx prisma generate
+      - run: npx playwright install --with-deps chromium
+      - run: npx prisma db push --skip-generate || true
+      - run: yarn seed:test || true
+      - run: yarn dev &
+      - run: npx wait-on http://localhost:3000 --timeout 60000
+      - run: yarn test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: test-results/
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Stage 3: Security tests (parallel with E2E, needs integration)
+  # ────────────────────────────────────────────────────────────────────────────
+
+  security-tests:
+    name: Security Tests
+    runs-on: ubuntu-latest
+    needs: [integration-tests]
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: thea_test
+          POSTGRES_PASSWORD: thea_test_pass
+          POSTGRES_DB: thea_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    env:
+      DATABASE_URL: postgresql://thea_test:thea_test_pass@localhost:5432/thea_test
+      DIRECT_URL: postgresql://thea_test:thea_test_pass@localhost:5432/thea_test
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ci-test-secret-do-not-use-in-production
+      THEA_OWNER_EMAIL: ci@thea.com.sa
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+      - run: npx prisma generate
+      - run: npx prisma db push --skip-generate || true
+      - run: yarn seed:test || true
+      - run: yarn dev &
+      - run: npx wait-on http://localhost:3000 --timeout 60000
+      - run: yarn test:security

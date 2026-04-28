@@ -1,0 +1,401 @@
+// =============================================================================
+// Orders Domain — OrdersHub, Results, Events, Attachments
+// =============================================================================
+
+model OrdersHub {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  encounterCoreId String? @db.Uuid
+  patientMasterId String? @db.Uuid
+
+  // Source reference
+  sourceSystem      String? // OPD, ER, IPD
+  sourceEncounterId String? @db.Uuid
+  sourceDepartment  String?
+
+  // Order details
+  kind          String // LAB, RADIOLOGY, MEDICATION, PROCEDURE, CONSULTATION, OTHER
+  departmentKey String? // opd, er, ipd, lab, radiology
+  orderCode     String?
+  orderName     String?
+  orderNameAr   String?
+  priority      String? @default("ROUTINE") // STAT, URGENT, ROUTINE
+  clinicalText  String?
+  notes         String?
+
+  // Status lifecycle
+  status       String    @default("ORDERED") // ORDERED, IN_PROGRESS, RESULTED, COMPLETED, CANCELLED
+  orderedAt    DateTime? @db.Timestamptz
+  acceptedAt   DateTime? @db.Timestamptz
+  inProgressAt DateTime? @db.Timestamptz
+  resultedAt   DateTime? @db.Timestamptz
+  completedAt  DateTime? @db.Timestamptz
+  cancelledAt  DateTime? @db.Timestamptz
+  cancelReason String?
+
+  // Assignment
+  assignedToUserId String? @db.Uuid
+  assignedToDept   String?
+
+  // Metadata
+  meta           Json? // Flexible extra data
+  idempotencyKey String? @unique
+  version        Int     @default(1)
+
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?
+  updatedByUserId String?
+
+  // Relations
+  tenant  Tenant        @relation(fields: [tenantId], references: [id])
+  events  OrderEvent[]
+  results OrderResult[]
+
+  @@index([tenantId])
+  @@index([tenantId, encounterCoreId])
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, status])
+  @@index([tenantId, kind])
+  // NOTE: For OPD→OrdersHub sync, query by meta->>'opdOrderId'
+  // Consider adding a GIN index: CREATE INDEX idx_orders_hub_meta ON orders_hub USING gin (meta);
+  @@map("orders_hub")
+}
+
+model OrderEvent {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String  @db.Uuid
+  orderId     String  @db.Uuid
+  eventType   String // ORDERED, ACCEPTED, IN_PROGRESS, RESULTED, COMPLETED, CANCELLED, NOTE
+  fromStatus  String?
+  toStatus    String?
+  note        String?
+  performedBy String? @db.Uuid
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  // Relations
+  tenant Tenant    @relation(fields: [tenantId], references: [id])
+  order  OrdersHub @relation(fields: [orderId], references: [id])
+
+  @@index([tenantId, orderId])
+  @@map("order_events")
+}
+
+model OrderResult {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String    @db.Uuid
+  orderId       String    @db.Uuid
+  resultType    String? // LAB, RADIOLOGY, PATHOLOGY, OTHER
+  status        String    @default("PRELIMINARY") // PRELIMINARY, FINAL, AMENDED, CANCELLED
+  data          Json? // Flexible result data
+  summary       String?
+  interpretedBy String?   @db.Uuid
+  verifiedBy    String?   @db.Uuid
+  verifiedAt    DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  tenant Tenant    @relation(fields: [tenantId], references: [id])
+  order  OrdersHub @relation(fields: [orderId], references: [id])
+
+  @@index([tenantId, orderId])
+  @@map("order_results")
+}
+
+model LabResult {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String  @db.Uuid
+  testId      String?
+  orderId     String? @db.Uuid
+  patientId   String? @db.Uuid
+  encounterId String? @db.Uuid
+
+  testCode   String?
+  testName   String?
+  testNameAr String?
+  parameters Json? // Array of { name, value, unit, range, abnormal, ... }
+  status     String  @default("PENDING") // PENDING, IN_PROGRESS, RESULTED, VERIFIED, CANCELLED
+  comments   String?
+
+  collectedAt DateTime? @db.Timestamptz
+  resultedAt  DateTime? @db.Timestamptz
+  verifiedAt  DateTime? @db.Timestamptz
+  verifiedBy  String?   @db.Uuid
+
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, orderId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, encounterId])
+  @@map("lab_results")
+}
+
+model RadiologyReport {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String  @db.Uuid
+  orderId     String? @db.Uuid
+  encounterId String? @db.Uuid
+  patientId   String? @db.Uuid
+
+  examCode      String?
+  examName      String?
+  examNameAr    String?
+  modality      String? // XRAY, CT, MRI, US, etc.
+  bodyPart      String?
+  findings      String?
+  impression    String?
+  status        String  @default("PENDING") // PENDING, IN_PROGRESS, REPORTED, VERIFIED, CANCELLED
+  radiologistId String? @db.Uuid
+  hasImages     Boolean @default(false)
+
+  reportedAt DateTime? @db.Timestamptz
+  verifiedAt DateTime? @db.Timestamptz
+  verifiedBy String?   @db.Uuid
+
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, orderId])
+  @@index([tenantId, encounterId])
+  @@index([tenantId, patientId])
+  @@map("radiology_reports")
+}
+
+model ConnectResult {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String @db.Uuid
+
+  // Source info
+  sourceSystem String? // LIS, RIS, HIS, etc.
+  sourceId     String?
+
+  // Patient link
+  patientId   String? @db.Uuid
+  encounterId String? @db.Uuid
+  orderId     String? @db.Uuid
+
+  // Result data (complex nested objects)
+  source      Json? // { system, id, name, ... }
+  patientLink Json? // { mrn, name, dob, ... }
+  order       Json? // { code, name, ... }
+  result      Json? // { parameters, values, ... }
+
+  status    String    @default("RECEIVED") // RECEIVED, MATCHED, APPLIED, REJECTED
+  matchedAt DateTime? @db.Timestamptz
+  appliedAt DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, orderId])
+  @@map("connect_results")
+}
+
+model ConnectIngestEvent {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  type            String // RESULT, VITALS
+  source          Json? // { system, facilityCode, deviceId, traceId }
+  occurredAt      String? // ISO date string
+  patientHash     String?
+  dedupeKey       String?
+  clientRequestId String?
+  createdByUserId String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, dedupeKey])
+  @@index([tenantId, clientRequestId])
+  @@map("connect_ingest_events")
+}
+
+model ConnectDeviceVitals {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String  @db.Uuid
+  source      Json? // { system, deviceId, traceId }
+  occurredAt  String? // ISO date string
+  patientLink Json? // { patientMasterId, mrnHash, mrnLast4 }
+  location    Json? // { area, bedId, roomId }
+  vitals      Json? // { hr, bpSys, bpDia, rr, temp, spo2 }
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("connect_device_vitals")
+}
+
+model Attachment {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String @db.Uuid
+
+  entityType     String // ENCOUNTER, PATIENT, ORDER, NOTE, etc.
+  entityId       String // ID of the parent entity
+  fileName       String
+  mimeType       String?
+  sizeBytes      Int?
+  storage        Json? // { provider, bucket, key, url }
+  checksum       String?
+  idempotencyKey String? @unique
+
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, entityType, entityId])
+  @@map("attachments")
+}
+
+// =============================================================================
+// Order Sets, Result Acks, Context Links
+// =============================================================================
+
+model ResultAck {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @db.Uuid
+  orderResultId  String   @db.Uuid
+  orderId        String?  @db.Uuid
+  userId         String?
+  roleAtAck      String?
+  ackAt          DateTime @db.Timestamptz
+  comment        String?
+  idempotencyKey String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, orderResultId, userId])
+  @@index([tenantId, orderResultId])
+  @@index([tenantId, idempotencyKey])
+  @@map("result_acks")
+}
+
+model OrderSet {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  name            String
+  nameAr          String?
+  description     String?
+  descriptionAr   String?
+  category        String?
+  scope           String?
+  departmentKeys  String[] @default([])
+  roleScope       String[] @default([])
+  items           Json?
+  isActive        Boolean  @default(true)
+  isDefault       Boolean  @default(false)
+  status          String   @default("ACTIVE")
+  createdByUserId String?
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, scope])
+  @@map("order_sets")
+}
+
+model OrderSetItem {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  orderSetId      String   @db.Uuid
+  kind            String?
+  orderCode       String?
+  displayName     String?
+  defaults        Json?
+  required        Boolean  @default(false)
+  position        Int      @default(0)
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  createdByUserId String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, orderSetId])
+  @@map("order_set_items")
+}
+
+model OrderSetApplication {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  orderSetId      String   @db.Uuid
+  encounterRef    Json?
+  encounterRefKey String?
+  createdOrderIds String[] @default([])
+  appliedByUserId String?
+  appliedAt       DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, orderSetId, encounterRefKey])
+  @@index([tenantId, encounterRefKey])
+  @@map("order_set_applications")
+}
+
+model OrderContextLink {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  orderId         String   @db.Uuid
+  encounterCoreId String?  @db.Uuid
+  noteId          String?
+  noteType        String?
+  reason          String?
+  linkedByUserId  String?
+  linkedAt        DateTime @default(now()) @db.Timestamptz
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  createdByUserId String?
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  updatedByUserId String?
+  idempotencyKey  String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, orderId])
+  @@index([tenantId, noteId])
+  @@map("order_context_links")
+}
+
+model OrderResultAck {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  orderId         String   @db.Uuid
+  encounterCoreId String?  @db.Uuid
+  userId          String?
+  reason          String?
+  time            DateTime @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, orderId, userId])
+  @@index([tenantId, orderId])
+  @@map("order_result_acks")
+}

@@ -1,0 +1,1467 @@
+// =============================================================================
+// Clinical Domain — Visit Notes, Physical Exams, Death Records, Home Medications
+// =============================================================================
+
+model OpdVisitNote {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  encounterCoreId String? @db.Uuid
+  opdEncounterId  String? @db.Uuid
+  patientId       String? @db.Uuid
+
+  // SOAP fields
+  chiefComplaint          String?
+  historyOfPresentIllness String?
+  reviewOfSystems         Json? // { system: findings }
+  pastMedicalHistory      String?
+  familyHistory           String?
+  socialHistory           String?
+
+  // Exam
+  physicalExam           String?
+  physicalExamStructured Json? // Structured exam data
+
+  // Assessment & Plan
+  assessment String?
+  plan       String?
+  diagnoses  Json? // [{ code, description, type, ... }]
+
+  // Vitals snapshot at time of note
+  vitalsSnapshot Json? // { bp, hr, temp, rr, spo2, weight, height, ... }
+
+  // Status
+  status    String    @default("DRAFT") // DRAFT, SIGNED, AMENDED, VOID
+  signedAt  DateTime? @db.Timestamptz
+  signedBy  String?   @db.Uuid
+  amendedAt DateTime? @db.Timestamptz
+  amendedBy String?   @db.Uuid
+
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?
+  updatedByUserId String?
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, encounterCoreId])
+  @@index([tenantId, patientId])
+  @@map("opd_visit_notes")
+}
+
+model PhysicalExam {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  encounterCoreId String? @db.Uuid
+  patientId       String? @db.Uuid
+
+  // Systems examination (structured JSON)
+  systems Json? // { general, heent, neck, cardiovascular, respiratory, ... }
+  summary String?
+  notes   String?
+
+  // Status
+  status      String    @default("DRAFT") // DRAFT, FINAL
+  finalizedAt DateTime? @db.Timestamptz
+  finalizedBy String?   @db.Uuid
+
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?
+  updatedByUserId String?
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, encounterCoreId])
+  @@map("physical_exams")
+}
+
+model HomeMedication {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String  @db.Uuid
+  patientId String? @db.Uuid
+
+  // Medication details
+  drugName  String?
+  dose      String?
+  unit      String?
+  frequency String? // daily, bid, tid, qid, prn, weekly, monthly, etc.
+  route     String? // oral, iv, im, sc, topical, inhaled, etc.
+  strength  String?
+  form      String? // tablet, capsule, syrup, injection, cream, etc.
+  source    String? // patient_reported, pharmacy_system, referral_letter, etc.
+  notes     String?
+
+  // Status
+  isActive   Boolean   @default(true)
+  isVerified Boolean   @default(false)
+  verifiedBy String?   @db.Uuid
+  verifiedAt DateTime? @db.Timestamptz
+
+  // Soft delete
+  deletedAt DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@map("home_medications")
+}
+
+model DeathDeclaration {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  patientId       String  @db.Uuid
+  encounterCoreId String? @db.Uuid
+
+  declaredAt   DateTime  @db.Timestamptz
+  declaredBy   String?   @db.Uuid
+  causeOfDeath String?
+  placeOfDeath String?
+  manner       String? // NATURAL, ACCIDENT, SUICIDE, HOMICIDE, UNDETERMINED
+  notes        String?
+  isFinalised  Boolean   @default(false)
+  finalisedAt  DateTime? @db.Timestamptz
+  finalisedBy  String?   @db.Uuid
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@map("death_declarations")
+}
+
+// =============================================================================
+// Clinical Tasks, Notes, Handover, Consents, Events
+// =============================================================================
+
+model ClinicalTask {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  encounterCoreId  String?   @db.Uuid
+  source           Json? // {system, sourceId}
+  taskType         String?
+  title            String?
+  priority         String? // LOW, NORMAL, HIGH, URGENT
+  status           String    @default("OPEN") // OPEN, CLAIMED, IN_PROGRESS, DONE, NOT_DONE, CANCELLED
+  dueAt            DateTime? @db.Timestamptz
+  assignedToUserId String?
+  claimedAt        DateTime? @db.Timestamptz
+  startedAt        DateTime? @db.Timestamptz
+  completedAt      DateTime? @db.Timestamptz
+  notDoneReason    String?
+  cancelReason     String?
+  idempotencyKey   String?   @unique
+  createdByUserId  String?
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, encounterCoreId])
+  @@index([tenantId, status])
+  @@map("clinical_tasks")
+}
+
+model ClinicalTaskEvent {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  taskId      String   @db.Uuid
+  eventType   String // CREATE, CLAIM, START, COMPLETE, NOT_DONE, CANCEL, REASSIGN
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  actorUserId String?
+  payload     Json?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, taskId])
+  @@map("clinical_task_events")
+}
+
+model ClinicalNote {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  patientMasterId String?  @db.Uuid
+  encounterCoreId String?  @db.Uuid
+  context         String?
+  area            String?
+  role            String?
+  noteType        String?
+  title           String?
+  content         String?
+  metadata        Json?
+  author          Json? // {userId, name, role}
+  createdByUserId String?
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  idempotencyKey  String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, encounterCoreId])
+  @@index([tenantId, patientMasterId])
+  @@map("clinical_notes")
+}
+
+model ClinicalHandover {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  encounterCoreId String?   @db.Uuid
+  episodeId       String?   @db.Uuid
+  fromRole        String?
+  toRole          String?
+  fromUserId      String?
+  toUserId        String?
+  summary         String?
+  risks           Json?
+  pendingTasks    Json?
+  pendingResults  Json?
+  activeOrders    Json?
+  status          String    @default("OPEN") // OPEN, FINALIZED
+  finalizedAt     DateTime? @db.Timestamptz
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  idempotencyKey  String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, encounterCoreId])
+  @@index([tenantId, episodeId])
+  @@index([tenantId, status])
+  @@map("clinical_handover")
+}
+
+model ClinicalConsent {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  consentType      String?
+  patientId        String?   @db.Uuid
+  encounterId      String?   @db.Uuid
+  signatureData    String?
+  signedBy         String?
+  guardianName     String?
+  guardianRelation String?
+  witnessName      String?
+  notes            String?
+  signedAt         DateTime? @db.Timestamptz
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+  createdByUserId  String?
+  withdrawnAt      DateTime? @db.Timestamptz
+  withdrawnBy      String?
+  withdrawalReason String?
+  status           String    @default("active") // active | withdrawn
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@index([tenantId, encounterId])
+  @@map("clinical_consents")
+}
+
+model ClinicalEvent {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @db.Uuid
+  userId       String?
+  platform     String?
+  type         String? // NOTE, ORDER, PROCEDURE, OTHER
+  subject      String?
+  trigger      String?
+  source       String?
+  payload      Json?
+  status       String   @default("queued") // queued, processing, processed, failed
+  errorMessage String?
+  updatedBy    String?
+  createdAt    DateTime @default(now()) @db.Timestamptz
+  updatedAt    DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("clinical_events")
+}
+
+// =============================================================================
+// Consult Management — Requests and Responses
+// =============================================================================
+
+model ConsultRequest {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  patientMasterId  String    @db.Uuid
+  encounterId      String?   @db.Uuid
+  episodeId        String?   @db.Uuid
+  requestedBy      String    @db.Uuid // userId
+  specialty        String
+  consultantId     String?   @db.Uuid // userId
+  urgency          String    @default("ROUTINE") // STAT, URGENT, ROUTINE
+  clinicalQuestion String
+  clinicalSummary  String?
+  status           String    @default("PENDING") // PENDING, ACKNOWLEDGED, IN_PROGRESS, COMPLETED, CANCELLED
+  acknowledgedAt   DateTime? @db.Timestamptz
+  completedAt      DateTime? @db.Timestamptz
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @db.Timestamptz
+
+  response ConsultResponse?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, status])
+  @@index([tenantId, consultantId])
+  @@map("consult_requests")
+}
+
+model ConsultResponse {
+  id              String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String         @db.Uuid
+  requestId       String         @unique @db.Uuid
+  request         ConsultRequest @relation(fields: [requestId], references: [id])
+  consultantId    String         @db.Uuid // userId
+  findings        String
+  impression      String?
+  recommendations String
+  followUpNeeded  Boolean        @default(false)
+  followUpDate    DateTime?      @db.Timestamptz
+  createdAt       DateTime       @default(now()) @db.Timestamptz
+  updatedAt       DateTime       @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, requestId])
+  @@map("consult_responses")
+}
+
+// =============================================================================
+// Wound Care Charting
+// =============================================================================
+
+model WoundAssessment {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @db.Uuid
+  patientMasterId   String   @db.Uuid
+  episodeId         String?  @db.Uuid
+  encounterId       String?  @db.Uuid
+  assessedBy        String   @db.Uuid // userId
+  assessmentDate    DateTime @db.Timestamptz
+  woundType         String // SURGICAL, PRESSURE, DIABETIC, VASCULAR, TRAUMATIC, BURN, OTHER
+  woundLocation     String
+  stage             String? // Pressure: I, II, III, IV, UNSTAGEABLE, DTI
+  length            Float? // cm
+  width             Float? // cm
+  depth             Float? // cm
+  tunneling         Boolean  @default(false)
+  undermining       Boolean  @default(false)
+  woundBed          Json? // {granulationPct, sloughPct, escharPct, epithelialPct}
+  exudate           Json? // {amount: NONE/SCANT/MODERATE/HEAVY, type: SEROUS/SANGUINEOUS/PURULENT}
+  periwoundSkin     String?
+  odor              String? // NONE, MILD, MODERATE, STRONG
+  painScore         Int?
+  treatment         Json? // {cleanser, primaryDressing, secondaryDressing, frequency, notes}
+  photoAttachmentId String?
+  healingTrajectory String? // IMPROVING, STATIC, DETERIORATING
+  notes             String?
+  createdAt         DateTime @default(now()) @db.Timestamptz
+  updatedAt         DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@map("wound_assessments")
+}
+
+// =============================================================================
+// Nutritional Assessments
+// =============================================================================
+
+model NutritionalAssessment {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  patientMasterId  String    @db.Uuid
+  episodeId        String?   @db.Uuid
+  assessedBy       String    @db.Uuid // dietitian userId
+  assessmentDate   DateTime  @db.Timestamptz
+  mustScore        Int? // Malnutrition Universal Screening Tool (0-6)
+  mnaScore         Float? // Mini Nutritional Assessment
+  height           Float? // cm
+  weight           Float? // kg
+  bmi              Float?
+  idealWeight      Float?
+  weightChangePct  Float? // % change in 3-6 months
+  appetiteStatus   String? // GOOD, FAIR, POOR, NONE
+  swallowingStatus String? // NORMAL, MODIFIED, NPO, TUBE_FED
+  dietaryHistory   String?
+  foodAllergies    String?
+  route            String? // ORAL, NGT, PEG, TPN, SUPPLEMENT
+  caloricNeed      Int? // kcal/day
+  proteinNeed      Float? // g/day
+  fluidNeed        Int? // mL/day
+  recommendations  String?
+  followUpDate     DateTime? @db.Timestamptz
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@map("nutritional_assessments")
+}
+
+// =============================================================================
+// Social Work Assessments
+// =============================================================================
+
+model SocialWorkAssessment {
+  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId               String   @db.Uuid
+  patientMasterId        String   @db.Uuid
+  episodeId              String?  @db.Uuid
+  assessedBy             String   @db.Uuid // social worker userId
+  assessmentDate         DateTime @db.Timestamptz
+  referralReason         String
+  livingArrangement      String? // ALONE, WITH_FAMILY, ASSISTED_LIVING, HOMELESS
+  primaryCaregiver       String?
+  supportSystem          String? // STRONG, ADEQUATE, WEAK, NONE
+  financialStatus        String?
+  employmentStatus       String?
+  substanceUse           String?
+  domesticViolence       Boolean?
+  mentalHealthHistory    String?
+  religiousCulturalNeeds String?
+  barriers               String?
+  strengths              String?
+  plan                   String?
+  dischargeBarriers      String?
+  followUpPlan           String?
+  createdAt              DateTime @default(now()) @db.Timestamptz
+  updatedAt              DateTime @updatedAt @db.Timestamptz
+
+  notes SocialWorkNote[]
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@map("social_work_assessments")
+}
+
+model SocialWorkNote {
+  id           String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String               @db.Uuid
+  assessmentId String               @db.Uuid
+  assessment   SocialWorkAssessment @relation(fields: [assessmentId], references: [id])
+  authorId     String               @db.Uuid // userId
+  content      String
+  noteType     String               @default("PROGRESS") // PROGRESS, DISCHARGE_PLAN, FAMILY_MEETING, REFERRAL
+  createdAt    DateTime             @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, assessmentId])
+  @@map("social_work_notes")
+}
+
+// =============================================================================
+// Patient Education Records
+// =============================================================================
+
+model PatientEducationRecord {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  patientMasterId String   @db.Uuid
+  episodeId       String?  @db.Uuid
+  encounterId     String?  @db.Uuid
+  educatorId      String   @db.Uuid // userId
+  educationDate   DateTime @db.Timestamptz
+  topics          Json     @default("[]") // [{topic, method, materials, duration}]
+  method          String[] // VERBAL, WRITTEN, DEMONSTRATION, VIDEO, GROUP_SESSION
+  barriers        String[] // LANGUAGE, LITERACY, COGNITIVE, SENSORY, CULTURAL
+  interpreter     Boolean  @default(false)
+  comprehension   String // VERBALIZED_UNDERSTANDING, RETURN_DEMO, WRITTEN_TEST, NO_UNDERSTANDING
+  followUpNeeded  Boolean  @default(false)
+  notes           String?
+  createdAt       DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@map("patient_education_records")
+}
+
+// =============================================================================
+// Infection Control Surveillance
+// =============================================================================
+
+model InfectionSurveillance {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String    @db.Uuid
+  patientMasterId      String    @db.Uuid
+  episodeId            String?   @db.Uuid
+  reportedBy           String    @db.Uuid // userId
+  reportDate           DateTime  @db.Timestamptz
+  infectionType        String // SSI, CAUTI, CLABSI, VAP, CDIFF, MRSA, VRE, OTHER_HAI
+  onset                String // COMMUNITY, HEALTHCARE_ASSOCIATED
+  organism             String?
+  sensitivityProfile   Json? // antibiogram
+  isolationPrecautions String[] // CONTACT, DROPLET, AIRBORNE, STANDARD
+  isolationStartDate   DateTime? @db.Timestamptz
+  isolationEndDate     DateTime? @db.Timestamptz
+  treatmentStarted     Boolean   @default(false)
+  treatment            String?
+  outcome              String? // RESOLVED, ONGOING, TRANSFERRED, DIED
+  cultureResults       Json?
+  notifiable           Boolean   @default(false)
+  notes                String?
+  createdAt            DateTime  @default(now()) @db.Timestamptz
+  updatedAt            DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, infectionType])
+  @@map("infection_surveillance")
+}
+
+// =============================================================================
+// Partogram — WHO labor monitoring chart with observation timeseries
+// =============================================================================
+
+model Partogram {
+  id                String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String                 @db.Uuid
+  patientMasterId   String                 @db.Uuid
+  episodeId         String?                @db.Uuid
+  admissionTime     DateTime               @db.Timestamptz
+  gestationalAge    Int?
+  gravidaPara       String?
+  membraneStatus    String?
+  ruptureTime       DateTime?              @db.Timestamptz
+  cervixOnAdmission Int?
+  presentingPart    String?
+  fetalPosition     String?
+  status            String                 @default("ACTIVE")
+  deliveryTime      DateTime?              @db.Timestamptz
+  deliveryMode      String?
+  observations      PartogramObservation[]
+  createdAt         DateTime               @default(now()) @db.Timestamptz
+  updatedAt         DateTime               @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@map("partograms")
+}
+
+model PartogramObservation {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  partogramId         String    @db.Uuid
+  partogram           Partogram @relation(fields: [partogramId], references: [id])
+  observedAt          DateTime  @db.Timestamptz
+  observedBy          String
+  bp                  String?
+  pulse               Int?
+  temperature         Float?
+  urineOutput         Int?
+  fhr                 Int?
+  fhrPattern          String?
+  cervixDilation      Int?
+  effacement          Int?
+  stationLevel        String?
+  contractionFreq     Int?
+  contractionDuration Int?
+  contractionStrength String?
+  oxytocin            Float?
+  medications         Json?
+  notes               String?
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, partogramId])
+  @@map("partogram_observations")
+}
+
+// =============================================================================
+// Dietary Orders & Meal Service — Inpatient Meal Management
+// =============================================================================
+
+model DietaryOrder {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  patientId           String    @db.Uuid
+  encounterId         String?   @db.Uuid
+  episodeId           String?   @db.Uuid // IPD episode
+  dietType            String // REGULAR, SOFT, LIQUID, CLEAR_LIQUID, NPO, DIABETIC, RENAL, CARDIAC, LOW_SODIUM, HIGH_PROTEIN, GLUTEN_FREE, TUBE_FEEDING, PARENTERAL
+  specialInstructions String?
+  allergies           String? // food allergies
+  texture             String? // REGULAR, MINCED, PUREED, THICKENED_LIQUID
+  fluidRestriction    Int? // mL per day if restricted
+  calorieTarget       Int? // kcal per day
+  proteinTarget       Int? // grams per day
+  status              String    @default("active") // active, completed, cancelled, on_hold
+  startDate           DateTime  @default(now()) @db.Timestamptz
+  endDate             DateTime? @db.Timestamptz
+  orderedBy           String    @db.Uuid // userId
+  orderedByName       String?
+  notes               String?
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+  updatedAt           DateTime  @updatedAt @db.Timestamptz
+
+  mealServices MealService[]
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, status])
+  @@index([tenantId, episodeId])
+  @@map("dietary_orders")
+}
+
+model MealService {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String       @db.Uuid
+  dietaryOrderId String       @db.Uuid
+  dietaryOrder   DietaryOrder @relation(fields: [dietaryOrderId], references: [id])
+  patientId      String       @db.Uuid
+  mealType       String // BREAKFAST, LUNCH, DINNER, SNACK_AM, SNACK_PM, SNACK_HS
+  scheduledDate  DateTime     @db.Timestamptz
+  scheduledTime  String? // e.g., "07:00", "12:00", "18:00"
+  status         String       @default("pending") // pending, prepared, delivered, consumed, refused, returned
+  deliveredAt    DateTime?    @db.Timestamptz
+  deliveredBy    String?
+  intakePercent  Int? // 0-100, how much patient ate
+  refusalReason  String?
+  menuItems      Json? // array of selected items
+  notes          String?
+  createdAt      DateTime     @default(now()) @db.Timestamptz
+  updatedAt      DateTime     @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, dietaryOrderId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, scheduledDate])
+  @@index([tenantId, status])
+  @@map("meal_services")
+}
+
+// ── 3.19 TPN (Total Parenteral Nutrition) Orders ─────────────────────────
+model TpnOrder {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  patientMasterId     String    @db.Uuid
+  episodeId           String?   @db.Uuid
+  orderedBy           String // userId
+  orderDate           DateTime  @db.Timestamptz
+  // Patient parameters
+  weight              Float // kg
+  height              Float? // cm
+  bmi                 Float?
+  // TPN Components
+  totalVolume         Int // mL
+  infusionRate        Float // mL/hr
+  infusionHours       Int       @default(24) // hours
+  dextrose            Json // {concentration,volume,calories}
+  aminoAcids          Json // {concentration,volume,protein}
+  lipids              Json? // {concentration,volume,calories}
+  electrolytes        Json // [{name,amount,unit}] Na,K,Ca,Mg,Phos,Cl,Acetate
+  vitamins            Json? // [{name,amount,unit}]
+  traceElements       Json? // [{name,amount,unit}]
+  additives           Json? // [{name,amount,unit}] insulin, heparin, etc
+  // Calculated totals
+  totalCalories       Int? // kcal/day
+  totalProtein        Float? // g/day
+  caloriesPerKg       Float?
+  proteinPerKg        Float?
+  glucoseInfusionRate Float? // mg/kg/min (GIR)
+  osmolarity          Float? // mOsm/L
+  accessType          String    @default("CENTRAL") // CENTRAL | PERIPHERAL
+  // Monitoring
+  labMonitoring       Json? // [{test,frequency}]
+  compatibilityCheck  Boolean   @default(false)
+  pharmacistVerified  Boolean   @default(false)
+  pharmacistId        String?
+  verifiedAt          DateTime? @db.Timestamptz
+  status              String    @default("DRAFT") // DRAFT | ACTIVE | COMPLETED | CANCELLED
+  startDate           DateTime? @db.Timestamptz
+  endDate             DateTime? @db.Timestamptz
+  notes               String?
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+  updatedAt           DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@map("tpn_orders")
+}
+
+// ── 3.20 Diet Catalog / Menu Templates ───────────────────────────────────
+model DietCatalogItem {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String   @db.Uuid
+  name          String
+  nameAr        String?
+  category      String // BREAKFAST | LUNCH | DINNER | SNACK | BEVERAGE | SUPPLEMENT
+  dietTypes     String[] // REGULAR, DIABETIC, RENAL, CARDIAC, etc
+  calories      Int? // kcal per serving
+  protein       Float? // grams per serving
+  carbohydrates Float? // grams per serving
+  fat           Float? // grams per serving
+  fiber         Float? // grams per serving
+  sodium        Float? // mg per serving
+  potassium     Float? // mg per serving
+  sugar         Float? // grams per serving
+  servingSize   String? // e.g. "200g", "1 cup"
+  allergens     String[] // GLUTEN, DAIRY, EGGS, NUTS, SOY, FISH, SHELLFISH
+  texture       String? // REGULAR | MINCED | PUREED | LIQUID
+  isVegetarian  Boolean  @default(false)
+  isVegan       Boolean  @default(false)
+  isHalal       Boolean  @default(true)
+  isAvailable   Boolean  @default(true)
+  imageUrl      String?
+  notes         String?
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, category])
+  @@map("diet_catalog_items")
+}
+
+// ── 3.21 Calorie/Intake Tracking ─────────────────────────────────────────
+model CalorieIntakeRecord {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  patientMasterId String   @db.Uuid
+  recordDate      DateTime @db.Date
+  mealType        String // BREAKFAST | LUNCH | DINNER | SNACK_AM | SNACK_PM
+  items           Json // [{name,quantity,calories,protein,carbs,fat}]
+  totalCalories   Int
+  totalProtein    Float?
+  totalCarbs      Float?
+  totalFat        Float?
+  intakePercent   Int? // 0-100 overall intake
+  fluidIntake     Int? // mL
+  recordedBy      String // userId
+  notes           String?
+  createdAt       DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, patientMasterId, recordDate])
+  @@map("calorie_intake_records")
+}
+
+// =============================================================================
+// Patient Transport Management
+// =============================================================================
+
+model TransportRequest {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  patientId           String    @db.Uuid
+  patientName         String?
+  encounterId         String?   @db.Uuid
+  requestType         String // intra_facility, inter_facility, ambulance, discharge
+  urgency             String    @default("routine") // stat, urgent, routine, scheduled
+  status              String    @default("pending") // pending, assigned, in_transit, completed, cancelled
+  origin              String // ward/unit/room
+  originDetails       String?
+  destination         String // ward/unit/room or external facility
+  destinationDetails  String?
+  requestedBy         String    @db.Uuid
+  requestedByName     String?
+  assignedTo          String?   @db.Uuid // transport staff userId
+  assignedToName      String?
+  scheduledAt         DateTime? @db.Timestamptz
+  dispatchedAt        DateTime? @db.Timestamptz
+  pickedUpAt          DateTime? @db.Timestamptz
+  arrivedAt           DateTime? @db.Timestamptz
+  completedAt         DateTime? @db.Timestamptz
+  cancelledAt         DateTime? @db.Timestamptz
+  cancelReason        String?
+  transportMode       String    @default("wheelchair") // wheelchair, stretcher, bed, ambulatory, ambulance, neonatal_isolette
+  oxygenRequired      Boolean   @default(false)
+  monitorRequired     Boolean   @default(false)
+  ivPumpRequired      Boolean   @default(false)
+  isolationRequired   Boolean   @default(false)
+  isolationType       String? // contact, droplet, airborne
+  nurseEscort         Boolean   @default(false)
+  specialInstructions String?
+  estimatedDuration   Int? // minutes
+  actualDuration      Int? // minutes
+  notes               String?
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+  updatedAt           DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, urgency])
+  @@index([tenantId, assignedTo])
+  @@index([tenantId, patientId])
+  @@map("transport_requests")
+}
+
+model TransportStaff {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @db.Uuid
+  userId      String    @db.Uuid
+  name        String
+  nameAr      String?
+  phone       String?
+  status      String    @default("available") // available, busy, off_duty, break
+  currentTask String?   @db.Uuid // transport request ID
+  zone        String? // assigned zone/building
+  shiftStart  DateTime? @db.Timestamptz
+  shiftEnd    DateTime? @db.Timestamptz
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, userId])
+  @@map("transport_staff")
+}
+
+// =============================================================================
+// Saudi MOH Drug Formulary
+// =============================================================================
+
+model FormularyDrug {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String   @db.Uuid
+  genericName           String
+  genericNameAr         String
+  brandNames            Json     @default("[]")
+  sfdaRegistration      String?
+  atcCode               String?
+  atcCategory           String?
+  /// Phase 7.3 — RxNorm code for ontology wiring (lib/ontology/wiring/formularyDrug.ts).
+  /// Nullable; rows without this code are skipped by the backfill script.
+  rxNorm                String?
+  therapeuticClass      String
+  therapeuticClassAr    String
+  formularyStatus       String   @default("formulary") // formulary, non_formulary, restricted, conditional
+  restrictionCriteria   String?
+  restrictionCriteriaAr String?
+  approverRole          String?
+  routes                Json     @default("[]")
+  forms                 Json     @default("[]")
+  maxDailyDose          Float?
+  maxDailyDoseUnit      String?
+  renalAdjustment       Boolean  @default(false)
+  hepaticAdjustment     Boolean  @default(false)
+  pregnancyCategory     String   @default("C")
+  lactationSafe         Boolean  @default(false)
+  pediatricApproved     Boolean  @default(true)
+  geriatricCaution      Boolean  @default(false)
+  highAlert             Boolean  @default(false)
+  controlled            Boolean  @default(false)
+  controlSchedule       String?
+  lasaPairs             Json     @default("[]")
+  blackBoxWarning       String?
+  blackBoxWarningAr     String?
+  interactions          Json     @default("[]")
+  contraindications     Json     @default("[]")
+  contraindicationsAr   Json     @default("[]")
+  monitoringRequired    Json     @default("[]")
+  storageConditions     String?
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now()) @db.Timestamptz
+  updatedAt             DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, genericName])
+  @@index([tenantId, atcCode])
+  @@index([tenantId, therapeuticClass])
+  @@index([tenantId, formularyStatus])
+  @@index([tenantId, highAlert])
+  @@index([tenantId, controlled])
+  @@map("formulary_drugs")
+}
+
+model FormularyRestrictionRequest {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String    @db.Uuid
+  drugId                String    @db.Uuid
+  drugName              String?
+  patientId             String?   @db.Uuid
+  encounterId           String?   @db.Uuid
+  requestedBy           String    @db.Uuid
+  requestedByName       String?
+  reason                String
+  clinicalJustification String?
+  status                String    @default("pending") // pending, approved, rejected
+  reviewedBy            String?   @db.Uuid
+  reviewedByName        String?
+  reviewedAt            DateTime? @db.Timestamptz
+  reviewNotes           String?
+  createdAt             DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, drugId])
+  @@index([tenantId, requestedBy])
+  @@map("formulary_restriction_requests")
+}
+
+// =============================================================================
+// ICD-10 Code Library — Comprehensive diagnosis code reference
+// =============================================================================
+
+model Icd10Code {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code          String // ICD-10-CM code (e.g., "E11.9")
+  description   String // English description
+  descriptionAr String? // Arabic description
+  chapter       String? // Roman numeral chapter (I-XXI)
+  category      String? // Category label (e.g., "Endocrine", "Respiratory")
+  isCommon      Boolean  @default(false)
+  synonyms      String[] // Search synonyms (Arabic + English)
+  parentCode    String? // Parent 3-char code (e.g., "E11" for "E11.9")
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  @@unique([code])
+  @@index([code])
+  @@index([category])
+  @@index([isCommon])
+  @@index([parentCode])
+  @@map("icd10_codes")
+}
+
+// =============================================================================
+// 4.10 — Blood Gas Analysis
+// =============================================================================
+
+model BloodGasAnalysis {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String   @db.Uuid
+  patientId          String   @db.Uuid
+  encounterId        String?  @db.Uuid
+  episodeId          String?  @db.Uuid
+  sampleType         String // ARTERIAL, VENOUS, CAPILLARY
+  ph                 Float?
+  paCo2              Float?
+  paO2               Float?
+  hco3               Float?
+  baseExcess         Float?
+  saO2               Float?
+  lactate            Float?
+  fio2               Float?
+  aaGradient         Float?
+  pfRatio            Float?
+  oxygenationIndex   Float?
+  interpretation     Json?
+  autoInterpretation String?
+  isAbnormal         Boolean  @default(false)
+  criticalAlert      Boolean  @default(false)
+  collectedAt        DateTime @db.Timestamptz
+  analyzedByUserId   String?  @db.Uuid
+  createdAt          DateTime @default(now()) @db.Timestamptz
+  updatedAt          DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, encounterId])
+  @@map("blood_gas_analyses")
+}
+
+// =============================================================================
+// 4.11 — LIS Connection Status
+// =============================================================================
+
+model LisConnectionStatus {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  analyzerId        String
+  analyzerName      String
+  connectionType    String // HL7, ASTM, FHIR, SERIAL
+  status            String    @default("OFFLINE")
+  lastMessageAt     DateTime? @db.Timestamptz
+  lastErrorAt       DateTime? @db.Timestamptz
+  lastError         String?
+  messagesProcessed Int       @default(0)
+  messagesFailed    Int       @default(0)
+  errorRate         Float?
+  uptime            Float?
+  ipAddress         String?
+  port              Int?
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("lis_connection_status")
+}
+
+// =============================================================================
+// 4.12 — Radiology Peer Review
+// =============================================================================
+
+model RadiologyPeerReview {
+  id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId               String    @db.Uuid
+  studyId                String    @db.Uuid
+  originalReportId       String    @db.Uuid
+  originalReaderId       String    @db.Uuid
+  reviewerId             String    @db.Uuid
+  score                  String?
+  clinicallySignificant  Boolean   @default(false)
+  discrepancyDetails     String?
+  reviewerComments       String?
+  originalReaderNotified Boolean   @default(false)
+  notifiedAt             DateTime? @db.Timestamptz
+  isRandomSelection      Boolean   @default(true)
+  modality               String?
+  bodyPart               String?
+  createdAt              DateTime  @default(now()) @db.Timestamptz
+  updatedAt              DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, reviewerId])
+  @@index([tenantId, originalReaderId])
+  @@map("radiology_peer_reviews")
+}
+
+// =============================================================================
+// 4.13 — Radiology Prior Studies
+// =============================================================================
+
+model RadiologyPriorStudy {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  currentStudyId  String   @db.Uuid
+  priorStudyId    String   @db.Uuid
+  patientId       String   @db.Uuid
+  modality        String
+  bodyPart        String?
+  priorStudyDate  DateTime @db.Timestamptz
+  comparisonNotes String?
+  linkedByUserId  String?  @db.Uuid
+  autoLinked      Boolean  @default(false)
+  createdAt       DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, currentStudyId])
+  @@map("radiology_prior_studies")
+}
+
+// =============================================================================
+// 4.17 — Kitchen Integration (Nutrition: Kitchen Production & Tray Cards)
+// =============================================================================
+
+model KitchenMealPlan {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @db.Uuid
+  date        DateTime  @db.Date
+  mealType    String // BREAKFAST, LUNCH, DINNER, SNACK
+  ward        String?
+  totalTrays  Int       @default(0)
+  trayDetails Json // array of {patientId, patientName, roomNumber, dietType, allergies, texture, specialRequests}
+  status      String // PLANNED, IN_PRODUCTION, READY, DELIVERING, COMPLETED
+  producedAt  DateTime? @db.Timestamptz
+  deliveredAt DateTime? @db.Timestamptz
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, date])
+  @@index([tenantId, ward])
+  @@map("kitchen_meal_plans")
+}
+
+model KitchenTrayCard {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  mealPlanId          String    @db.Uuid
+  patientId           String    @db.Uuid
+  patientName         String
+  roomNumber          String?
+  bedNumber           String?
+  dietType            String // REGULAR, DIABETIC, RENAL, CARDIAC, SOFT, LIQUID, NPO, HALAL, CUSTOM
+  allergies           Json? // array of allergen strings
+  textureModification String? // REGULAR, MINCED, PUREED, THICKENED_LIQUID
+  specialRequests     String?
+  status              String // PREPARED, SENT, RECEIVED, RETURNED
+  sentAt              DateTime? @db.Timestamptz
+  receivedByNurse     String?
+  receivedAt          DateTime? @db.Timestamptz
+  returnedAt          DateTime? @db.Timestamptz
+  wasteAmount         String? // NONE, PARTIAL, FULL
+  wasteReason         String?
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+  updatedAt           DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, mealPlanId])
+  @@index([tenantId, patientId])
+  @@map("kitchen_tray_cards")
+}
+
+// =============================================================================
+// 4.18 — Pharmacy: IV Admixture
+// =============================================================================
+
+model IvAdmixtureOrder {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @db.Uuid
+  patientId          String    @db.Uuid
+  encounterId        String?   @db.Uuid
+  episodeId          String?   @db.Uuid
+  drug               String
+  drugCode           String?
+  diluent            String // NS, D5W, LR, STERILE_WATER, D5NS
+  diluentVolume      Float // mL
+  drugDose           Float
+  drugDoseUnit       String // mg, g, mcg, units, mEq
+  finalConcentration Float?
+  concentrationUnit  String? // mg/mL, units/mL
+  infusionRate       Float? // mL/hr
+  infusionDuration   Float? // hours
+  compatibility      String? // COMPATIBLE, INCOMPATIBLE, UNKNOWN
+  ySiteCompatible    Json? // array of compatible co-infusions
+  stabilityHours     Int? // beyond-use hours
+  storageCondition   String? // ROOM_TEMP, REFRIGERATED, PROTECT_FROM_LIGHT
+  beyondUseDate      DateTime? @db.Timestamptz
+  status             String // ORDERED, PREPARING, VERIFIED, DISPENSED, ADMINISTERED
+  preparedByUserId   String?   @db.Uuid
+  verifiedByUserId   String?   @db.Uuid
+  labelPrinted       Boolean   @default(false)
+  batchId            String? // for batch preparations
+  orderedByUserId    String    @db.Uuid
+  createdAt          DateTime  @default(now()) @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, status])
+  @@map("iv_admixture_orders")
+}
+
+// =============================================================================
+// 4.19 — Pharmacy: Automated Dispensing Cabinet (ADC)
+// =============================================================================
+
+model AdcCabinet {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String    @db.Uuid
+  cabinetName  String
+  location     String // ward/unit
+  manufacturer String? // PYXIS, OMNICELL, OTHER
+  model        String?
+  serialNumber String?
+  status       String // ONLINE, OFFLINE, MAINTENANCE
+  lastSyncAt   DateTime? @db.Timestamptz
+  totalPockets Int       @default(0)
+  createdAt    DateTime  @default(now()) @db.Timestamptz
+  updatedAt    DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("adc_cabinets")
+}
+
+model AdcTransaction {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @db.Uuid
+  cabinetId         String   @db.Uuid
+  pocketNumber      String?
+  drugName          String
+  drugCode          String?
+  transactionType   String // DISPENSE, RESTOCK, RETURN, OVERRIDE, COUNT
+  quantity          Int
+  patientId         String?  @db.Uuid
+  orderId           String?  @db.Uuid
+  userId            String   @db.Uuid
+  userName          String?
+  isOverride        Boolean  @default(false)
+  overrideReason    String?
+  witnessUserId     String?  @db.Uuid
+  previousCount     Int?
+  newCount          Int?
+  discrepancy       Boolean  @default(false)
+  discrepancyAmount Int?
+  createdAt         DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, cabinetId])
+  @@index([tenantId, drugName])
+  @@index([tenantId, isOverride])
+  @@index([tenantId, discrepancy])
+  @@map("adc_transactions")
+}
+
+model AdcInventory {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  cabinetId         String    @db.Uuid
+  pocketNumber      String
+  drugName          String
+  drugCode          String?
+  currentQuantity   Int       @default(0)
+  minQuantity       Int       @default(0)
+  maxQuantity       Int       @default(0)
+  parLevel          Int       @default(0)
+  needsRestock      Boolean   @default(false)
+  lastCountAt       DateTime? @db.Timestamptz
+  lastCountByUserId String?   @db.Uuid
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, cabinetId])
+  @@index([tenantId, needsRestock])
+  @@map("adc_inventory")
+}
+
+// =============================================================================
+// 4.20 — OB/GYN: Fetal Monitoring Strip (CTG)
+// =============================================================================
+
+model CtgRecording {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  patientId        String    @db.Uuid
+  encounterId      String?   @db.Uuid
+  episodeId        String?   @db.Uuid
+  startedAt        DateTime  @db.Timestamptz
+  endedAt          DateTime? @db.Timestamptz
+  durationMinutes  Int?
+  fhrData          Json? // array of {timestamp, bpm}
+  contractionData  Json? // array of {timestamp, intensity (0-100)}
+  baselineRate     Int? // bpm
+  variability      String? // ABSENT, MINIMAL, MODERATE, MARKED
+  accelerations    Json? // array of {timestamp, duration, amplitude}
+  decelerations    Json? // array of {timestamp, type (EARLY/LATE/VARIABLE/PROLONGED), duration}
+  category         String? // I, II, III (NICHD)
+  interpretation   String? // free text
+  annotations      Json? // array of {timestamp, event (EXAM/MEDICATION/POSITION_CHANGE/OTHER), note}
+  status           String // RECORDING, COMPLETED, ARCHIVED
+  reviewedByUserId String?   @db.Uuid
+  reviewedAt       DateTime? @db.Timestamptz
+  archivedUrl      String? // stored strip image/PDF
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@map("ctg_recordings")
+}
+
+// =============================================================================
+// 4.21 — Radiology: Speech Recognition
+// =============================================================================
+
+model SpeechRecognitionSession {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  userId           String    @db.Uuid
+  reportId         String?   @db.Uuid
+  engineType       String // DRAGON_MEDICAL, MMODAL, WEB_SPEECH_API, WHISPER
+  language         String    @default("en")
+  status           String // ACTIVE, PAUSED, COMPLETED, ERROR
+  rawTranscript    String?
+  editedTranscript String?
+  wordCount        Int       @default(0)
+  accuracy         Float? // estimated %
+  durationSeconds  Int?
+  commands         Json? // array of voice commands used
+  startedAt        DateTime  @db.Timestamptz
+  endedAt          DateTime? @db.Timestamptz
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, userId])
+  @@map("speech_recognition_sessions")
+}
+
+// =============================================================================
+// 5.0 — PDPL Right to Erasure (Right to be Forgotten)
+// =============================================================================
+
+model DataErasureRequest {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  patientId       String    @db.Uuid
+  requestedBy     String    // userId or "patient_self"
+  requestedAt     DateTime  @default(now()) @db.Timestamptz
+  reason          String?
+  status          String    @default("pending") // pending | approved | rejected | completed | partially_completed
+  reviewedBy      String?
+  reviewedAt      DateTime? @db.Timestamptz
+  reviewNotes     String?
+  completedAt     DateTime? @db.Timestamptz
+  retainedData    Json?     // categories that could not be deleted (legal retention)
+  deletedData     Json?     // categories that were deleted
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, patientId])
+  @@index([tenantId, status])
+  @@map("data_erasure_requests")
+}
+
+// =============================================================================
+// 6.0 — PDPL Data Breach Notification
+// =============================================================================
+
+model DataBreachIncident {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  title             String
+  description       String
+  severity          String    @default("medium") // low | medium | high | critical
+  status            String    @default("detected") // detected | investigating | contained | resolved | reported_to_authority
+  detectedAt        DateTime  @default(now()) @db.Timestamptz
+  detectedBy        String    // userId
+  containedAt       DateTime? @db.Timestamptz
+  resolvedAt        DateTime? @db.Timestamptz
+  affectedRecords   Int       @default(0)
+  affectedPatients  Int       @default(0)
+  dataCategories    String[]  // e.g., ["demographics", "medical_records", "billing"]
+  rootCause         String?
+  remediation       String?
+  notifiedAuthority Boolean   @default(false)
+  authorityNotifiedAt DateTime? @db.Timestamptz
+  notifiedPatients  Boolean   @default(false)
+  patientsNotifiedAt DateTime? @db.Timestamptz
+  timeline          Json?     // array of { date, action, actor, notes }
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([tenantId, detectedAt])
+  @@map("data_breach_incidents")
+}
+
+// =============================================================================
+// Medication Administration Record (MAR)
+// =============================================================================
+
+model MedicationAdministration {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  encounterCoreId  String    @db.Uuid
+  patientId        String    @db.Uuid
+  medicationId     String?   @db.Uuid
+  medicationName   String
+  dose             String
+  route            String    // PO, IV, IM, SC, etc.
+  scheduledTime    DateTime  @db.Timestamptz
+  administeredTime DateTime? @db.Timestamptz
+  status           String    @default("SCHEDULED") // GIVEN, HELD, REFUSED, NOT_GIVEN, SCHEDULED
+  holdReason       String?
+  refusalReason    String?
+  notes            String?
+  nurseId          String?   @db.Uuid
+  nurseName        String?
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @db.Timestamptz
+
+  tenant        Tenant        @relation(fields: [tenantId], references: [id])
+  encounterCore EncounterCore @relation(fields: [encounterCoreId], references: [id])
+  patient       PatientMaster @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, encounterCoreId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, status])
+  @@map("medication_administrations")
+}
+
+// =============================================================================
+// Nursing Assessment (cross-module)
+// =============================================================================
+
+model NursingAssessment {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  patientId       String    @db.Uuid
+  encounterCoreId String    @db.Uuid
+  type            String    // VITALS, PAIN, FALL_RISK, SKIN, NEUROLOGICAL, etc.
+  vitalSigns      Json?     // { bp, hr, temp, rr, spo2, weight, height, bmi, painLevel, bloodGlucose }
+  painLevel       Int?
+  fallRisk        String?
+  pressureUlcerRisk String?
+  notes           String?
+  assessedBy      String?   @db.Uuid
+  assessedByName  String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+
+  tenant        Tenant        @relation(fields: [tenantId], references: [id])
+  encounterCore EncounterCore @relation(fields: [encounterCoreId], references: [id])
+  patient       PatientMaster @relation(fields: [patientId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, encounterCoreId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, type])
+  @@map("nursing_assessments")
+}

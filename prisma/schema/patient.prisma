@@ -1,0 +1,225 @@
+// =============================================================================
+// Patient Domain — Master Patient Index, Allergies, Problems, Insurance
+// =============================================================================
+
+model PatientMaster {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String        @db.Uuid
+  mrn            String?
+  firstName      String
+  middleName     String?
+  lastName       String
+  fullName       String
+  nameNormalized String // Lowercase for search
+  dob            DateTime?     @db.Date
+  gender         PatientGender @default(UNKNOWN)
+
+  // Identifiers (flat + identifiers JSONB for shim compat)
+  nationalId  String?
+  iqama       String?
+  passport    String?
+  identifiers Json?
+
+  status              PatientMasterStatus @default(KNOWN)
+  mergedIntoPatientId String?             @db.Uuid
+  mergedAt            DateTime?           @db.Timestamptz
+
+  // Demographics
+  mobile               String?
+  email                String?
+  bloodType            String?
+  nationality          String?
+  city                 String?
+  knownAllergies       Json?
+  emergencyContact     Json?
+  insuranceCompanyName String?
+  links                Json?
+
+  // Hash columns for encrypted search
+  nationalId_hash String?
+  iqama_hash      String?
+  passport_hash   String?
+  fullName_hash   String?
+
+  // Audit
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?
+  updatedByUserId String?
+
+  // Relations
+  tenant         Tenant                @relation(fields: [tenantId], references: [id])
+  allergies      PatientAllergy[]
+  problems       PatientProblem[]
+  insurances     PatientInsurance[]
+  identityLinks  PatientIdentityLink[]
+  encounterCores              EncounterCore[]
+  opdEncounters               OpdEncounter[]
+  erEncounters                ErEncounter[]
+  dailyCarePaths              DailyCarePath[]
+  medicationAdministrations   MedicationAdministration[]
+  nursingAssessments          NursingAssessment[]
+
+  @@unique([tenantId, nationalId])
+  @@unique([tenantId, mrn])
+  @@index([tenantId])
+  @@index([nameNormalized])
+  @@index([nationalId])
+  @@index([tenantId, status])
+  @@index([tenantId, mrn])
+  @@index([tenantId, mobile])
+  @@map("patient_master")
+}
+
+model PatientAllergy {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String    @db.Uuid
+  patientId String    @db.Uuid
+  allergen  String
+  reaction  String?
+  type      String    @default("DRUG") // DRUG, FOOD, ENVIRONMENTAL, OTHER
+  severity  String? // mild, moderate, severe
+  status    String    @default("active") // active, inactive, resolved
+  nkda      Boolean   @default(false)
+  onsetDate DateTime? @db.Date
+  notes     String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  // Relations
+  patient PatientMaster @relation(fields: [patientId], references: [id])
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([patientId])
+  @@map("patient_allergies")
+}
+
+model PatientProblem {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String    @db.Uuid
+  patientId    String    @db.Uuid
+  problemName  String
+  code         String? // ICD/SNOMED code (aliases icdCode for API compat)
+  description  String? // Detailed problem description
+  icdCode      String?
+  status       String    @default("active") // active, resolved, inactive
+  onsetDate    DateTime? @db.Date
+  resolvedDate DateTime? @db.Date
+  severity     String?
+  notes        String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  // Relations
+  patient PatientMaster @relation(fields: [patientId], references: [id])
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([patientId])
+  @@map("patient_problems")
+}
+
+model PatientInsurance {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String    @db.Uuid
+  patientId            String    @db.Uuid
+  payerName            String
+  payerId              String?
+  insurerId            String?
+  insurerName          String?
+  policyNumber         String?
+  memberId             String?
+  groupNumber          String?
+  planType             String?
+  relation             String? // self, spouse, child, other
+  status               String    @default("active") // active, expired, cancelled
+  effectiveDate        DateTime? @db.Date
+  expiryDate           DateTime? @db.Date
+  startDate            DateTime? @db.Timestamptz
+  endDate              DateTime? @db.Timestamptz
+  isPrimary            Boolean   @default(true)
+  lastEligibilityCheck DateTime? @db.Timestamptz
+  eligible             Boolean?
+  coverageActive       Boolean?
+  remainingBenefit     Decimal?  @db.Decimal(12, 2)
+  eligibilityStatus    String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+  updatedBy String?
+
+  // Relations
+  patient PatientMaster @relation(fields: [patientId], references: [id])
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([patientId])
+  @@index([tenantId, insurerId])
+  @@map("patient_insurance")
+}
+
+model PatientIdentityLink {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String  @db.Uuid
+  patientId       String  @db.Uuid
+  system          String // ER, IPD, OPD
+  sourcePatientId String // ID in the source system
+  mrn             String?
+  tempMrn         String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  // Relations
+  patient PatientMaster @relation(fields: [patientId], references: [id])
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([patientId])
+  @@index([system, sourcePatientId])
+  @@map("patient_identity_links")
+}
+
+// =============================================================================
+// 4.14 — Portal Family/Proxy Access
+// =============================================================================
+
+model PortalProxyAccess {
+  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId                String    @db.Uuid
+  patientId               String    @db.Uuid
+  proxyUserId             String    @db.Uuid
+  proxyName               String
+  relationship            String // PARENT, GUARDIAN, CAREGIVER, SPOUSE, OTHER
+  scope                   String    @default("ALL") // ALL, SPECIFIC_ENCOUNTERS
+  allowedEncounterIds     Json?
+  verificationMethod      String? // ID_VERIFIED, DOCUMENT_UPLOADED
+  verificationDocumentUrl String?
+  status                  String    @default("ACTIVE") // ACTIVE, REVOKED, EXPIRED
+  grantedAt               DateTime  @default(now()) @db.Timestamptz
+  revokedAt               DateTime? @db.Timestamptz
+  revokedByUserId         String?   @db.Uuid
+  revokeReason            String?
+  expiresAt               DateTime? @db.Timestamptz
+  patientDob              DateTime? @db.Timestamptz
+  createdAt               DateTime  @default(now()) @db.Timestamptz
+  updatedAt               DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, proxyUserId])
+  @@map("portal_proxy_access")
+}

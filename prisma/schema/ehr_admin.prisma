@@ -1,0 +1,199 @@
+// =============================================================================
+// EHR Admin Domain — Patients, Privileges, Encounters, Orders, Notes, Tasks, Users, Audit
+// =============================================================================
+
+model EhrPatient {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  mrn               String?
+  firstName         String
+  middleName        String?
+  lastName          String
+  dateOfBirth       DateTime? @db.Date
+  gender            String    @default("UNKNOWN")
+  phone             String?
+  email             String?
+  address           Json?
+  nationalId        String?
+  insuranceId       String?
+  insuranceProvider String?
+  isActive          Boolean   @default(true)
+  deceasedDate      DateTime? @db.Date
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+  createdBy         String?
+  updatedBy         String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, mrn])
+  @@index([tenantId, isActive])
+  @@map("ehr_patients")
+}
+
+model EhrPrivilege {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String    @db.Uuid
+  userId       String
+  grantedBy    String
+  resource     String
+  action       String
+  scope        String?
+  departmentId String?
+  expiresAt    DateTime? @db.Timestamptz
+  isActive     Boolean   @default(true)
+  revokedAt    DateTime? @db.Timestamptz
+  revokedBy    String?
+  createdAt    DateTime  @default(now()) @db.Timestamptz
+  updatedAt    DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, userId])
+  @@map("ehr_privileges")
+}
+
+model EhrEncounter {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String    @db.Uuid
+  patientId            String    @db.Uuid
+  mrn                  String?
+  encounterNumber      String?
+  encounterType        String    @default("OUTPATIENT")
+  admissionDate        DateTime? @db.Timestamptz
+  dischargeDate        DateTime? @db.Timestamptz
+  status               String    @default("PLANNED")
+  department           String?
+  service              String?
+  location             String?
+  attendingPhysicianId String?
+  chiefComplaint       String?
+  primaryDiagnosis     String?
+  diagnosisCodes       String[]  @default([])
+  createdAt            DateTime  @default(now()) @db.Timestamptz
+  updatedAt            DateTime  @updatedAt @db.Timestamptz
+  createdBy            String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("ehr_encounters")
+}
+
+model EhrOrder {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String   @db.Uuid
+  patientId            String   @db.Uuid
+  encounterId          String?  @db.Uuid
+  mrn                  String?
+  orderType            String   @default("OTHER")
+  description          String?
+  code                 String?
+  orderedBy            String?
+  orderingProviderName String?
+  status               String   @default("DRAFT")
+  priority             String   @default("ROUTINE")
+  instructions         String?
+  createdAt            DateTime @default(now()) @db.Timestamptz
+  updatedAt            DateTime @updatedAt @db.Timestamptz
+  createdBy            String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("ehr_orders")
+}
+
+model EhrNote {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @db.Uuid
+  patientId   String    @db.Uuid
+  encounterId String?   @db.Uuid
+  noteType    String    @default("PROGRESS")
+  title       String?
+  content     String?
+  authoredBy  String?
+  authorName  String?
+  status      String    @default("DRAFT")
+  authoredAt  DateTime? @db.Timestamptz
+  sections    Json?
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+  createdBy   String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@map("ehr_notes")
+}
+
+model EhrTask {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @db.Uuid
+  patientId   String?   @db.Uuid
+  encounterId String?   @db.Uuid
+  title       String
+  description String?
+  taskType    String    @default("OTHER")
+  assignedTo  String?
+  status      String    @default("PENDING")
+  dueDate     DateTime? @db.Timestamptz
+  completedAt DateTime? @db.Timestamptz
+  completedBy String?
+  priority    String    @default("NORMAL")
+  notes       String?
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+  createdBy   String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("ehr_tasks")
+}
+
+model EhrAuditLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String   @db.Uuid
+  userId     String?
+  action     String
+  resource   String?
+  resourceId String?
+  details    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, userId])
+  @@map("ehr_audit_logs")
+}
+
+model EhrUser {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String   @db.Uuid
+  userId        String
+  email         String?
+  firstName     String?
+  lastName      String?
+  licenseNumber String?
+  specialty     String?
+  department    String?
+  role          String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, userId])
+  @@map("ehr_users")
+}

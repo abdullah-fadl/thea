@@ -1,0 +1,75 @@
+// =============================================================================
+// Outcome Metrics Framework — Phase 6.3
+//
+// Turns the master plan's "outcome-based, not activity-based" principle into
+// runtime infrastructure.  Every feature can declare an OUTCOME it intends to
+// improve; this schema stores those declarations and their measured values.
+//
+// All access is gated by FF_OUTCOME_METRICS_ENABLED (default OFF).
+// Zero destructive SQL — additive only.
+//
+// Design:
+//   OutcomeDefinition — one row per declared outcome key (e.g. 'er.door_to_provider_minutes').
+//     Populated at boot from lib/outcomes/registry.ts when flag is ON.
+//   OutcomeMeasurement — one row per (outcomeKey, tenantId, periodStart, granularity,
+//     dimensionsHash) tuple.  Written by compute-outcomes.ts or computeOutcome().
+//     dimensionsHash = sha256(canonical JSON of the dimensions object) so that
+//     Postgres can enforce uniqueness over the otherwise-opaque Json column.
+// =============================================================================
+
+/// Declarative outcome definition — what we're trying to improve and how to measure it.
+model OutcomeDefinition {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key              String   @unique
+  name             String
+  description      String
+  /// Physical unit of the metric value (e.g. 'minutes', 'percent', 'count').
+  unit             String
+  /// Whether higher or lower values are better, or a specific target is the goal.
+  direction        String   // 'higher_is_better' | 'lower_is_better' | 'target'
+  /// Numeric goal for 'lower_is_better' / 'higher_is_better' / 'target' directions.
+  target           Float?
+  /// Acceptable deviation from target (symmetric, in same unit as value).
+  targetTolerance  Float?
+  /// Declarative formula spec.  See lib/outcomes/compute.ts for supported kinds:
+  ///   count | sum | duration_between_events | ratio_of_counts
+  formula          Json
+  /// Arbitrary tags for grouping / filtering (e.g. ['er', 'triage', 'safety']).
+  tags             String[]
+  status           String   @default("active") // 'active' | 'archived'
+  createdAt        DateTime @default(now()) @db.Timestamptz
+  updatedAt        DateTime @updatedAt @db.Timestamptz
+
+  measurements OutcomeMeasurement[]
+
+  @@index([key])
+  @@index([status])
+  @@map("outcome_definitions")
+}
+
+/// One computed measurement per (outcome, tenant, period, dimension slice).
+model OutcomeMeasurement {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  outcomeKey       String
+  tenantId         String   @db.Uuid
+  periodStart      DateTime @db.Timestamptz
+  periodEnd        DateTime @db.Timestamptz
+  /// Time bucket granularity used when the row was computed.
+  periodGranularity String  // 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'
+  /// Arbitrary slice dimensions (e.g. { hospitalId, departmentCode }).
+  dimensions       Json     @default("{}")
+  /// sha256 of canonical JSON(dimensions) — used for uniqueness enforcement.
+  dimensionsHash   String
+  /// The computed metric value (unit is in the OutcomeDefinition).
+  value            Float
+  /// Number of underlying events / patients / records that contributed to this value.
+  sampleSize       Int      @default(0)
+  computedAt       DateTime @db.Timestamptz
+
+  definition OutcomeDefinition @relation(fields: [outcomeKey], references: [key])
+
+  @@unique([outcomeKey, tenantId, periodStart, periodGranularity, dimensionsHash])
+  @@index([outcomeKey, tenantId, periodStart])
+  @@index([tenantId])
+  @@map("outcome_measurements")
+}

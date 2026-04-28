@@ -1,0 +1,115 @@
+// =============================================================================
+// Discharge Domain — Summaries, Prescriptions, Medication Reconciliation
+// =============================================================================
+
+model DischargeSummary {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  encounterCoreId String   @db.Uuid
+  sourceSystem    String?
+  disposition     String?
+  summaryText     String?
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  createdByUserId String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, encounterCoreId])
+  @@map("discharge_summary")
+}
+
+model DischargePrescription {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String   @db.Uuid
+  encounterId      String   @db.Uuid
+  reconciliationId String?  @db.Uuid
+  drugName         String?
+  dose             String?
+  unit             String?
+  frequency        String?
+  route            String?
+  duration         String?
+  quantity         String?
+  refills          Int?
+  instructions     String?
+  status           String   @default("ACTIVE")
+  createdAt        DateTime @default(now()) @db.Timestamptz
+  createdBy        String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, encounterId])
+  @@map("discharge_prescriptions")
+}
+
+model MedReconciliation {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  encounterId     String    @db.Uuid
+  type            String? // admission, discharge
+  items           Json?
+  homeMedications Json?
+  status          String    @default("PENDING")
+  completedBy     String?
+  completedAt     DateTime? @db.Timestamptz
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, encounterId])
+  @@map("med_reconciliations")
+}
+
+// =============================================================================
+// Enhanced Discharge Summary — Comprehensive discharge documentation
+// =============================================================================
+
+model EnhancedDischargeSummary {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String    @db.Uuid
+  episodeId             String    @unique @db.Uuid
+  encounterCoreId       String?   @db.Uuid
+  patientMasterId       String?   @db.Uuid
+  admissionDate         DateTime? @db.Timestamptz
+  dischargeDate         DateTime? @db.Timestamptz
+  attendingPhysician    String?
+  admittingDiagnosis    String?
+  dischargeDiagnoses    Json? // [{diagnosis, icdCode, isPrimary}]
+  procedures            Json? // [{procedure, cptCode, date, surgeon}]
+  hospitalCourse        String?   @db.Text
+  significantFindings   String?   @db.Text
+  consultations         Json? // [{specialty, consultant, findings}]
+  conditionAtDischarge  String? // IMPROVED, STABLE, UNCHANGED, DETERIORATED
+  functionalStatus      String?
+  dischargeMedications  Json? // [{drug, dose, frequency, route, duration, instructions, isNew, isChanged, isStopped}]
+  medReconciliation     Json? // [{drug, status, reason}]
+  followUpAppointments  Json? // [{specialty, provider, date, location, instructions}]
+  pendingResults        Json? // [{test, expectedDate, followUpWith}]
+  activityRestrictions  String?
+  dietInstructions      String?
+  woundCare             String?
+  equipmentNeeded       Json?
+  homeHealth            Boolean   @default(false)
+  homeHealthDetails     String?
+  patientEducation      Json? // [{topic, materialProvided, understoodBy}]
+  warningSignsToWatch   Json? // [{sign, action}]
+  emergencyInstructions String?
+  codeStatus            String?
+  advanceDirective      Boolean   @default(false)
+  authorUserId          String?   @db.Uuid
+  authorName            String?
+  signedAt              DateTime? @db.Timestamptz
+  coSignerUserId        String?   @db.Uuid
+  coSignerName          String?
+  coSignedAt            DateTime? @db.Timestamptz
+  status                String    @default("DRAFT") // DRAFT, COMPLETED, SIGNED, CO_SIGNED
+  createdAt             DateTime  @default(now()) @db.Timestamptz
+  updatedAt             DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, episodeId])
+  @@index([tenantId, patientMasterId])
+  @@map("enhanced_discharge_summaries")
+}

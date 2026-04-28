@@ -1,0 +1,157 @@
+// =============================================================================
+// Integration Domain — Instruments, Messages, Config, ADT Events, FHIR Subscriptions
+// =============================================================================
+
+model Instrument {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  name           String
+  type           String? // lab_analyzer, imaging_modality, vitals_monitor, ecg
+  manufacturer   String?
+  model          String?
+  serialNumber   String?
+  department     String?
+  protocol       String? // HL7, ASTM, DICOM, FHIR, REST
+  connectionType String? // tcp, http, serial, dicom_cstore
+  host           String?
+  port           Int?
+  aeTitle        String?
+  status         String    @default("OFFLINE") // ONLINE, OFFLINE, ERROR, MAINTENANCE
+  lastHeartbeat  DateTime? @db.Timestamptz
+  config         Json?
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("instruments")
+}
+
+model IntegrationMessage {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String    @db.Uuid
+  direction    String // INBOUND, OUTBOUND
+  protocol     String?
+  messageType  String?
+  instrumentId String?   @db.Uuid
+  rawMessage   String?
+  parsedData   Json?
+  status       String    @default("RECEIVED") // RECEIVED, PROCESSED, FAILED, RETRY
+  errorMessage String?
+  retryCount   Int       @default(0)
+  nextRetryAt  DateTime? @db.Timestamptz
+  receivedAt   DateTime? @db.Timestamptz
+  processedAt  DateTime? @db.Timestamptz
+  createdAt    DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("integration_messages")
+}
+
+model IntegrationConfig {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String   @db.Uuid
+  key              String   @default("default")
+  engineType       String?
+  mirthUrl         String?
+  mirthApiPort     Int?
+  hl7ListenerPort  Int?
+  httpListenerPort Int?
+  theaCallbackUrl  String?
+  autoRouteResults Boolean  @default(false)
+  retryEnabled     Boolean  @default(true)
+  maxRetries       Int      @default(3)
+  channels         Json?
+  updatedAt        DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, key])
+  @@map("integration_config")
+}
+
+model IntegrationAdtEvent {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  messageId         String?
+  eventType         String?
+  patientId         String?
+  patientName       String?
+  dateOfBirth       String?
+  sex               String?
+  patientClass      String?
+  assignedLocation  String?
+  attendingDoctor   String?
+  admitDateTime     DateTime? @db.Timestamptz
+  dischargeDateTime DateTime? @db.Timestamptz
+  visitNumber       String?
+  receivedAt        DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("integration_adt_events")
+}
+
+model FhirSubscription {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  status          String    @default("requested") // requested, active, error, off
+  reason          String?
+  criteria        String?
+  channelType     String? // rest-hook
+  channelEndpoint String?
+  channelPayload  String?
+  channelHeaders  String[]  @default([])
+  end             DateTime? @db.Timestamptz
+  error           String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("fhir_subscriptions")
+}
+
+model FhirSubscriptionLog {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @db.Uuid
+  subscriptionId String   @db.Uuid
+  resourceType   String?
+  resourceId     String?
+  action         String? // create, update, delete
+  status         String? // delivered, failed
+  httpStatus     Int?
+  endpoint       String?
+  timestamp      DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, subscriptionId])
+  @@map("fhir_subscription_log")
+}
+
+model DicomSource {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  name      String
+  wadoUrl   String?
+  qidoUrl   String?
+  stowUrl   String?
+  aeTitle   String?
+  isDefault Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("dicom_sources")
+}

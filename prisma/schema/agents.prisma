@@ -1,0 +1,70 @@
+// =============================================================================
+// AI Agents Framework — Phase 6.2
+// AgentDefinition, AgentRun, AgentToolCall
+// All additive. Flag-gated at runtime by FF_AI_AGENTS_ENABLED.
+// =============================================================================
+
+/// Declarative registry of agents. Populated at boot when FF_AI_AGENTS_ENABLED=true.
+model AgentDefinition {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key              String   @unique
+  name             String
+  description      String
+  version          Int      @default(1)
+  /// Zod schema (serialised to JSON) describing the agent's required input.
+  inputSchemaJson  Json
+  /// Zod schema (serialised to JSON) describing the agent's output shape.
+  outputSchemaJson Json
+  /// Cedar policy key this agent's execution is gated by.
+  policyKey        String
+  status           String   @default("active") // 'active' | 'paused' | 'deprecated'
+  createdAt        DateTime @default(now()) @db.Timestamptz
+  updatedAt        DateTime @updatedAt @db.Timestamptz
+
+  runs AgentRun[]
+
+  @@index([key])
+  @@map("agent_definitions")
+}
+
+/// Every invocation of a registered agent is tracked here.
+model AgentRun {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @db.Uuid
+  agentKey           String
+  actorUserId        String?   @db.Uuid
+  inputJson          Json
+  outputJson         Json?
+  status             String    @default("running") // 'running' | 'success' | 'failed' | 'cancelled'
+  errorMessage       String?
+  startedAt          DateTime  @default(now()) @db.Timestamptz
+  completedAt        DateTime? @db.Timestamptz
+  durationMs         Int?
+  eventsEmittedCount Int       @default(0)
+  cedarDecision      String    @default("unevaluated") // 'allow' | 'deny' | 'unevaluated'
+  cedarReasons       String[]
+
+  definition AgentDefinition? @relation(fields: [agentKey], references: [key])
+  toolCalls  AgentToolCall[]
+
+  @@index([tenantId, agentKey, startedAt])
+  @@map("agent_runs")
+}
+
+/// Every tool invoked during an AgentRun is recorded here.
+model AgentToolCall {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  agentRunId     String   @db.Uuid
+  toolKey        String
+  inputJson      Json
+  outputJson     Json?
+  status         String   @default("success") // 'success' | 'failed'
+  durationMs     Int      @default(0)
+  policyDecision String   @default("allow") // 'allow' | 'deny'
+  createdAt      DateTime @default(now()) @db.Timestamptz
+
+  run AgentRun @relation(fields: [agentRunId], references: [id])
+
+  @@index([agentRunId])
+  @@map("agent_tool_calls")
+}

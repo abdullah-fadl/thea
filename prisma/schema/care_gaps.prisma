@@ -1,0 +1,96 @@
+// =============================================================================
+// Care Gaps — Patient Recruitment, Unfulfilled Orders, Outreach Tracking
+// =============================================================================
+
+model CareGap {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String @db.Uuid
+
+  // Patient & encounter link
+  patientMasterId String  @db.Uuid
+  encounterCoreId String? @db.Uuid
+
+  // Gap classification
+  gapType           String // LAB_OVERDUE, RAD_OVERDUE, MEDICATION_MISSED, FOLLOWUP_MISSED, REFERRAL_PENDING
+  sourceOrderId     String? @db.Uuid // The OrdersHub order that triggered this gap
+  sourceOrderKind   String? // LAB, RADIOLOGY, MEDICATION, PROCEDURE
+  sourceOrderName   String? // Human-readable order name
+  sourceOrderNameAr String? // Arabic order name
+
+  // Gap details
+  reason     String? // Why this gap was created
+  reasonAr   String? // Arabic reason
+  dueAt      DateTime? @db.Timestamptz // When the order was expected to be fulfilled
+  detectedAt DateTime  @default(now()) @db.Timestamptz // When the scanner detected this gap
+
+  // Severity & priority
+  priority      String @default("ROUTINE") // STAT, URGENT, ROUTINE
+  severityScore Int    @default(50) // 0-100, higher = more severe
+
+  // Status lifecycle
+  status          String    @default("OPEN") // OPEN, CONTACTED, SCHEDULED, RESOLVED, DISMISSED
+  resolvedAt      DateTime? @db.Timestamptz
+  resolvedBy      String?   @db.Uuid
+  resolvedReason  String? // How it was resolved
+  dismissedAt     DateTime? @db.Timestamptz
+  dismissedBy     String?   @db.Uuid
+  dismissedReason String? // Why it was dismissed
+
+  // Outreach tracking
+  lastOutreachAt DateTime? @db.Timestamptz
+  outreachCount  Int       @default(0)
+
+  // Metadata
+  meta Json? // Flexible extra data
+
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?
+
+  // Relations
+  tenant       Tenant               @relation(fields: [tenantId], references: [id])
+  outreachLogs CareGapOutreachLog[]
+
+  @@unique([tenantId, sourceOrderId]) // One gap per order
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, status])
+  @@index([tenantId, gapType])
+  @@index([tenantId, priority])
+  @@index([tenantId, dueAt])
+  @@map("care_gaps")
+}
+
+model CareGapOutreachLog {
+  id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String @db.Uuid
+  careGapId String @db.Uuid
+
+  // Outreach details
+  outreachType String // SMS, CALL, WHATSAPP, EMAIL
+  channel      String? // phone number, email address used
+  message      String? // Message content or call notes
+  messageAr    String? // Arabic message
+
+  // Status
+  status       String  @default("SENT") // SENT, DELIVERED, FAILED, NO_ANSWER, ANSWERED
+  outcome      String? // PATIENT_WILL_COME, PATIENT_REFUSED, RESCHEDULED, NO_RESPONSE
+  outcomeNotes String? // Staff notes about the outcome
+
+  // Timestamps
+  sentAt      DateTime  @default(now()) @db.Timestamptz
+  respondedAt DateTime? @db.Timestamptz
+
+  // Staff
+  performedBy     String? @db.Uuid // User who performed the outreach
+  performedByName String? // Cached name
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  // Relations
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  careGap CareGap @relation(fields: [careGapId], references: [id])
+
+  @@index([tenantId, careGapId])
+  @@map("care_gap_outreach_logs")
+}

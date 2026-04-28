@@ -1,0 +1,113 @@
+// =============================================================================
+// Workflow Domain — Routing Rules, Escalation, Clinical Pathways
+// =============================================================================
+
+model WorkflowRoutingRule {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @db.Uuid
+  name           String
+  nameAr         String?
+  description    String?
+  isActive       Boolean  @default(true)
+  priority       Int      @default(0)
+  conditions     Json?
+  conditionLogic String? // AND, OR
+  actions        Json?
+  createdBy      String?
+  createdAt      DateTime @default(now()) @db.Timestamptz
+  updatedAt      DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("workflow_routing_rules")
+}
+
+model WorkflowEscalationRule {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @db.Uuid
+  name      String
+  nameAr    String?
+  trigger   String?
+  isActive  Boolean  @default(true)
+  levels    Json?
+  createdBy String?
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("workflow_escalation_rules")
+}
+
+model WorkflowEscalationLog {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  ruleId         String    @db.Uuid
+  trigger        String?
+  resourceType   String?
+  resourceId     String?
+  patientId      String?   @db.Uuid
+  currentLevel   Int       @default(1)
+  maxLevel       Int       @default(3)
+  status         String    @default("active") // active, acknowledged, resolved, expired
+  escalatedAt    DateTime  @default(now()) @db.Timestamptz
+  acknowledgedAt DateTime? @db.Timestamptz
+  acknowledgedBy String?
+  resolvedAt     DateTime? @db.Timestamptz
+  notifications  Json?
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("workflow_escalation_log")
+}
+
+model ClinicalPathway {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String   @db.Uuid
+  name                 String
+  nameAr               String?
+  description          String?
+  descriptionAr        String?
+  category             String?
+  tasks                Json?
+  totalDurationMinutes Int?
+  isActive             Boolean  @default(true)
+  isDefault            Boolean  @default(false)
+  createdBy            String?
+  createdAt            DateTime @default(now()) @db.Timestamptz
+  updatedAt            DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("clinical_pathways")
+}
+
+model ClinicalPathwayInstance {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @db.Uuid
+  pathwayId   String    @db.Uuid
+  pathwayName String?
+  patientId   String?   @db.Uuid
+  encounterId String?   @db.Uuid
+  startedAt   DateTime? @db.Timestamptz
+  startedBy   String?
+  status      String    @default("active") // active, completed, cancelled
+  tasks       Json?
+  compliance  Int?
+  completedAt DateTime? @db.Timestamptz
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, pathwayId])
+  @@map("clinical_pathway_instances")
+}

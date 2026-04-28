@@ -1,0 +1,1 @@
+export { TheaSidebar } from './TheaSidebar';

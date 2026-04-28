@@ -1,0 +1,73 @@
+// =============================================================================
+// Phase 5.1 — Projection state + snapshot tables
+// Builds the CQRS read-model layer on top of the Phase 4.2 events table.
+// All access is gated by FF_EVENT_PROJECTIONS_ENABLED (default OFF).
+// =============================================================================
+
+enum ProjectionStatus {
+  active
+  rebuilding
+  paused
+}
+
+/// One row per registered projection — tracks the high-water-mark event sequence.
+model ProjectionState {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name              String           @unique
+  lastEventSequence BigInt           @default(0)
+  lastEventTime     DateTime?        @db.Timestamptz
+  status            ProjectionStatus @default(active)
+  errorMessage      String?
+  createdAt         DateTime         @default(now()) @db.Timestamptz
+  updatedAt         DateTime         @updatedAt @db.Timestamptz
+
+  @@index([name])
+  @@map("projection_states")
+}
+
+/// Periodic state checkpoints — lets replay skip already-processed events.
+model ProjectionSnapshot {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectionName String
+  tenantId       String   @db.Uuid
+  aggregateId    String
+  state          Json
+  eventSequence  BigInt
+  createdAt      DateTime @default(now()) @db.Timestamptz
+
+  @@index([projectionName, tenantId, aggregateId])
+  @@map("projection_snapshots")
+}
+
+// =============================================================================
+// Phase 4.2 — Domain Event Log (append-only)
+// Separate from audit_logs: carries semantic domain events (what happened)
+// not access-control records (who touched what row).
+// See docs/platform-framework.md §Events and lib/events/ for the bus layer.
+// =============================================================================
+
+model EventRecord {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  eventName   String
+  version     Int
+  // Logical grouping of the entity that changed (e.g. "department", "patient")
+  aggregate   String
+  // The entity's own ID within the aggregate (e.g. the department UUID)
+  aggregateId String
+  // Validated at emit-time against the registered Zod schema for this eventName+version
+  payload     Json
+  // Caller context: userId, requestId, etc. Nullable.
+  metadata    Json?
+  emittedAt   DateTime @db.Timestamptz
+  // Globally monotonic bigint — sufficient for per-tenant ordering in append queries
+  sequence    BigInt   @default(autoincrement())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([eventName])
+  @@index([tenantId, aggregate, aggregateId])
+  @@index([tenantId, emittedAt])
+  @@map("events")
+}

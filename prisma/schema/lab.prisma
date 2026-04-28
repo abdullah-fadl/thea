@@ -1,0 +1,273 @@
+// =============================================================================
+// Lab Domain — Orders, Specimens, Critical Alerts, QC Results, Incoming Results
+// =============================================================================
+
+model LabOrder {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @db.Uuid
+  patientId          String?   @db.Uuid
+  patientName        String?
+  mrn                String?
+  encounterId        String?   @db.Uuid
+  testCode           String?
+  testName           String?
+  testNameAr         String?
+  category           String?
+  priority           String    @default("ROUTINE")
+  clinicalNotes      String?
+  orderingDoctorId   String?
+  orderingDoctorName String?
+  fasting            Boolean   @default(false)
+  specimenType       String?
+  status             String    @default("PENDING")
+  orderedAt          DateTime? @db.Timestamptz
+  orderedBy          String?
+  orderedByName      String?
+  specimenId         String?
+  collectedAt        DateTime? @db.Timestamptz
+  collectedBy        String?
+  completedAt        DateTime? @db.Timestamptz
+  createdAt          DateTime  @default(now()) @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, patientId])
+  @@map("lab_orders")
+}
+
+model LabSpecimen {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String    @db.Uuid
+  specimenId    String?
+  orderId       String?   @db.Uuid
+  patientId     String?   @db.Uuid
+  encounterId   String?   @db.Uuid
+  testCode      String?
+  tubeType      String?
+  collectedAt   DateTime? @db.Timestamptz
+  collectedBy   String?
+  collectorName String?
+  notes         String?
+  status        String    @default("PENDING")
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, orderId])
+  @@index([tenantId, status])
+  @@map("lab_specimens")
+}
+
+model LabCriticalAlert {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  orderId        String?   @db.Uuid
+  testCode       String?
+  testName       String?
+  patientId      String?   @db.Uuid
+  patientName    String?
+  mrn            String?
+  encounterId    String?   @db.Uuid
+  value          String?
+  unit           String?
+  criticalType   String?
+  threshold      String?
+  source         String?
+  acknowledgedAt DateTime? @db.Timestamptz
+  acknowledgedBy String?
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, acknowledgedAt])
+  @@map("lab_critical_alerts")
+}
+
+model LabQcResult {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @db.Uuid
+  analyteCode String
+  analyteName Json?
+  lotNumber   String?
+  level       String?
+  value       Decimal?  @db.Decimal(12, 4)
+  mean        Decimal?  @db.Decimal(12, 4)
+  sd          Decimal?  @db.Decimal(12, 4)
+  zScore      Decimal?  @db.Decimal(12, 4)
+  performedAt DateTime? @db.Timestamptz
+  performedBy String?
+  violations  Json?
+  status      String?
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, analyteCode, lotNumber, level])
+  @@map("lab_qc_results")
+}
+
+model LabResultIncoming {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String   @db.Uuid
+  testCode       String?
+  testName       String?
+  value          String?
+  unit           String?
+  abnormalFlag   String?
+  referenceRange String?
+  orderId        String?  @db.Uuid
+  hl7MessageId   String?
+  receivedAt     DateTime @default(now()) @db.Timestamptz
+  processed      Boolean  @default(false)
+  createdAt      DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, processed])
+  @@map("lab_results_incoming")
+}
+
+// =============================================================================
+// Lab Microbiology — Culture results, organism identification, sensitivity
+// =============================================================================
+
+model LabMicroCulture {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String    @db.Uuid
+  orderId               String?   @db.Uuid
+  specimenId            String?   @db.Uuid
+  patientId             String?   @db.Uuid
+  patientName           String?
+  mrn                   String?
+  encounterId           String?   @db.Uuid
+  specimenType          String? // BLOOD, URINE, SPUTUM, WOUND, CSF, STOOL, TISSUE, OTHER
+  specimenSource        String?
+  collectedAt           DateTime? @db.Timestamptz
+  receivedAt            DateTime? @db.Timestamptz
+  // Culture setup
+  mediaUsed             Json? // [{medium, incubation}]
+  gramStain             String? // GRAM_POS_COCCI, GRAM_NEG_ROD, etc.
+  gramStainResult       String?
+  // Results
+  growthStatus          String    @default("PENDING") // PENDING, NO_GROWTH, GROWTH, CONTAMINATED
+  organisms             Json? // [{name, colony_count, identification_method}]
+  // Sensitivity
+  sensitivities         Json? // [{organism, antibiotic, result, mic, interpretation}] result: S, I, R
+  esblDetected          Boolean?
+  mrsaDetected          Boolean?
+  vreDetected           Boolean?
+  cprDetected           Boolean? // Carbapenem-resistant
+  // Status
+  status                String    @default("RECEIVED") // RECEIVED, IN_PROGRESS, PRELIMINARY, FINAL, AMENDED
+  preliminaryAt         DateTime? @db.Timestamptz
+  finalizedAt           DateTime? @db.Timestamptz
+  finalizedBy           String?
+  // Reporting
+  interpretation        String?
+  clinicalSignificance  String?
+  infectionControlAlert Boolean   @default(false)
+  notes                 String?
+  createdAt             DateTime  @default(now()) @db.Timestamptz
+  updatedAt             DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, status])
+  @@map("lab_micro_cultures")
+}
+
+// =============================================================================
+// Lab TAT (Turn-Around Time) tracking
+// =============================================================================
+
+model LabTatRecord {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  orderId           String    @db.Uuid
+  testCode          String?
+  testName          String?
+  category          String?
+  priority          String?
+  orderedAt         DateTime? @db.Timestamptz
+  collectedAt       DateTime? @db.Timestamptz
+  receivedAt        DateTime? @db.Timestamptz
+  processingStartAt DateTime? @db.Timestamptz
+  resultAt          DateTime? @db.Timestamptz
+  verifiedAt        DateTime? @db.Timestamptz
+  // Calculated TATs in minutes
+  orderToCollect    Int?
+  collectToReceive  Int?
+  receiveToResult   Int?
+  resultToVerify    Int?
+  totalTat          Int?
+  // Benchmarks
+  targetTatMin      Int?
+  withinTarget      Boolean?
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, testCode])
+  @@index([tenantId, createdAt])
+  @@map("lab_tat_records")
+}
+
+// =============================================================================
+// Lab Result Amendments — Audit trail for amended lab results
+// =============================================================================
+
+model LabResultAmendment {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  resultId        String   @db.Uuid
+  orderId         String?  @db.Uuid
+  amendmentNumber Int      @default(1)
+  originalValues  Json // Snapshot of original parameter values before amendment
+  amendedValues   Json // New parameter values after amendment
+  reason          String
+  amendedByUserId String   @db.Uuid
+  amendedByName   String?
+  createdAt       DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, resultId])
+  @@map("lab_result_amendments")
+}
+
+// =============================================================================
+// Lab Auto-Validation Rules — Configurable rules for auto-validating results
+// =============================================================================
+
+model LabAutoValidationRule {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String   @db.Uuid
+  testCode   String
+  ruleName   String
+  ruleType   String // range, delta, qc
+  parameters Json // Rule-specific config: { min, max } for range, { maxDelta } for delta, etc.
+  enabled    Boolean  @default(true)
+  priority   Int      @default(0)
+  createdBy  String?  @db.Uuid
+  updatedBy  String?  @db.Uuid
+  createdAt  DateTime @default(now()) @db.Timestamptz
+  updatedAt  DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, testCode, ruleName])
+  @@index([tenantId])
+  @@index([tenantId, testCode, enabled])
+  @@map("lab_auto_validation_rules")
+}

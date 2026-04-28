@@ -1,0 +1,211 @@
+// =============================================================================
+// Scheduling Domain — Resources, Slots, Reservations, Templates
+// =============================================================================
+
+model SchedulingResource {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String   @db.Uuid
+  resourceType  String // CLINIC_ROOM, PROCEDURE_ROOM, PROVIDER, DOCTOR, etc.
+  departmentKey String // opd, er, ipd, or, radiology, lab
+  displayName   String
+  nameAr        String?
+  nameEn        String?
+  status        String   @default("ACTIVE") // ACTIVE, INACTIVE, ARCHIVED
+  tags          String[] @default([])
+
+  // Provider reference
+  resourceRef           Json? // { kind, providerId } — legacy/mongo-style
+  resourceRefProviderId String? @db.Uuid
+  resourceRefKind       String? // provider
+
+  clinicId                String?
+  specialtyCode           String?
+  consultationServiceCode String?
+  level                   String? // CONSULTANT, SPECIALIST, RESIDENT
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  tenant                Tenant                           @relation(fields: [tenantId], references: [id])
+  slots                 SchedulingSlot[]
+  reservations          SchedulingReservation[]
+  availabilityOverrides SchedulingAvailabilityOverride[]
+
+  @@unique([tenantId, resourceType, departmentKey, displayName])
+  @@index([tenantId])
+  @@index([tenantId, resourceType, departmentKey])
+  @@index([tenantId, displayName])
+  @@map("scheduling_resources")
+}
+
+model SchedulingSlot {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String   @db.Uuid
+  resourceId    String   @db.Uuid
+  date          String // YYYY-MM-DD string for lookup
+  status        String   @default("OPEN") // OPEN, HELD, BOOKED, CHECKED_IN, BLOCKED
+  startAt       DateTime @db.Timestamptz
+  endAt         DateTime @db.Timestamptz
+  generationKey String?  @unique // ${resourceId}:${date}:${startKey}
+  templateId    String?  @db.Uuid
+  derivedFrom   Json? // { templateId, generationKey }
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  // Relations
+  tenant       Tenant                  @relation(fields: [tenantId], references: [id])
+  resource     SchedulingResource      @relation(fields: [resourceId], references: [id])
+  reservations SchedulingReservation[]
+
+  @@index([tenantId, resourceId, date])
+  @@index([tenantId, date])
+  @@map("scheduling_slots")
+}
+
+model SchedulingReservation {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  reservationId   String?   @db.Uuid // legacy duplicate of id
+  slotId          String    @db.Uuid
+  resourceId      String    @db.Uuid
+  reservationType String // HOLD, BOOKING
+  subjectType     String? // ENCOUNTER_CORE, PATIENT_MASTER, EXTERNAL_REF
+  subjectId       String? // ID of referenced subject
+  bookingId       String?   @db.Uuid
+  notes           String?
+  status          String    @default("ACTIVE") // ACTIVE, CANCELLED, EXPIRED
+  expiresAt       DateTime? @db.Timestamptz
+  idempotencyKey  String?   @unique
+
+  cancelReason      String?
+  cancelledAt       DateTime? @db.Timestamptz
+  cancelledByUserId String?
+  expiredAt         DateTime? @db.Timestamptz
+  expiredByUserId   String?
+
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  createdByUserId String?
+
+  // Relations
+  tenant   Tenant             @relation(fields: [tenantId], references: [id])
+  slot     SchedulingSlot     @relation(fields: [slotId], references: [id])
+  resource SchedulingResource @relation(fields: [resourceId], references: [id])
+
+  @@unique([tenantId, slotId, subjectId])
+  @@index([tenantId])
+  @@index([tenantId, slotId])
+  @@index([tenantId, resourceId, createdAt])
+  @@map("scheduling_reservations")
+}
+
+model SchedulingTemplate {
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String  @db.Uuid
+  resourceId    String  @db.Uuid
+  name          String?
+  dayOfWeek     Int? // 0=Sunday, 6=Saturday (legacy single-day)
+  daysOfWeek    Int[]   @default([]) // [0..6] array for multi-day templates
+  startTime     String? // HH:mm
+  endTime       String? // HH:mm
+  slotDuration  Int? // minutes (legacy name)
+  slotMinutes   Int? // minutes (preferred name)
+  isActive      Boolean @default(true)
+  status        String  @default("ACTIVE") // ACTIVE, ARCHIVED
+  timezone      String  @default("UTC")
+  rrule         String? // FREQ=WEEKLY;BYDAY=...
+  effectiveFrom String? // YYYY-MM-DD
+  effectiveTo   String? // YYYY-MM-DD
+
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, resourceId])
+  @@index([tenantId, resourceId, status])
+  @@map("scheduling_templates")
+}
+
+model SchedulingAvailabilityOverride {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  resourceId      String   @db.Uuid
+  date            String // YYYY-MM-DD for lookup
+  blocks          Json? // [{ startTime, endTime, reason }]
+  opens           Json? // [{ startTime, endTime, reason }]
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?  @db.Uuid
+
+  // Relations
+  tenant   Tenant             @relation(fields: [tenantId], references: [id])
+  resource SchedulingResource @relation(fields: [resourceId], references: [id])
+
+  @@unique([tenantId, resourceId, date])
+  @@index([tenantId])
+  @@index([tenantId, resourceId])
+  @@index([tenantId, resourceId, date])
+  @@map("scheduling_availability_overrides")
+}
+
+// =============================================================================
+// 4.8 — Multi-Resource Booking
+// =============================================================================
+
+model MultiResourceBooking {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  patientId       String   @db.Uuid
+  appointmentId   String?  @db.Uuid
+  resources       Json // array of {resourceId, resourceType, resourceName}
+  startAt         DateTime @db.Timestamptz
+  endAt           DateTime @db.Timestamptz
+  status          String   @default("PENDING") // PENDING, CONFIRMED, CANCELLED
+  conflictDetails Json?
+  notes           String?
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+  createdByUserId String?  @db.Uuid
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("multi_resource_bookings")
+}
+
+// =============================================================================
+// 4.9 — Waitlist Management
+// =============================================================================
+
+model SchedulingWaitlist {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  patientId         String    @db.Uuid
+  patientName       String
+  desiredProviderId String?   @db.Uuid
+  desiredClinic     String?
+  urgency           String    @default("ROUTINE") // ROUTINE, URGENT, ASAP
+  dateRangeStart    DateTime? @db.Timestamptz
+  dateRangeEnd      DateTime? @db.Timestamptz
+  preferredTimes    Json? // array of {dayOfWeek, timeSlot}
+  status            String    @default("WAITING") // WAITING, OFFERED, ACCEPTED, DECLINED, EXPIRED, CANCELLED
+  offeredSlotId     String?   @db.Uuid
+  offeredAt         DateTime? @db.Timestamptz
+  respondedAt       DateTime? @db.Timestamptz
+  position          Int?
+  notes             String?
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, urgency])
+  @@map("scheduling_waitlist")
+}

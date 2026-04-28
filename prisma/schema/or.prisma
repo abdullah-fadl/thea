@@ -1,0 +1,635 @@
+// =============================================================================
+// Operating Room Domain — Cases, Events, Surgical Checklists
+// =============================================================================
+
+model OrCase {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String    @db.Uuid
+  orderId              String    @db.Uuid
+  encounterCoreId      String?   @db.Uuid
+  episodeId            String?   @db.Uuid
+  patientMasterId      String?   @db.Uuid
+  procedureName        String?
+  procedureCode        String?
+  departmentKey        String?
+  status               String    @default("OPEN") // OPEN, IN_PROGRESS, COMPLETED, CANCELLED
+  // Scheduling fields
+  scheduledDate        DateTime? @db.Date
+  scheduledStartTime   DateTime? @db.Timestamptz
+  scheduledEndTime     DateTime? @db.Timestamptz
+  estimatedDurationMin Int?
+  roomName             String? // Theater 1, Theater 2, etc.
+  priority             String    @default("ELECTIVE") // EMERGENCY, URGENT, ELECTIVE
+  caseType             String? // Elective, Emergency, Add-on
+  surgeonName          String?
+  anesthesiologistName String?
+  asaClass             String? // ASA I, II, III, IV, V, VI
+  createdAt            DateTime  @default(now()) @db.Timestamptz
+  createdByUserId      String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, orderId])
+  @@index([tenantId])
+  @@index([tenantId, encounterCoreId])
+  @@index([tenantId, scheduledDate])
+  @@map("or_cases")
+}
+
+model OrCaseEvent {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  caseId          String   @db.Uuid
+  step            String // PRE_OP, TIME_OUT, INTRA_OP, POST_OP, RECOVERY
+  data            Json? // Step-specific structured data
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  createdByUserId String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, caseId])
+  @@map("or_case_events")
+}
+
+// =============================================================================
+// OR Time-Out — WHO Surgical Safety Checklist
+// =============================================================================
+
+model OrTimeOut {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String   @db.Uuid
+  caseId             String   @unique @db.Uuid
+  performedAt        DateTime @db.Timestamptz
+  performedBy        String   @db.Uuid // userId (charge/circulating nurse)
+  patientIdConfirmed Boolean  @default(false)
+  procedureConfirmed Boolean  @default(false)
+  siteConfirmed      Boolean  @default(false)
+  consentConfirmed   Boolean  @default(false)
+  antibioticGiven    Boolean  @default(false)
+  imagingAvailable   Boolean  @default(false)
+  equipmentReady     Boolean  @default(false)
+  teamIntroduced     Boolean  @default(false)
+  criticalConcerns   String?
+  signatures         Json     @default("[]") // [{role, userId, name, timestamp}]
+  createdAt          DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, caseId])
+  @@map("or_time_outs")
+}
+
+// =============================================================================
+// OR Anesthesia Record
+// =============================================================================
+
+model OrAnesthesiaRecord {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @db.Uuid
+  caseId             String    @db.Uuid
+  anesthesiologistId String    @db.Uuid // userId
+  anesthesiaType     String // GENERAL, REGIONAL, LOCAL, MAC, SEDATION
+  inductionTime      DateTime? @db.Timestamptz
+  emergenceTime      DateTime? @db.Timestamptz
+  airwayManagement   String? // ETT, LMA, MASK, AWAKE_INTUBATION
+  agents             Json      @default("[]") // [{drug, dose, route, time}]
+  vitalsLog          Json      @default("[]") // [{time, hr, bp, spo2, etco2, temp}]
+  fluidBalance       Json? // {crystalloid, colloid, blood, urine, ebl}
+  complications      String?
+  notes              String?
+  createdAt          DateTime  @default(now()) @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, caseId])
+  @@map("or_anesthesia_records")
+}
+
+// =============================================================================
+// OR PACU (Post-Anesthesia Care Unit) Record
+// =============================================================================
+
+model OrPacuRecord {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String    @db.Uuid
+  caseId        String    @db.Uuid
+  nurseId       String    @db.Uuid // userId
+  arrivalTime   DateTime  @db.Timestamptz
+  dischargeTime DateTime? @db.Timestamptz
+  aldreteScores Json      @default("[]") // [{time, activity, respiration, circulation, consciousness, color, total}]
+  vitalsLog     Json      @default("[]") // [{time, hr, bp, rr, spo2, pain, temp}]
+  painMgmt      Json? // pain management interventions
+  nausea        Boolean   @default(false)
+  shivering     Boolean   @default(false)
+  bleeding      String?
+  disposition   String? // WARD, ICU, HOME, EXTENDED_STAY
+  notes         String?
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, caseId])
+  @@map("or_pacu_records")
+}
+
+// =============================================================================
+// OR Surgical Team
+// =============================================================================
+
+model OrSurgicalTeam {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String   @db.Uuid
+  caseId            String   @unique @db.Uuid
+  surgeon           String? // userId
+  assistantSurgeon  String? // userId
+  anesthesiologist  String? // userId
+  scrubNurse        String? // userId
+  circulatingNurse  String? // userId
+  perfusionist      String? // userId
+  specialistConsult String? // userId
+  notes             String?
+  createdAt         DateTime @default(now()) @db.Timestamptz
+  updatedAt         DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, caseId])
+  @@map("or_surgical_teams")
+}
+
+// =============================================================================
+// OR Implants Tracking
+// =============================================================================
+
+model OrImplant {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String    @db.Uuid
+  caseId       String    @db.Uuid
+  itemName     String
+  manufacturer String?
+  lotNumber    String?
+  serialNumber String?
+  expiryDate   DateTime? @db.Date
+  quantity     Int       @default(1)
+  site         String?
+  recordedBy   String    @db.Uuid // userId
+  createdAt    DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, caseId])
+  @@map("or_implants")
+}
+
+// =============================================================================
+// OR Surgical Count — Instrument/Sponge/Needle Count (Patient Safety)
+// =============================================================================
+
+model OrSurgicalCount {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  caseId              String    @db.Uuid
+  phase               String // PRE_OP, POST_OP
+  instruments         Json      @default("[]") // [{itemName, expectedCount, actualCount}]
+  sponges             Json      @default("[]")
+  needles             Json      @default("[]")
+  blades              Json      @default("[]")
+  otherItems          Json      @default("[]")
+  totalExpected       Int       @default(0)
+  totalActual         Int       @default(0)
+  isDiscrepancy       Boolean   @default(false)
+  discrepancyNote     String?
+  discrepancyResolved Boolean   @default(false)
+  resolutionNote      String?
+  resolvedAt          DateTime? @db.Timestamptz
+  resolvedByUserId    String?   @db.Uuid
+  // Two-nurse verification
+  countedByUserId     String    @db.Uuid
+  countedByName       String?
+  verifiedByUserId    String?   @db.Uuid
+  verifiedByName      String?
+  verifiedAt          DateTime? @db.Timestamptz
+  countedAt           DateTime  @db.Timestamptz
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, caseId])
+  @@index([tenantId, caseId, phase])
+  @@map("or_surgical_counts")
+}
+
+// =============================================================================
+// OR Specimen Log — Surgical Specimen Chain of Custody
+// =============================================================================
+
+model OrSpecimenLog {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  caseId              String    @db.Uuid
+  patientMasterId     String?   @db.Uuid
+  specimenLabel       String
+  specimenType        String // BIOPSY, EXCISION, RESECTION, FLUID, SWAB, CYTOLOGY, FROZEN_SECTION, OTHER
+  site                String? // Anatomical site
+  destination         String // PATHOLOGY, MICROBIOLOGY, CYTOLOGY, HISTOLOGY, OTHER
+  fixative            String? // FORMALIN, FROZEN, FRESH, OTHER
+  containerType       String?
+  quantity            Int       @default(1)
+  collectedByUserId   String    @db.Uuid
+  collectedByName     String?
+  collectedAt         DateTime  @db.Timestamptz
+  handedToUserId      String?   @db.Uuid
+  handedToName        String?
+  handedAt            DateTime? @db.Timestamptz
+  sentConfirmed       Boolean   @default(false)
+  sentConfirmedAt     DateTime? @db.Timestamptz
+  sentConfirmedBy     String?   @db.Uuid
+  pathologySpecimenId String?   @db.Uuid
+  notes               String?
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, caseId])
+  @@map("or_specimen_logs")
+}
+
+// =============================================================================
+// OR Nursing Pre-Op Assessment
+// =============================================================================
+
+model OrNursingPreOp {
+  id                      String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId                String    @db.Uuid
+  caseId                  String    @unique @db.Uuid
+  assessedByUserId        String    @db.Uuid
+  assessedByName          String?
+  assessedAt              DateTime  @db.Timestamptz
+  // Patient identification
+  patientIdVerified       Boolean   @default(false)
+  idBandChecked           Boolean   @default(false)
+  // NPO status
+  npoCompliant            Boolean   @default(false)
+  lastOralIntakeTime      DateTime? @db.Timestamptz
+  npoNotes                String?
+  // Allergies & medications
+  allergiesReviewed       Boolean   @default(false)
+  allergiesList           Json      @default("[]") // [{allergen, reaction, severity}]
+  homeMediaReviewed       Boolean   @default(false)
+  homeMedications         Json      @default("[]") // [{medication, dose, lastTaken}]
+  // Pre-op vitals
+  vitals                  Json? // {hr, bp, rr, spo2, temp, pain, weight, height}
+  // IV access
+  ivAccess                Boolean   @default(false)
+  ivSite                  String?
+  ivGauge                 String?
+  ivFluid                 String?
+  // Skin assessment
+  skinIntegrity           String? // INTACT, RASH, BRUISING, WOUND, PRESSURE_INJURY, OTHER
+  skinNotes               String?
+  // Mental status
+  mentalStatus            String? // ALERT, ORIENTED, CONFUSED, SEDATED, ANXIOUS
+  // Belongings
+  jewelryRemoved          Boolean   @default(false)
+  denturesRemoved         Boolean   @default(false)
+  prostheticsRemoved      Boolean   @default(false)
+  hearingAidsRemoved      Boolean   @default(false)
+  belongingsSecured       Boolean   @default(false)
+  belongingsNotes         String?
+  // Consents
+  surgicalConsentSigned   Boolean   @default(false)
+  anesthesiaConsentSigned Boolean   @default(false)
+  bloodConsentSigned      Boolean   @default(false)
+  // Lab & imaging
+  labResultsReviewed      Boolean   @default(false)
+  imagingReviewed         Boolean   @default(false)
+  bloodProductsReady      Boolean   @default(false)
+  pregnancyTestResult     String? // POSITIVE, NEGATIVE, N_A
+  // Surgical site
+  surgicalSiteMarked      Boolean   @default(false)
+  siteMarkedBy            String?
+  laterality              String? // LEFT, RIGHT, BILATERAL, N_A
+  // Patient safety
+  fallRiskAssessed        Boolean   @default(false)
+  fallRiskLevel           String? // LOW, MODERATE, HIGH
+  dvtProphylaxis          Boolean   @default(false)
+  dvtMethod               String? // SCD, TED_HOSE, PHARMACOLOGICAL
+  patientEducation        Boolean   @default(false)
+  // Overall status
+  status                  String    @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED, INCOMPLETE
+  nursingNotes            String?
+  createdAt               DateTime  @default(now()) @db.Timestamptz
+  updatedAt               DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, caseId])
+  @@map("or_nursing_pre_ops")
+}
+
+// =============================================================================
+// OR Anesthesia Pre-Op Assessment (Pre-Operative Evaluation)
+// =============================================================================
+
+model OrAnesthesiaPreOp {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId                 String    @db.Uuid
+  caseId                   String    @unique @db.Uuid
+  assessedByUserId         String    @db.Uuid
+  assessedByName           String?
+  assessedAt               DateTime  @db.Timestamptz
+  // ASA classification
+  asaClass                 String? // I, II, III, IV, V, VI
+  asaEmergency             Boolean   @default(false)
+  // Airway assessment
+  mallampatiScore          String? // I, II, III, IV
+  thyroMentalDistance      String? // NORMAL, REDUCED
+  mouthOpening             String? // ADEQUATE, LIMITED
+  neckMobility             String? // FULL, LIMITED, FIXED
+  dentitionStatus          String? // NORMAL, MISSING, LOOSE, DENTURES, CROWNS
+  beardPresent             Boolean   @default(false)
+  predictedDifficultAirway Boolean   @default(false)
+  airwayNotes              String?
+  // Medical history
+  cardiacHistory           Json? // {conditions:[], notes}
+  respiratoryHistory       Json? // {conditions:[], notes}
+  hepaticHistory           Json? // {conditions:[], notes}
+  renalHistory             Json? // {conditions:[], notes}
+  endocrineHistory         Json? // {conditions:[], notes}
+  neurologicHistory        Json? // {conditions:[], notes}
+  hematologicHistory       Json? // {conditions:[], notes}
+  // Previous anesthesia
+  previousAnesthesia       Boolean   @default(false)
+  previousComplications    String?
+  familyAnesthesiaHx       String? // malignant hyperthermia, etc.
+  // Current medications
+  currentMedications       Json      @default("[]") // [{medication, dose, frequency, lastDose}]
+  herbals                  String?
+  // NPO verification
+  npoVerified              Boolean   @default(false)
+  lastSolidsTime           DateTime? @db.Timestamptz
+  lastClearLiquidsTime     DateTime? @db.Timestamptz
+  // Planned anesthesia
+  plannedAnesthesiaType    String? // GENERAL, REGIONAL, SPINAL, EPIDURAL, COMBINED, MAC, LOCAL
+  plannedAirway            String? // ETT, LMA, MASK, AWAKE_FIBEROPTIC, TRACHEOSTOMY
+  // Pre-medications
+  preMedications           Json      @default("[]") // [{drug, dose, route, time}]
+  // Risk assessment
+  cardiacRiskIndex         String? // LOW, INTERMEDIATE, HIGH
+  pulmonaryRiskScore       String?
+  bleedingRisk             String? // LOW, MODERATE, HIGH
+  ponvRisk                 String? // LOW, MODERATE, HIGH (Post-Op Nausea/Vomiting)
+  // Informed consent
+  risksExplained           Boolean   @default(false)
+  consentObtained          Boolean   @default(false)
+  // Overall status
+  status                   String    @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED, INCOMPLETE
+  specialConsiderations    String?
+  anesthesiaNotes          String?
+  createdAt                DateTime  @default(now()) @db.Timestamptz
+  updatedAt                DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, caseId])
+  @@map("or_anesthesia_pre_ops")
+}
+
+// =============================================================================
+// OR Nursing Documentation — Circulating Nurse Record
+// =============================================================================
+
+model OrNursingDoc {
+  id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId               String    @db.Uuid
+  caseId                 String    @unique @db.Uuid
+  // Patient positioning
+  position               String? // SUPINE, PRONE, LATERAL_L, LATERAL_R, LITHOTOMY, TRENDELENBURG, REVERSE_TRENDELENBURG, SITTING, BEACH_CHAIR
+  positionAids           Json? // [{aid, location}]
+  positionVerifiedBy     String?   @db.Uuid
+  // Skin preparation
+  skinPrepAgent          String? // BETADINE, CHLORHEXIDINE, ALCOHOL, IODINE, OTHER
+  skinPrepArea           String?
+  skinPrepPerformedBy    String?   @db.Uuid
+  skinIntegrityPreOp     String? // INTACT, RASH, WOUND, OTHER
+  skinIntegrityPostOp    String?
+  // Tourniquet
+  tourniquetUsed         Boolean   @default(false)
+  tourniquetSite         String?
+  tourniquetPressure     Int? // mmHg
+  tourniquetOnTime       DateTime? @db.Timestamptz
+  tourniquetOffTime      DateTime? @db.Timestamptz
+  tourniquetTotalMin     Int?
+  // Electrocautery
+  electrocauteryUsed     Boolean   @default(false)
+  electrocauteryType     String? // MONOPOLAR, BIPOLAR, BOTH
+  electrocauterySettings Json? // {cutPower, coagPower, groundPadSite}
+  groundPadPlacement     String?
+  // Blood loss
+  estimatedBloodLossMl   Int?
+  irrigationUsedMl       Int?
+  drainType              String?
+  drainOutput            String?
+  // General
+  nursingNotes           String?
+  documentedByUserId     String    @db.Uuid
+  documentedByName       String?
+  createdAt              DateTime  @default(now()) @db.Timestamptz
+  updatedAt              DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, caseId])
+  @@map("or_nursing_docs")
+}
+
+// =============================================================================
+// OR Operative Note — Structured Surgical Report
+// =============================================================================
+
+model OrOperativeNote {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String    @db.Uuid
+  caseId               String    @unique @db.Uuid
+  surgeonUserId        String    @db.Uuid
+  surgeonName          String?
+  // Procedure details
+  preOpDiagnosis       String?
+  postOpDiagnosis      String?
+  procedurePerformed   String?
+  procedureCode        String?
+  operationType        String? // ELECTIVE, EMERGENCY, URGENT
+  laterality           String? // LEFT, RIGHT, BILATERAL, N_A
+  // Timing
+  incisionTime         DateTime? @db.Timestamptz
+  closureTime          DateTime? @db.Timestamptz
+  totalDurationMin     Int?
+  // Team
+  assistantSurgeon     String?
+  anesthesiologist     String?
+  scrubNurse           String?
+  circulatingNurse     String?
+  // Anesthesia
+  anesthesiaType       String? // GENERAL, REGIONAL, SPINAL, EPIDURAL, MAC, LOCAL
+  // Findings & technique
+  findings             String?   @db.Text
+  techniqueDescription String?   @db.Text
+  complications        String?   @db.Text
+  estimatedBloodLossMl Int?
+  drains               Json? // [{type, site, output}]
+  specimens            Json? // [{label, type, destination}]
+  implants             Json? // [{name, manufacturer, lot, serial}]
+  // Wound closure
+  closureMethod        String? // SUTURES, STAPLES, GLUE, STERI_STRIPS, OPEN
+  dressingType         String?
+  // Post-op plan
+  postOpInstructions   String?   @db.Text
+  dietInstructions     String?
+  activityLevel        String? // BED_REST, AMBULATE, WEIGHT_BEARING, NON_WEIGHT_BEARING
+  followUpPlan         String?
+  // Disposition
+  disposition          String? // WARD, ICU, PACU, SAME_DAY_DISCHARGE
+  // Status
+  status               String    @default("DRAFT") // DRAFT, COMPLETED, SIGNED, AMENDED
+  signedAt             DateTime? @db.Timestamptz
+  amendedAt            DateTime? @db.Timestamptz
+  amendmentReason      String?
+  createdAt            DateTime  @default(now()) @db.Timestamptz
+  updatedAt            DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, caseId])
+  @@index([tenantId, surgeonUserId])
+  @@map("or_operative_notes")
+}
+
+// =============================================================================
+// OR Post-Op Orders — Standard Post-Op Order Template
+// =============================================================================
+
+model OrPostOpOrder {
+  id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId               String    @db.Uuid
+  caseId                 String    @unique @db.Uuid
+  orderedByUserId        String    @db.Uuid
+  orderedByName          String?
+  // Admission
+  admitTo                String? // WARD, ICU, PACU, SAME_DAY
+  bedType                String? // REGULAR, TELEMETRY, ICU
+  condition              String? // STABLE, GUARDED, CRITICAL
+  // Vitals
+  vitalFrequency         String? // Q15MIN, Q30MIN, Q1H, Q2H, Q4H, Q8H
+  neurovascularChecks    Boolean   @default(false)
+  neurovascularFreq      String?
+  // Activity
+  activityLevel          String? // BED_REST, DANGLE, AMBULATE_WITH_ASSIST, AD_LIB
+  positionRestrictions   String?
+  fallPrecautions        Boolean   @default(false)
+  // Diet
+  dietType               String? // NPO, CLEAR_LIQUIDS, FULL_LIQUIDS, REGULAR, CARDIAC, DIABETIC
+  fluidRestriction       String?
+  // IV fluids
+  ivFluids               Json? // [{fluid, rate, duration}]
+  // Medications
+  painManagement         Json? // [{drug, dose, route, frequency}]
+  antibiotics            Json? // [{drug, dose, route, frequency, duration}]
+  anticoagulation        Json? // [{drug, dose, route, frequency}]
+  antiemetics            Json? // [{drug, dose, route, frequency}]
+  otherMedications       Json? // [{drug, dose, route, frequency}]
+  // Wound care
+  woundCareInstructions  String?
+  drainManagement        String?
+  dressingChanges        String?
+  // DVT prophylaxis
+  dvtProphylaxis         Boolean   @default(false)
+  dvtMethod              String? // SCD, TED_HOSE, PHARMACOLOGICAL
+  // Respiratory
+  oxygenTherapy          String? // ROOM_AIR, NC_2L, NC_4L, FACE_MASK, BIPAP
+  incentiveSpirometry    Boolean   @default(false)
+  coughDeepBreath        Boolean   @default(false)
+  // I&O
+  intakeOutputMonitoring Boolean   @default(false)
+  foleyPresent           Boolean   @default(false)
+  foleyRemovalPlan       String?
+  // Labs
+  labOrders              Json? // [{test, timing}]
+  // Imaging
+  imagingOrders          Json? // [{study, timing}]
+  // Notifications
+  callDoctorIf           Json? // [{condition, threshold}]
+  // Status
+  status                 String    @default("DRAFT") // DRAFT, ACTIVE, COMPLETED, CANCELLED
+  activatedAt            DateTime? @db.Timestamptz
+  createdAt              DateTime  @default(now()) @db.Timestamptz
+  updatedAt              DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, caseId])
+  @@map("or_post_op_orders")
+}
+
+// ── 3.17 OR Surgeon Preference Cards ─────────────────────────────────────
+model OrPreferenceCard {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  surgeonId         String // userId
+  surgeonName       String
+  procedureName     String
+  procedureCode     String?
+  specialty         String? // e.g. ORTHOPEDIC, CARDIAC, NEURO, GENERAL
+  instruments       Json // [{name, quantity, size, notes}]
+  sutures           Json? // [{type, size, quantity, needle}]
+  implants          Json? // [{name, manufacturer, catalog, size}]
+  equipment         Json? // [{name, settings, notes}]
+  medications       Json? // [{name, dose, route, timing}]
+  positioning       String? // SUPINE | PRONE | LATERAL | LITHOTOMY | BEACH_CHAIR
+  skinPrep          String? // BETADINE | CHLORHEXIDINE | ALCOHOL | IODINE
+  draping           String?
+  specialRequests   String?
+  estimatedDuration Int? // minutes
+  roomPreference    String?
+  status            String    @default("ACTIVE") // ACTIVE | ARCHIVED
+  version           Int       @default(1)
+  lastUsedAt        DateTime? @db.Timestamptz
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, surgeonId])
+  @@index([tenantId, procedureName])
+  @@map("or_preference_cards")
+}
+
+// ── 3.18 OR Utilization Analytics ────────────────────────────────────────
+model OrUtilizationSnapshot {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String   @db.Uuid
+  snapshotDate       DateTime @db.Date
+  roomName           String
+  totalSlotMinutes   Int // available minutes in the day
+  bookedMinutes      Int      @default(0)
+  actualMinutes      Int      @default(0)
+  casesScheduled     Int      @default(0)
+  casesCompleted     Int      @default(0)
+  casesCancelled     Int      @default(0)
+  avgTurnoverMinutes Float? // average turnover between cases
+  firstCaseOnTime    Boolean?
+  delayMinutes       Int      @default(0)
+  utilizationPct     Float? // actualMinutes / totalSlotMinutes * 100
+  overtime           Int      @default(0) // minutes past scheduled end
+  details            Json? // [{caseId, procedure, scheduledStart, actualStart, actualEnd, turnover}]
+  createdAt          DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, snapshotDate, roomName])
+  @@index([tenantId])
+  @@index([tenantId, snapshotDate])
+  @@map("or_utilization_snapshots")
+}

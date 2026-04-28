@@ -1,0 +1,115 @@
+// =============================================================================
+// CSSD Domain — Sterilization Trays, Cycles, Dispatches
+// =============================================================================
+
+model CssdTray {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String   @db.Uuid
+  trayName         String
+  trayCode         String
+  department       String? // owning department (OR, ICU, etc.)
+  instruments      Json     @default("[]") // [{name, quantity, description}]
+  totalInstruments Int      @default(0)
+  active           Boolean  @default(true)
+  createdByUserId  String?
+  createdAt        DateTime @default(now()) @db.Timestamptz
+  updatedAt        DateTime @updatedAt @db.Timestamptz
+
+  cycles CssdCycle[]
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, department])
+  @@map("cssd_trays")
+}
+
+model CssdCycle {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  trayId              String    @db.Uuid
+  tray                CssdTray  @relation(fields: [trayId], references: [id])
+  loadNumber          String // autoclave load number
+  machine             String
+  method              String // STEAM, ETO, PLASMA, CHEMICAL
+  cycleNumber         String
+  temperature         Float?
+  pressure            Float?
+  duration            Int? // minutes
+  biologicalIndicator Boolean   @default(false)
+  biologicalResult    String? // PASS, FAIL
+  chemicalIndicator   String? // PASS, FAIL
+  startTime           DateTime  @db.Timestamptz
+  endTime             DateTime? @db.Timestamptz
+  operator            String    @db.Uuid // userId
+  status              String    @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED, FAILED, RECALLED
+  expiryDate          DateTime? @db.Timestamptz
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+
+  dispatches CssdDispatch[]
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, trayId])
+  @@index([tenantId, status])
+  @@map("cssd_cycles")
+}
+
+model CssdDispatch {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String    @db.Uuid
+  cycleId      String    @db.Uuid
+  cycle        CssdCycle @relation(fields: [cycleId], references: [id])
+  trayId       String    @db.Uuid
+  dispatchedTo String // department/location
+  dispatchedBy String    @db.Uuid // userId
+  dispatchedAt DateTime  @db.Timestamptz
+  receivedBy   String?   @db.Uuid
+  receivedAt   DateTime? @db.Timestamptz
+  returnedBy   String?   @db.Uuid
+  returnedAt   DateTime? @db.Timestamptz
+  status       String    @default("DISPATCHED") // DISPATCHED, RECEIVED, USED, RETURNED
+  notes        String?
+  createdAt    DateTime  @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, cycleId])
+  @@index([tenantId, status])
+  @@map("cssd_dispatches")
+}
+
+// ── 3.14 CSSD Recall Tracking ────────────────────────────────────────────
+model CssdRecall {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @db.Uuid
+  cycleId            String    @db.Uuid
+  trayId             String    @db.Uuid
+  recallReason       String // BI_FAILURE | CI_FAILURE | EQUIPMENT_MALFUNCTION | PACKAGING_BREACH | EXPIRY | OTHER
+  recallType         String    @default("MANDATORY") // MANDATORY | PRECAUTIONARY
+  severity           String    @default("HIGH") // CRITICAL | HIGH | MEDIUM | LOW
+  initiatedBy        String // userId
+  initiatedAt        DateTime  @db.Timestamptz
+  affectedLoads      Json? // [{loadNumber, machine, date}] other loads from same machine/batch
+  affectedDispatches Json? // [{dispatchId, department, status}] dispatches to recall
+  notifications      Json? // [{userId, role, notifiedAt, method, acknowledged}]
+  rootCause          String?
+  correctiveAction   String?
+  preventiveAction   String?
+  investigationNotes String?
+  status             String    @default("OPEN") // OPEN | IN_PROGRESS | ITEMS_RETRIEVED | INVESTIGATION | CLOSED
+  closedBy           String?
+  closedAt           DateTime? @db.Timestamptz
+  closedNotes        String?
+  createdAt          DateTime  @default(now()) @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, cycleId])
+  @@index([tenantId, status])
+  @@map("cssd_recalls")
+}

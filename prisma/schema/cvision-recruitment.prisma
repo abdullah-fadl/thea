@@ -1,0 +1,512 @@
+// =============================================================================
+// CVision Recruitment Domain — Requisitions, Candidates, Interviews, Offers,
+// CV Parsing, Job Postings, Talent Pools, Manpower Planning
+// =============================================================================
+
+// ── Enums ────────────────────────────────────────────────────────────────────
+
+enum CvisionRequisitionStatus {
+  DRAFT
+  SUBMITTED
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+enum CvisionRequisitionReason {
+  NEW_POSITION
+  REPLACEMENT
+  BACKFILL
+  EXPANSION
+  OTHER
+}
+
+enum CvisionCandidateStatus {
+  APPLIED
+  NEW
+  SCREENING
+  SCREENED
+  SHORTLISTED
+  INTERVIEW
+  OFFER
+  HIRED
+  REJECTED
+  WITHDRAWN
+}
+
+enum CvisionCandidateSource {
+  PORTAL
+  REFERRAL
+  AGENCY
+  DIRECT
+  OTHER
+  CV_INBOX
+  LINKEDIN
+}
+
+enum CvisionInterviewType {
+  PHONE
+  VIDEO
+  IN_PERSON
+  TECHNICAL
+  PANEL
+  HR
+}
+
+enum CvisionInterviewStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum CvisionOfferStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  NEGOTIATING
+  APPROVED
+  REJECTED
+  HR_REJECTED
+  EXPIRED
+}
+
+enum CvisionCvParseStatus {
+  QUEUED
+  DONE
+  FAILED
+}
+
+enum CvisionCvInboxItemStatus {
+  UPLOADED
+  PARSED
+  SUGGESTED
+  ASSIGNED
+  REJECTED
+}
+
+// ── Job Requisitions ─────────────────────────────────────────────────────────
+
+model CvisionJobRequisition {
+  id                 String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String                   @db.Uuid
+  requisitionNumber  String
+  title              String
+  description        String?
+  departmentId       String                   @db.Uuid
+  unitId             String?                  @db.Uuid
+  jobTitleId         String?                  @db.Uuid
+  gradeId            String?                  @db.Uuid
+  positionId         String?                  @db.Uuid
+  headcountRequested Int                      @default(1)
+  reason             CvisionRequisitionReason @default(NEW_POSITION)
+  employmentType     String?
+  requirements       Json?
+  skills             Json?
+  experienceYears    Json?
+  salaryRange        Json?
+  status             CvisionRequisitionStatus @default(DRAFT)
+  statusChangedAt    DateTime?                @db.Timestamptz
+  statusReason       String?
+  approvals          Json?
+  createdByUserId    String?                  @db.Uuid
+  submittedAt        DateTime?                @db.Timestamptz
+  submittedBy        String?
+  approvedAt         DateTime?                @db.Timestamptz
+  approvedBy         String?
+  openedAt           DateTime?                @db.Timestamptz
+  closedAt           DateTime?                @db.Timestamptz
+  targetStartDate    DateTime?                @db.Date
+  closingDate        DateTime?                @db.Date
+  applicantCount     Int                      @default(0)
+  isArchived         Boolean                  @default(false)
+  metadata           Json?
+  createdAt          DateTime                 @default(now()) @db.Timestamptz
+  updatedAt          DateTime                 @updatedAt @db.Timestamptz
+  createdBy          String?
+  updatedBy          String?
+  deletedAt          DateTime?                @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, requisitionNumber])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, departmentId])
+  @@index([tenantId, positionId])
+  @@index([tenantId, isArchived])
+  @@map("cvision_job_requisitions")
+}
+
+// ── Candidates ───────────────────────────────────────────────────────────────
+
+model CvisionCandidate {
+  id              String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String                 @db.Uuid
+  requisitionId   String?                @db.Uuid
+  applicationId   String?                @db.Uuid
+  departmentId    String?                @db.Uuid
+  jobTitleId      String?                @db.Uuid
+  fullName        String
+  email           String?
+  phone           String?
+  source          CvisionCandidateSource @default(DIRECT)
+  referredBy      String?
+  status          CvisionCandidateStatus @default(NEW)
+  statusChangedAt DateTime?              @db.Timestamptz
+  statusReason    String?
+  screeningScore  Int?
+  notes           String?
+  screenedBy      String?
+  screenedAt      DateTime?              @db.Timestamptz
+  interviews      Json?
+  offer           Json?
+  hiredAt         DateTime?              @db.Timestamptz
+  employeeId      String?                @db.Uuid
+  isArchived      Boolean                @default(false)
+  metadata        Json?
+  createdAt       DateTime               @default(now()) @db.Timestamptz
+  updatedAt       DateTime               @updatedAt @db.Timestamptz
+  createdBy       String?
+  updatedBy       String?
+  deletedAt       DateTime?              @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, requisitionId])
+  @@index([tenantId, status])
+  @@index([tenantId, email])
+  @@index([tenantId, source])
+  @@index([tenantId, isArchived])
+  @@index([employeeId])
+  @@map("cvision_candidates")
+}
+
+// ── Candidate Documents ──────────────────────────────────────────────────────
+
+model CvisionCandidateDocument {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String   @db.Uuid
+  candidateId   String   @db.Uuid
+  kind          String // CV, CERTIFICATE, OTHER
+  fileName      String
+  storageKey    String
+  mimeType      String?
+  fileSize      Int?
+  extractedText String?
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+  createdBy     String?
+  updatedBy     String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, candidateId])
+  @@index([candidateId])
+  @@index([tenantId, kind])
+  @@map("cvision_candidate_documents")
+}
+
+// ── Interviews ───────────────────────────────────────────────────────────────
+
+model CvisionInterview {
+  id            String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String                 @db.Uuid
+  candidateId   String                 @db.Uuid
+  requisitionId String?                @db.Uuid
+  roundNumber   Int
+  type          CvisionInterviewType
+  status        CvisionInterviewStatus @default(SCHEDULED)
+  scheduledDate DateTime               @db.Date
+  scheduledTime String
+  duration      Int?
+  location      String?
+  meetingLink   String?
+  interviewers  Json?
+  notes         String?
+  score         Int?
+  feedback      String?
+  decision      String?
+  aiAnalysis    Json?
+  completedAt   DateTime?              @db.Timestamptz
+  completedBy   String?
+  createdAt     DateTime               @default(now()) @db.Timestamptz
+  updatedAt     DateTime               @updatedAt @db.Timestamptz
+  createdBy     String?
+  updatedBy     String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, candidateId])
+  @@index([tenantId, requisitionId])
+  @@index([tenantId, status])
+  @@index([tenantId, scheduledDate])
+  @@index([candidateId])
+  @@map("cvision_interviews")
+}
+
+// ── Interview Sessions ───────────────────────────────────────────────────────
+
+model CvisionInterviewSession {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @db.Uuid
+  interviewId String    @db.Uuid
+  sessionType String
+  startedAt   DateTime? @db.Timestamptz
+  endedAt     DateTime? @db.Timestamptz
+  recording   Json?
+  transcript  Json?
+  notes       String?
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, interviewId])
+  @@index([interviewId])
+  @@map("cvision_interview_sessions")
+}
+
+// ── Job Postings ─────────────────────────────────────────────────────────────
+
+model CvisionJobPosting {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  requisitionId    String    @db.Uuid
+  title            String
+  description      String?
+  departmentName   String?
+  location         String?
+  employmentType   String?
+  salaryRange      Json?
+  requirements     Json?
+  benefits         Json?
+  status           String    @default("draft") // draft, active, closed, expired
+  publishedAt      DateTime? @db.Timestamptz
+  expiresAt        DateTime? @db.Timestamptz
+  applicationCount Int       @default(0)
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now()) @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @db.Timestamptz
+  createdBy        String?
+  updatedBy        String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, requisitionId])
+  @@index([tenantId, status])
+  @@index([tenantId, isActive])
+  @@map("cvision_job_postings")
+}
+
+// ── Applications ─────────────────────────────────────────────────────────────
+
+model CvisionApplication {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  postingId   String   @db.Uuid
+  candidateId String?  @db.Uuid
+  fullName    String
+  email       String
+  phone       String?
+  coverLetter String?
+  resumeKey   String?
+  answers     Json?
+  status      String   @default("submitted") // submitted, reviewed, accepted, rejected
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, postingId])
+  @@index([tenantId, candidateId])
+  @@index([tenantId, status])
+  @@index([tenantId, email])
+  @@map("cvision_applications")
+}
+
+// ── CV Parse Jobs ────────────────────────────────────────────────────────────
+
+model CvisionCvParseJob {
+  id               String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String               @db.Uuid
+  candidateId      String               @db.Uuid
+  documentId       String               @db.Uuid
+  status           CvisionCvParseStatus @default(QUEUED)
+  extractedRawText String?
+  extractedJson    Json?
+  meta             Json?
+  errors           String?
+  startedAt        DateTime?            @db.Timestamptz
+  completedAt      DateTime?            @db.Timestamptz
+  createdAt        DateTime             @default(now()) @db.Timestamptz
+  updatedAt        DateTime             @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, candidateId])
+  @@index([tenantId, documentId])
+  @@index([tenantId, status])
+  @@map("cvision_cv_parse_jobs")
+}
+
+// ── CV Inbox Batches ─────────────────────────────────────────────────────────
+
+model CvisionCvInboxBatch {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  createdByUserId String   @db.Uuid
+  itemCount       Int      @default(0)
+  parsedCount     Int      @default(0)
+  suggestedCount  Int      @default(0)
+  assignedCount   Int      @default(0)
+  isArchived      Boolean  @default(false)
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, createdByUserId])
+  @@index([tenantId, isArchived])
+  @@map("cvision_cv_inbox_batches")
+}
+
+// ── CV Inbox Items ───────────────────────────────────────────────────────────
+
+model CvisionCvInboxItem {
+  id                      String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId                String                   @db.Uuid
+  batchId                 String                   @db.Uuid
+  fileName                String
+  storageKey              String
+  mimeType                String?
+  fileSize                Int?
+  extractedRawText        String?
+  status                  CvisionCvInboxItemStatus @default(UPLOADED)
+  parseError              String?
+  suggestedRequisitionIds Json?
+  suggestedScores         Json?
+  assignedRequisitionId   String?                  @db.Uuid
+  assignedCandidateId     String?                  @db.Uuid
+  assignedAt              DateTime?                @db.Timestamptz
+  assignedBy              String?
+  createdAt               DateTime                 @default(now()) @db.Timestamptz
+  updatedAt               DateTime                 @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, batchId])
+  @@index([tenantId, status])
+  @@index([tenantId, assignedRequisitionId])
+  @@map("cvision_cv_inbox_items")
+}
+
+// ── Talent Pool ──────────────────────────────────────────────────────────────
+
+model CvisionTalentPool {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  candidateId String   @db.Uuid
+  category    String?
+  skills      Json?
+  notes       String?
+  addedBy     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz
+  updatedAt   DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, candidateId])
+  @@index([tenantId, category])
+  @@index([tenantId, isActive])
+  @@map("cvision_talent_pool")
+}
+
+// ── Killout / Screening Questions ────────────────────────────────────────────
+
+model CvisionKilloutQuestion {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String   @db.Uuid
+  requisitionId String?  @db.Uuid
+  question      String
+  questionType  String // yes_no, text, multiple_choice
+  options       Json?
+  isRequired    Boolean  @default(true)
+  correctAnswer String?
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now()) @db.Timestamptz
+  updatedAt     DateTime @updatedAt @db.Timestamptz
+  createdBy     String?
+  updatedBy     String?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, requisitionId])
+  @@index([tenantId, isActive])
+  @@map("cvision_killout_questions")
+}
+
+// ── Candidate Rankings ───────────────────────────────────────────────────────
+
+model CvisionCandidateRanking {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String    @db.Uuid
+  candidateId   String    @db.Uuid
+  requisitionId String?   @db.Uuid
+  overallScore  Decimal?  @db.Decimal(5, 2)
+  criteria      Json?
+  rankedBy      String?
+  rankedAt      DateTime? @db.Timestamptz
+  notes         String?
+  createdAt     DateTime  @default(now()) @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, candidateId])
+  @@index([tenantId, requisitionId])
+  @@index([tenantId, overallScore])
+  @@map("cvision_candidate_rankings")
+}
+
+// ── Manpower Planning ────────────────────────────────────────────────────────
+
+model CvisionManpowerPlan {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  departmentId      String    @db.Uuid
+  positionId        String?   @db.Uuid
+  budgetedHeadcount Int
+  effectiveFrom     DateTime  @db.Date
+  effectiveTo       DateTime? @db.Date
+  notes             String?
+  createdByUserId   String    @db.Uuid
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, departmentId])
+  @@index([tenantId, positionId])
+  @@index([tenantId, effectiveFrom])
+  @@map("cvision_manpower_plans")
+}

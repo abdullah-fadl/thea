@@ -1,0 +1,75 @@
+// =============================================================================
+// Pathology / Histology Domain — Specimens, Reports
+// =============================================================================
+
+model PathologySpecimen {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  patientMasterId   String    @db.Uuid
+  episodeId         String?   @db.Uuid
+  caseId            String?   @db.Uuid // OR case if surgical specimen
+  orderId           String?   @db.Uuid // order reference
+  accessionNumber   String?
+  specimenType      String // BIOPSY, EXCISION, RESECTION, FLUID, SWAB, CYTOLOGY, OTHER
+  site              String
+  clinicalHistory   String?
+  clinicalDiagnosis String?
+  collectedBy       String?   @db.Uuid // userId (optional)
+  collectedAt       DateTime? @db.Timestamptz
+  receivedAt        DateTime? @db.Timestamptz
+  receivedBy        String?   @db.Uuid // userId who received in lab
+  fixative          String? // FORMALIN, FROZEN, FRESH, OTHER
+  numberOfParts     Int       @default(1)
+  status            String    @default("RECEIVED") // RECEIVED, GROSSING, PROCESSING, EMBEDDING, SECTIONING, STAINING, REPORTING, FINALIZED
+  grossingData      Json? // {weight, dimensions, appearance, cassettes:[{label,description}], frozenSection, frozenResult}
+  createdByUserId   String?
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+
+  report PathologyReport?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, status])
+  @@map("pathology_specimens")
+}
+
+model PathologyReport {
+  id                     String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId               String            @db.Uuid
+  specimenId             String            @unique @db.Uuid
+  specimen               PathologySpecimen @relation(fields: [specimenId], references: [id])
+  pathologistId          String            @db.Uuid // userId
+  grossDescription       String?
+  microscopicDescription String?
+  specialStains          String?
+  // Legacy free-text IHC (kept for backward compat)
+  immunohistochemistry   String?
+  // Structured IHC markers: [{id,marker,clone,result,intensity,percentPositive,pattern,notes}]
+  ihcMarkers             Json              @default("[]")
+  molecularStudies       String?
+  // Structured molecular: [{id,testType,target,method,result,interpretation}]
+  molecularResults       Json              @default("[]")
+  // Tumor profile: {histologicalType,grade,pT,pN,pM,margins,marginDistance,lvi,pni,lymphNodesExamined,lymphNodesPositive,ajccStage}
+  tumorCharacteristics   Json?
+  diagnosis              String            @default("")
+  icdCode                String?
+  snomed                 String?
+  comments               String?
+  status                 String            @default("DRAFT") // DRAFT, PRELIMINARY, FINAL, AMENDED
+  signedAt               DateTime?         @db.Timestamptz
+  signedBy               String?           @db.Uuid
+  amendedAt              DateTime?         @db.Timestamptz
+  amendedBy              String?           @db.Uuid
+  amendmentNote          String?
+  amendments             Json              @default("[]") // [{date, reason, previousDiagnosis}]
+  createdAt              DateTime          @default(now()) @db.Timestamptz
+  updatedAt              DateTime          @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, specimenId])
+  @@map("pathology_reports")
+}

@@ -1,0 +1,114 @@
+/**
+ * EXAMPLE: Platform Contract Test
+ * Copy to: __tests__/platforms/my-platform/contract.test.ts
+ *
+ * PURPOSE: Every platform MUST pass these three contract checks:
+ *
+ *   Contract 1 — Extension FK integrity
+ *     Inserting an extension row without a matching core entity must fail.
+ *     This verifies that the DB-level FK constraint is in place and the
+ *     migration ran correctly.
+ *
+ *   Contract 2 — No direct core writes from platform code
+ *     Platform business logic (lib/my-platform/**) must not call
+ *     prisma.<corEntity>.create / .update / .delete.
+ *     Enforced by static grep + a runtime isolation check.
+ *
+ *   Contract 3 — Emitted events match registered schema (Phase 4.2+)
+ *     Any event emitted by a platform handler must validate against the
+ *     registered payload schema.  The test stubs this until 4.2 lands.
+ *
+ * Run: yarn jest __tests__/platforms/my-platform/contract.test.ts
+ *
+ * This file is NOT run by the application.  It is a scaffold reference.
+ */
+
+// ---------------------------------------------------------------------------
+// Imports — replace with real paths once the platform is implemented
+// ---------------------------------------------------------------------------
+// import { prisma } from '@/lib/db/prisma';
+// import { isMyPlatformEnabled } from '@/lib/my-platform/entitlement';
+
+describe('MyPlatform contract', () => {
+  // -------------------------------------------------------------------------
+  // Contract 1: Extension FK must be enforced at the database level
+  // -------------------------------------------------------------------------
+  describe('Contract 1 — Extension FK integrity', () => {
+    it('rejects an extension row whose coreId does not exist', async () => {
+      // Arrange: a UUID that does not exist in the core entity table
+      const nonExistentCoreId = '00000000-0000-0000-0000-000000000001';
+
+      // Act + Assert: the DB must throw a foreign-key violation
+      await expect(
+        // Replace with real prisma model once schema is finalized
+        // prisma.myPlatform_OrderExtension.create({
+        //   data: {
+        //     coreId: nonExistentCoreId,
+        //     tenantId: 'any-tenant-uuid',
+        //   },
+        // })
+        Promise.reject(new Error('FK violation: coreId does not exist')) // stub
+      ).rejects.toThrow();
+    });
+
+    it('accepts an extension row whose coreId exists', async () => {
+      // Arrange: create a real core entity row first
+      // const coreRow = await prisma.coreOrder.create({ data: { tenantId: '...' } });
+      //
+      // Act: create the extension
+      // const ext = await prisma.myPlatform_OrderExtension.create({
+      //   data: { coreId: coreRow.id, tenantId: coreRow.tenantId },
+      // });
+      //
+      // Assert
+      // expect(ext.coreId).toBe(coreRow.id);
+      expect(true).toBe(true); // remove stub when implementing
+    });
+
+    it('enforces one-extension-per-core-entity uniqueness', async () => {
+      // Inserting a second extension for the same coreId must fail.
+      // expect(secondInsert).rejects.toThrow(/unique constraint/i);
+      expect(true).toBe(true); // remove stub when implementing
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Contract 2: Platform code must not write directly to core tables
+  // -------------------------------------------------------------------------
+  describe('Contract 2 — No direct core writes from platform lib', () => {
+    it('lib/my-platform does not call prisma.patient.create/update/delete', () => {
+      // Static analysis: grep the platform lib for forbidden calls.
+      // This is a lightweight guard; CI should also run a stricter lint rule.
+      const { execSync } = require('child_process');
+      const forbidden = [
+        'prisma.patient.create',
+        'prisma.patient.update',
+        'prisma.patient.delete',
+        'prisma.encounter.create',
+        'prisma.encounter.update',
+        'prisma.encounter.delete',
+        // add all core tables here
+      ];
+
+      for (const pattern of forbidden) {
+        let found = '';
+        try {
+          found = execSync(`grep -r "${pattern}" lib/my-platform/ 2>/dev/null || true`).toString();
+        } catch {
+          found = '';
+        }
+        expect(found.trim()).toBe('');
+      }
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Contract 3: Emitted events match registered schema (Phase 4.2 stub)
+  // -------------------------------------------------------------------------
+  describe('Contract 3 — Emitted event payloads (Phase 4.2 stub)', () => {
+    it.todo('my_platform.order_extension.created payload satisfies MyPlatformOrderCreatedPayload schema');
+    it.todo('my_platform.order_extension.approved payload satisfies MyPlatformOrderApprovedPayload schema');
+    // TODO(phase-4.2): implement by importing the registered schema and
+    // validating a sample payload through ajv or zod.
+  });
+});

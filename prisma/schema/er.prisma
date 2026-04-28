@@ -1,0 +1,562 @@
+// =============================================================================
+// ER Domain — Emergency Department Encounters, Beds, Triage, Notes
+// =============================================================================
+
+model ErPatient {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  patientMasterId String?   @db.Uuid
+  tempMrn         String?
+  mrn             String?
+  fullName        String?
+  firstName       String?
+  lastName        String?
+  dob             DateTime? @db.Date
+  gender          String? // MALE, FEMALE, OTHER, UNKNOWN
+  nationalId      String?
+  iqama           String?
+  passport        String?
+  phone           String?
+  status          String?   @default("ACTIVE") // ACTIVE, MERGED
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientMasterId])
+  @@index([tenantId, tempMrn])
+  @@map("er_patients")
+}
+
+model ErEncounter {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String          @db.Uuid
+  encounterCoreId String?         @unique @db.Uuid
+  patientId       String          @db.Uuid
+  status          ErStatus        @default(ARRIVED)
+  arrivalMethod   ErArrivalMethod @default(WALKIN)
+  paymentStatus   ErPaymentStatus @default(PENDING)
+  triageLevel     Int?
+  chiefComplaint  String?
+  startedAt       DateTime        @db.Timestamptz
+  closedAt        DateTime?       @db.Timestamptz
+  createdByUserId String
+  visitNumber     String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  tenant                  Tenant                     @relation(fields: [tenantId], references: [id])
+  encounterCore           EncounterCore?             @relation(fields: [encounterCoreId], references: [id])
+  patient                 PatientMaster              @relation(fields: [patientId], references: [id])
+  triage                  ErTriageAssessment?
+  bedAssignments          ErBedAssignment[]
+  staffAssignments        ErStaffAssignment[]
+  notes                   ErNote[]
+  doctorNotes             ErDoctorNote[]
+  nursingNotes            ErNursingNote[]
+  dispositions            ErDisposition[]
+  tasks                   ErTask[]
+  observations            ErObservation[]
+  escalations             ErEscalation[]
+  notifications           ErNotification[]
+  nursingTransferRequests ErNursingTransferRequest[]
+
+  @@unique([tenantId, visitNumber])
+  @@index([tenantId])
+  @@index([patientId])
+  @@index([status])
+  @@index([tenantId, status])
+  @@map("er_encounters")
+}
+
+model ErTriageAssessment {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  encounterId      String    @unique @db.Uuid
+  nurseId          String
+  painScore        Int?
+  vitals           Json? // { bp, hr, temp, rr, spo2, ... }
+  allergiesShort   String?
+  chronicShort     String?
+  triageStartAt    DateTime  @db.Timestamptz
+  triageEndAt      DateTime? @db.Timestamptz
+  aiSuggestedLevel Int?
+  notes            String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  // Relations
+  encounter ErEncounter @relation(fields: [encounterId], references: [id])
+
+  @@index([encounterId])
+  @@map("er_triage_assessments")
+}
+
+model ErBed {
+  id       String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String     @db.Uuid
+  zone     String
+  bedLabel String
+  state    ErBedState @default(VACANT)
+
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  tenant      Tenant            @relation(fields: [tenantId], references: [id])
+  assignments ErBedAssignment[]
+
+  @@unique([tenantId, zone, bedLabel])
+  @@index([tenantId])
+  @@index([zone])
+  @@map("er_beds")
+}
+
+model ErBedAssignment {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  encounterId      String    @db.Uuid
+  bedId            String    @db.Uuid
+  assignedAt       DateTime  @db.Timestamptz
+  unassignedAt     DateTime? @db.Timestamptz
+  assignedByUserId String
+
+  // Relations
+  encounter ErEncounter @relation(fields: [encounterId], references: [id])
+  bed       ErBed       @relation(fields: [bedId], references: [id])
+
+  @@index([encounterId])
+  @@index([bedId])
+  @@map("er_bed_assignments")
+}
+
+model ErStaffAssignment {
+  id           String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  encounterId  String                @db.Uuid
+  userId       String
+  role         ErStaffAssignmentRole
+  assignedAt   DateTime              @db.Timestamptz
+  unassignedAt DateTime?             @db.Timestamptz
+
+  // Relations
+  encounter ErEncounter @relation(fields: [encounterId], references: [id])
+
+  @@index([encounterId])
+  @@index([userId])
+  @@map("er_staff_assignments")
+}
+
+model ErNote {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  encounterId String   @db.Uuid
+  authorId    String
+  noteType    String? // general, nursing, procedure
+  content     String
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  // Relations
+  encounter ErEncounter @relation(fields: [encounterId], references: [id])
+
+  @@index([encounterId])
+  @@map("er_notes")
+}
+
+model ErDoctorNote {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  encounterId String   @db.Uuid
+  authorId    String
+  noteType    String? // assessment, plan, progress
+  subjective  String?
+  objective   String?
+  assessment  String?
+  plan        String?
+  freeText    String?
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  // Relations
+  encounter ErEncounter @relation(fields: [encounterId], references: [id])
+
+  @@index([encounterId])
+  @@map("er_doctor_notes")
+}
+
+model ErNursingNote {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String   @db.Uuid
+  encounterId String   @db.Uuid
+  authorId    String
+  nurseId     String?
+  category    String? // assessment, intervention, evaluation
+  type        String?
+  content     String
+  vitals      Json?
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  // Extended nursing assessment fields
+  mewsScore        Int?
+  mewsLevel        String?
+  consciousness    String?
+  fallRiskScore    Int?
+  fallRiskLevel    String?
+  gcsScore         Int?
+  bradenScore      Int?
+  bradenRisk       String?
+  painData         Json?
+  bradenData       Json?
+  ioData           Json?
+  sbarData         Json?
+  familyCommData   Json?
+  proceduresData   Json?
+  nursingTasksData Json?
+  marData          Json?
+
+  // Relations
+  encounter ErEncounter @relation(fields: [encounterId], references: [id])
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([encounterId])
+  @@map("er_nursing_notes")
+}
+
+model ErDisposition {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String   @db.Uuid
+  encounterId           String   @db.Uuid
+  type                  String // discharge, admit, transfer, ama, death
+  destination           String?
+  notes                 String?
+  admitWardUnit         String? // Ward/unit for admit dispositions
+  handoffSbar           String? // SBAR handoff notes
+  transferType          String? // Type of transfer (internal, external)
+  dischargeInstructions String? // Patient discharge instructions
+  finalDiagnosis        String? // Final diagnosis at disposition
+  reasonForAdmission    String? // Reason for admission
+  decidedBy             String
+  decidedAt             DateTime @db.Timestamptz
+
+  // Relations
+  encounter ErEncounter @relation(fields: [encounterId], references: [id])
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([encounterId])
+  @@map("er_dispositions")
+}
+
+model ErTask {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId             String    @db.Uuid
+  encounterId          String    @db.Uuid
+  taskType             String // order, medication, procedure, lab, imaging
+  title                String
+  label                String?
+  orderSetKey          String?
+  status               String    @default("pending") // pending, in_progress, completed, cancelled
+  priority             String?
+  assignedTo           String?
+  dueAt                DateTime? @db.Timestamptz
+  startedAt            DateTime? @db.Timestamptz
+  completedAt          DateTime? @db.Timestamptz
+  resultAcknowledgedAt DateTime? @db.Timestamptz
+  notes                String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+  createdBy String?
+
+  // Relations
+  encounter ErEncounter @relation(fields: [encounterId], references: [id])
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([encounterId])
+  @@index([status])
+  @@map("er_tasks")
+}
+
+model ErObservation {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  encounterId     String   @db.Uuid
+  observationType String // vitals, lab_value, imaging_finding
+  code            String?
+  value           String?
+  numericValue    Decimal? @db.Decimal(12, 4)
+  unit            String?
+  referenceRange  String?
+  isAbnormal      Boolean  @default(false)
+  observedAt      DateTime @db.Timestamptz
+  recordedBy      String?
+  nurseId         String?
+  vitals          Json?
+  painScore       Int?
+  avpu            String?
+  critical        Boolean  @default(false)
+  criticalReasons Json?
+  createdByUserId String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  // Relations
+  encounter ErEncounter @relation(fields: [encounterId], references: [id])
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([encounterId])
+  @@map("er_observations")
+}
+
+model ErEscalation {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId         String    @db.Uuid
+  encounterId      String    @db.Uuid
+  level            Int       @default(1)
+  reason           String
+  escalatedTo      String?
+  escalatedBy      String
+  createdByUserId  String?
+  urgency          String?
+  note             String?
+  status           String    @default("open") // open, acknowledged, resolved
+  resolvedAt       DateTime? @db.Timestamptz
+  resolvedBy       String?
+  resolvedByUserId String?
+  resolution       String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  // Relations
+  encounter ErEncounter @relation(fields: [encounterId], references: [id])
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([encounterId])
+  @@map("er_escalations")
+}
+
+model ErNotification {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  encounterId     String    @db.Uuid
+  type            String // bed_ready, results_ready, escalation, etc.
+  recipientId     String
+  title           String
+  message         String?
+  severity        String?   @default("INFO")
+  readAt          DateTime? @db.Timestamptz
+  readByUserId    String?   @db.Uuid
+  createdBySystem Boolean?  @default(false)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  // Relations
+  encounter ErEncounter @relation(fields: [encounterId], references: [id])
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([encounterId])
+  @@index([recipientId])
+  @@map("er_notifications")
+}
+
+model ErNursingHandover {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  encounterId    String?   @db.Uuid
+  fromNurseId    String
+  toNurseId      String
+  type           String?
+  shiftType      String? // day, evening, night
+  patientSummary String?
+  sbar           Json?
+  pendingTasks   String[]  @default([])
+  criticalAlerts String[]  @default([])
+  handoverNotes  String?
+  acknowledgedAt DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([encounterId])
+  @@map("er_nursing_handovers")
+}
+
+model ErAdmissionHandover {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  erEncounterId  String?   @db.Uuid
+  ipdEpisodeId   String?
+  fromDepartment String?
+  toDepartment   String?
+  patientSummary String?
+  diagnosis      String?
+  pendingOrders  String[]  @default([])
+  handoverNotes  String?
+  handedOverBy   String
+  receivedBy     String?
+  receivedAt     DateTime? @db.Timestamptz
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("admission_handovers")
+}
+
+model RespiratoryScreening {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId      String   @db.Uuid
+  encounterId   String?  @db.Uuid
+  patientId     String?  @db.Uuid
+  screeningData Json? // Screening questionnaire responses
+  result        String? // positive, negative, inconclusive
+  riskLevel     String? // low, moderate, high
+  screenedBy    String?
+  screenedAt    DateTime @db.Timestamptz
+  notes         String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([encounterId])
+  @@map("respiratory_screenings")
+}
+
+model ErNursingTransferRequest {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  encounterId       String    @db.Uuid
+  fromNurseId       String
+  toNurseId         String?
+  requestedByUserId String?
+  reason            String?
+  urgency           String?
+  status            String    @default("pending") // pending, approved, rejected, completed
+  priority          String?
+  notes             String?
+  resolvedBy        String?
+  resolvedByUserId  String?
+  resolvedAt        DateTime? @db.Timestamptz
+  resolution        String?
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  encounter ErEncounter @relation(fields: [encounterId], references: [id])
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([encounterId])
+  @@index([tenantId])
+  @@index([status])
+  @@map("er_nursing_transfer_requests")
+}
+
+model ErSequence {
+  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String @db.Uuid
+  sequenceKey String // e.g., 'encounter_number', 'triage_number'
+  currentVal  Int    @default(0)
+
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, sequenceKey])
+  @@map("er_sequences")
+}
+
+// =============================================================================
+// 4.1 — MCI / Mass Casualty Incident Management
+// =============================================================================
+
+model MciIncident {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId            String    @db.Uuid
+  triggerType         String // MANUAL, AUTO
+  level               Int       @default(1) // 1, 2, 3
+  status              String    @default("ACTIVE") // ACTIVE, STANDBY, DEACTIVATED
+  description         String?
+  commandStructure    Json? // {incidentCommander, medical, triage, treatment, transport}
+  surgeCapacity       Json? // {beds, staff, equipment}
+  activatedAt         DateTime  @default(now()) @db.Timestamptz
+  activatedByUserId   String    @db.Uuid
+  deactivatedAt       DateTime? @db.Timestamptz
+  deactivatedByUserId String?   @db.Uuid
+  deactivationReason  String?
+  patientCount        Int       @default(0)
+  createdAt           DateTime  @default(now()) @db.Timestamptz
+  updatedAt           DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("mci_incidents")
+}
+
+model MciPatient {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String   @db.Uuid
+  incidentId      String   @db.Uuid
+  patientId       String?  @db.Uuid
+  triageTag       String // RED, YELLOW, GREEN, BLACK
+  tagNumber       String
+  name            String?
+  estimatedAge    Int?
+  gender          String?
+  chiefComplaint  String?
+  triageNotes     String?
+  disposition     String? // ADMITTED, DISCHARGED, TRANSFERRED, MORGUE
+  arrivedAt       DateTime @default(now()) @db.Timestamptz
+  createdByUserId String?  @db.Uuid
+  createdAt       DateTime @default(now()) @db.Timestamptz
+  updatedAt       DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, incidentId])
+  @@index([tenantId, triageTag])
+  @@map("mci_patients")
+}
+
+// =============================================================================
+// 4.2 — CTAS/ESI Triage Scoring
+// =============================================================================
+
+model ErTriageScore {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId           String    @db.Uuid
+  encounterId        String    @db.Uuid
+  scaleType          String // CTAS, ESI
+  level              Int // 1-5
+  criteria           Json? // array of criteria matched
+  autoSuggestedLevel Int?
+  overrideReason     String?
+  reassessmentDueAt  DateTime? @db.Timestamptz
+  assessedByUserId   String    @db.Uuid
+  createdAt          DateTime  @default(now()) @db.Timestamptz
+  updatedAt          DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, encounterId])
+  @@map("er_triage_scores")
+}

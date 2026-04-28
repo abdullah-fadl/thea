@@ -1,0 +1,95 @@
+// =============================================================================
+// Appointment Reminders — Automated SMS/Email/Push notifications
+// =============================================================================
+// NEW file — does NOT modify any existing schema
+
+model AppointmentReminder {
+  id              String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String @db.Uuid
+  bookingId       String @db.Uuid
+  patientMasterId String @db.Uuid
+
+  // Appointment snapshot (denormalized for sending without extra lookups)
+  patientName     String?
+  patientNameAr   String?
+  patientMobile   String?
+  patientEmail    String?
+  doctorName      String?
+  doctorNameAr    String?
+  clinicName      String?
+  clinicNameAr    String?
+  appointmentDate DateTime @db.Date
+  appointmentTime String? // HH:mm
+
+  // Reminder config
+  channel          String // SMS, EMAIL, PUSH, WHATSAPP, PORTAL
+  reminderType     String // BEFORE_24H, BEFORE_2H, MANUAL, FOLLOW_UP
+  scheduledAt      DateTime @db.Timestamptz
+  messageTemplate  String? // Template key
+  messageContent   String? // Rendered message (for audit)
+  messageContentAr String?
+
+  // Status
+  status      String    @default("SCHEDULED") // SCHEDULED, SENDING, SENT, FAILED, CANCELLED
+  sentAt      DateTime? @db.Timestamptz
+  deliveredAt DateTime? @db.Timestamptz
+  failReason  String?
+  retryCount  Int       @default(0)
+
+  // Patient response
+  responseType  String? // CONFIRMED, CANCELLED, NO_RESPONSE
+  respondedAt   DateTime? @db.Timestamptz
+  responseToken String?   @unique // Token for confirm/cancel links
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, bookingId])
+  @@index([tenantId, scheduledAt])
+  @@index([tenantId, appointmentDate])
+  @@index([responseToken])
+  @@map("appointment_reminders")
+}
+
+model ReminderSettings {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId String @unique @db.Uuid
+
+  // Feature toggle
+  enabled Boolean @default(true)
+
+  // Channels
+  smsEnabled      Boolean @default(false)
+  emailEnabled    Boolean @default(false)
+  pushEnabled     Boolean @default(true)
+  whatsappEnabled Boolean @default(false)
+  portalEnabled   Boolean @default(true)
+
+  // Timing
+  before24h         Boolean @default(true)
+  before2h          Boolean @default(true)
+  customHoursBefore Int? // Optional extra reminder
+
+  // Templates (JSON for flexibility)
+  smsTemplateAr   String?
+  smsTemplateEn   String?
+  emailTemplateAr String?
+  emailTemplateEn String?
+
+  // Working hours (don't send reminders outside these)
+  quietHoursStart String? // HH:mm (e.g., "22:00")
+  quietHoursEnd   String? // HH:mm (e.g., "07:00")
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
+
+  // Relations
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("reminder_settings")
+}

@@ -1,0 +1,193 @@
+// =============================================================================
+// Telemedicine Domain — Virtual Consultations and Doctor Availability
+// =============================================================================
+
+model TeleConsultation {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  patientMasterId String    @db.Uuid
+  doctorId        String
+  scheduledAt     DateTime  @db.Timestamptz
+  duration        Int       @default(30)
+  type            String    @default("VIDEO")
+  status          String    @default("SCHEDULED")
+  chiefComplaint  String?
+  notes           String?
+  meetingUrl      String?
+  meetingId       String?
+  startedAt       DateTime? @db.Timestamptz
+  endedAt         DateTime? @db.Timestamptz
+  actualDuration  Int?
+  prescription    Json?
+  followUpNeeded  Boolean   @default(false)
+  followUpDate    DateTime? @db.Timestamptz
+  patientRating   Int?
+  patientFeedback String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, doctorId])
+  @@index([tenantId, patientMasterId])
+  @@map("tele_consultations")
+}
+
+model TeleAvailability {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @db.Uuid
+  doctorId     String
+  dayOfWeek    Int
+  startTime    String
+  endTime      String
+  slotDuration Int      @default(30)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now()) @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, doctorId])
+  @@map("tele_availability")
+}
+
+// =============================================================================
+// 4.5 — Video Call Visits
+// =============================================================================
+
+model TeleVisit {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  encounterId       String?   @db.Uuid
+  patientId         String    @db.Uuid
+  doctorId          String    @db.Uuid
+  status            String    @default("SCHEDULED") // SCHEDULED, WAITING_ROOM, IN_CALL, COMPLETED, CANCELLED, NO_SHOW
+  scheduledAt       DateTime  @db.Timestamptz
+  joinedByPatientAt DateTime? @db.Timestamptz
+  joinedByDoctorAt  DateTime? @db.Timestamptz
+  endedAt           DateTime? @db.Timestamptz
+  duration          Int?
+  roomId            String?
+  recordingUrl      String?
+  recordingConsent  Boolean   @default(false)
+  connectionQuality String? // GOOD, FAIR, POOR
+  chatLog           Json?
+  sharedFiles       Json?
+  notes             String?
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, doctorId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, status])
+  @@map("tele_visits")
+}
+
+// =============================================================================
+// 4.6 — E-Prescription Linking
+// =============================================================================
+
+model TelePrescription {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId        String    @db.Uuid
+  teleVisitId     String    @db.Uuid
+  encounterId     String?   @db.Uuid
+  patientId       String    @db.Uuid
+  doctorId        String    @db.Uuid
+  medications     Json // array of {name, dose, frequency, duration, instructions}
+  status          String    @default("CREATED") // CREATED, SENT_TO_PATIENT, PHARMACY_NOTIFIED, DISPENSED, DELIVERY_ARRANGED
+  pharmacyId      String?   @db.Uuid
+  deliveryOption  String? // PICKUP, HOME_DELIVERY
+  deliveryAddress String?
+  deliveryStatus  String? // PENDING, IN_TRANSIT, DELIVERED
+  wasfatyRef      String?
+  sentToPatientAt DateTime? @db.Timestamptz
+  dispensedAt     DateTime? @db.Timestamptz
+  createdAt       DateTime  @default(now()) @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, teleVisitId])
+  @@map("tele_prescriptions")
+}
+
+// =============================================================================
+// 4.7 — Remote Patient Monitoring
+// =============================================================================
+
+model RpmDevice {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId          String    @db.Uuid
+  patientId         String    @db.Uuid
+  deviceType        String // BP_MONITOR, GLUCOMETER, WEIGHT_SCALE, PULSE_OXIMETER, HR_MONITOR
+  deviceName        String?
+  manufacturer      String?
+  serialNumber      String?
+  integrationSource String? // BLUETOOTH_LE, APPLE_HEALTH, GOOGLE_FIT, MANUAL, DEVICE_API
+  isActive          Boolean   @default(true)
+  lastSyncAt        DateTime? @db.Timestamptz
+  createdAt         DateTime  @default(now()) @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@map("rpm_devices")
+}
+
+model RpmReading {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId       String    @db.Uuid
+  patientId      String    @db.Uuid
+  deviceId       String?   @db.Uuid
+  readingType    String // BP, GLUCOSE, WEIGHT, SPO2, HR, TEMPERATURE
+  value          Json // {systolic, diastolic} for BP, {value, unit} for others
+  unit           String // mmHg, mg/dL, kg, %, bpm, C
+  readAt         DateTime  @db.Timestamptz
+  isAbnormal     Boolean   @default(false)
+  alertTriggered Boolean   @default(false)
+  alertAckedBy   String?   @db.Uuid
+  alertAckedAt   DateTime? @db.Timestamptz
+  notes          String?
+  createdAt      DateTime  @default(now()) @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@index([tenantId, patientId, readingType])
+  @@index([tenantId, isAbnormal])
+  @@map("rpm_readings")
+}
+
+model RpmThreshold {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId              String   @db.Uuid
+  patientId             String   @db.Uuid
+  readingType           String
+  lowCritical           Float?
+  lowWarning            Float?
+  highWarning           Float?
+  highCritical          Float?
+  diastolicLowCritical  Float?
+  diastolicLowWarning   Float?
+  diastolicHighWarning  Float?
+  diastolicHighCritical Float?
+  isActive              Boolean  @default(true)
+  setByUserId           String   @db.Uuid
+  createdAt             DateTime @default(now()) @db.Timestamptz
+  updatedAt             DateTime @updatedAt @db.Timestamptz
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, patientId])
+  @@map("rpm_thresholds")
+}
